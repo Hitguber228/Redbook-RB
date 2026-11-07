@@ -51,7 +51,10 @@ class AIService:
         else:
             # 3. Компьютерное зрение / Морфологический анализ
             if not matched:
-                if "птиц" in hint_clean or "клюв" in hint_clean or "перо" in hint_clean or "аист" in hint_clean:
+                if "зубр" in hint_clean or "бизон" in hint_clean or "горб" in hint_clean or "бород" in hint_clean:
+                    matched = next((s for s in all_species if s["id"] == "bison-bonasus"), all_species[0])
+                    confidence = 0.96
+                elif "птиц" in hint_clean or "клюв" in hint_clean or "перо" in hint_clean or "аист" in hint_clean:
                     matched = next((s for s in all_species if s["id"] == "ciconia-nigra"), all_species[1])
                     confidence = 0.93
                 elif "черепах" in hint_clean or "панцир" in hint_clean or "вод" in hint_clean:
@@ -66,7 +69,7 @@ class AIService:
                 elif "гриб" in hint_clean or "капуст" in hint_clean:
                     matched = next((s for s in all_species if s["id"] == "sparassis-crispa"), all_species[7])
                     confidence = 0.90
-                elif "жук" in hint_clean or "рог" in hint_clean or "насеком" in hint_clean:
+                elif "жук" in hint_clean or "насеком" in hint_clean or "олень" in hint_clean:
                     matched = next((s for s in all_species if s["id"] == "lucanus-cervus"), all_species[8])
                     confidence = 0.97
                 else:

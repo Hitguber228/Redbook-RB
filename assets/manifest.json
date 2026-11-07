@@ -1,0 +1,19 @@
+{
+  "name": "Интерактивная Красная книга Республики Беларусь",
+  "short_name": "Красная книга РБ",
+  "description": "Электронный научно-образовательный справочник редких и исчезающих видов Республики Беларусь",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8F9FA",
+  "theme_color": "#2D6A4F",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
+

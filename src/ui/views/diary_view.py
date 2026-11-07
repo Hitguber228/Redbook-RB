@@ -1,4 +1,6 @@
 import flet as ft
+import os
+import csv
 from datetime import datetime
 from typing import Callable
 from ...database.db import db_manager
@@ -16,7 +18,7 @@ class DiaryView(ft.Container):
         observations = db_manager.get_observations()
 
         self.name_field = ft.TextField(
-            label="Ваше имя / Исследователь" if lang == "ru" else "Ваша імя / Даследчык",
+            label="Ваше имя / Учащийся-исследователь" if lang == "ru" else "Ваша імя / Навучэнец-даследчык",
             value="Юный натуралист",
             border_radius=10,
             filled=True
@@ -24,14 +26,14 @@ class DiaryView(ft.Container):
 
         self.species_field = ft.TextField(
             label="Предполагаемый вид" if lang == "ru" else "Меркаваны від",
-            hint_text="Например: Европейская рысь или Болотная черепаха",
+            hint_text="Например: Европейская рысь, Зубр, Болотная черепаха...",
             border_radius=10,
             filled=True
         )
 
         self.notes_field = ft.TextField(
-            label="Заметки о встрече и биотопе" if lang == "ru" else "Нататкі аб сустрэчы і біятопе",
-            hint_text="Опишите поведение, место встречи, состояние особи...",
+            label="Заметки о биотопе и поведении" if lang == "ru" else "Нататкі аб біятопе і паводзінах",
+            hint_text="Опишите характер леса/болота, поведение особи, следы жизнедеятельности...",
             multiline=True,
             min_lines=2,
             border_radius=10,
@@ -55,7 +57,7 @@ class DiaryView(ft.Container):
                                 size=15
                             ),
                             ft.Text(
-                                "Заполните форму выше, чтобы зафиксировать встречу краснокнижника в природе Беларуси!" if lang == "ru" else "Запоўніце форму вышэй, каб зафіксаваць сустрэчу рэдкага віду!",
+                                "Заполните форму выше, чтобы зафиксировать встречу краснокнижника в дикой природе Беларуси!" if lang == "ru" else "Запоўніце форму вышэй, каб зафіксаваць сустрэчу рэдкага віду!",
                                 size=12,
                                 color=ft.Colors.GREY_600,
                                 text_align=ft.TextAlign.CENTER
@@ -68,6 +70,7 @@ class DiaryView(ft.Container):
             for obs in observations:
                 obs_cards.append(
                     ft.Card(
+                        elevation=1,
                         content=ft.Container(
                             padding=14,
                             content=ft.Column(
@@ -82,36 +85,50 @@ class DiaryView(ft.Container):
                                     ),
                                     ft.Text(f"Наблюдатель: {obs['user_name']}", size=12, color=AppColors.PRIMARY, weight=ft.FontWeight.W_600),
                                     ft.Text(obs["notes"], size=13),
-                                    ft.Text(f"📍 Координаты: {obs['latitude']:.4f}, {obs['longitude']:.4f}", size=11, color=ft.Colors.GREY_600)
+                                    ft.Text(f"📍 GPS фиксация: {obs['latitude']:.4f}, {obs['longitude']:.4f}", size=11, color=ft.Colors.GREY_600)
                                 ]
                             )
                         )
                     )
                 )
 
+        self.export_status = ft.Text("", size=12, color=ft.Colors.GREEN_700, weight=ft.FontWeight.BOLD)
+
         self.content = ft.ListView(
             expand=True,
-            padding=ft.Padding.all(16),
+            padding=ft.Padding.symmetric(horizontal=16, vertical=16),
             spacing=16,
             controls=[
-                ft.Text(
-                    "Полевой дневник натуралиста (Citizen Science)" if lang == "ru" else "Палявы дзённік натураліста (Citizen Science)",
-                    size=20,
-                    weight=ft.FontWeight.BOLD
-                ),
-                ft.Text(
-                    "Фиксация находок редких видов в дикой природе Беларуси. Работает 100% автономно без интернета!" if lang == "ru" else "Фіксацыя знаходак рэдкіх відаў у дзікай прыродзе Беларусі. Працуе 100% аўтаномна без інтэрнэту!",
-                    size=13,
-                    color=AppColors.TEXT_MUTED_LIGHT
+                ft.Column(
+                    spacing=4,
+                    controls=[
+                        ft.Text(
+                            "Полевой дневник натуралиста (Citizen Science)" if lang == "ru" else "Палявы дзённік натураліста (Citizen Science)",
+                            size=22,
+                            weight=ft.FontWeight.BOLD
+                        ),
+                        ft.Text(
+                            "Фиксация находок редких видов в дикой природе Беларуси. Работает 100% автономно в полевых условиях без интернета!" if lang == "ru" else "Фіксацыя знаходак рэдкіх відаў у дзікай прыродзе Беларусі. Працуе 100% аўтаномна ў палявых умовах без інтэрнэту!",
+                            size=13,
+                            color=AppColors.TEXT_MUTED_LIGHT
+                        )
+                    ]
                 ),
                 # Карточка добавления наблюдения
                 ft.Card(
+                    elevation=2,
                     content=ft.Container(
-                        padding=16,
+                        padding=18,
                         content=ft.Column(
                             spacing=12,
                             controls=[
-                                ft.Text("Добавить новое наблюдение" if lang == "ru" else "Дадаць новае назіранне", size=15, weight=ft.FontWeight.BOLD),
+                                ft.Row(
+                                    spacing=8,
+                                    controls=[
+                                        ft.Icon(ft.Icons.NOTE_ADD, color=AppColors.PRIMARY, size=22),
+                                        ft.Text("Новая полевая запись" if lang == "ru" else "Новы палявы запіс", size=16, weight=ft.FontWeight.BOLD)
+                                    ]
+                                ),
                                 self.name_field,
                                 self.species_field,
                                 self.notes_field,
@@ -130,8 +147,21 @@ class DiaryView(ft.Container):
                     )
                 ),
                 ft.Divider(height=1),
-                ft.Text("История полевых находок:" if lang == "ru" else "Гісторыя палявых знаходак:", weight=ft.FontWeight.BOLD, size=15),
-                ft.Column(spacing=10, controls=obs_cards)
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    controls=[
+                        ft.Text("История полевых находок:" if lang == "ru" else "Гісторыя палявых знаходак:", weight=ft.FontWeight.BOLD, size=15),
+                        ft.FilledButton(
+                            content="Экспорт в CSV для отчета" if lang == "ru" else "Экспарт у CSV для справаздачы",
+                            icon=ft.Icons.DOWNLOAD,
+                            style=ft.ButtonStyle(bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST, color=ft.Colors.ON_SURFACE),
+                            on_click=self._export_to_csv
+                        )
+                    ]
+                ),
+                self.export_status,
+                ft.Column(spacing=10, controls=obs_cards),
+                ft.Container(height=24) # Bottom padding
             ]
         )
 
@@ -143,7 +173,6 @@ class DiaryView(ft.Container):
         notes = self.notes_field.value or "Встречен в естественной среде обитания."
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-        # Минск/Беларусь дефолтные координаты
         db_manager.add_observation(
             species_guess=guess,
             user_name=user,
@@ -158,3 +187,30 @@ class DiaryView(ft.Container):
         self._build_ui()
         self.update()
 
+    def _export_to_csv(self, e):
+        observations = db_manager.get_observations()
+        if not observations:
+            self.export_status.value = "⚠️ Нет наблюдений для экспорта!"
+            self.export_status.color = ft.Colors.AMBER_800
+            self.export_status.update()
+            return
+
+        export_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "field_observations_report.csv"))
+        
+        with open(export_path, "w", encoding="utf-8-sig", newline="") as f:
+            writer = csv.writer(f, delimiter=";")
+            writer.writerow(["ID", "Наблюдатель", "Предполагаемый вид", "Заметки о биотопе", "Широта (GPS)", "Долгота (GPS)", "Дата и время фиксации"])
+            for o in observations:
+                writer.writerow([
+                    o["id"],
+                    o["user_name"],
+                    o["species_guess"],
+                    o["notes"],
+                    f"{o['latitude']:.4f}",
+                    f"{o['longitude']:.4f}",
+                    o["date_created"]
+                ])
+
+        self.export_status.value = f"✅ Отчет успешно экспортирован в {os.path.basename(export_path)} ({len(observations)} записей)!"
+        self.export_status.color = ft.Colors.GREEN_700
+        self.export_status.update()

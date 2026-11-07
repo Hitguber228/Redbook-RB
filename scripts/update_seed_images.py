@@ -19,3 +19,4 @@ with open('src/database/seed_data.py', 'w', encoding='utf-8') as f:
     f.write(text)
 
 print('Updated all 19 image_urls to local paths in seed_data.py!')
+

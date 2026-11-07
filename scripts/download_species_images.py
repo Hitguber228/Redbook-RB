@@ -82,3 +82,4 @@ for sp_id, query in SPECIES_WIKI_MAP.items():
 
 client.close()
 print(f"\n🎉 Успешно сохранено: {success_count}/{len(SPECIES_WIKI_MAP)} видов!")
+

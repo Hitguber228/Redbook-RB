@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Интерактивная карта Красной книги Беларуси</title>
+  <link rel="stylesheet" href="leaflet.css" />
+  <script src="leaflet.js"></script>
+  <script src="map_data.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body, html {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background: #121A16;
+    }
+
+    #map {
+      height: 100%;
+      width: 100%;
+      z-index: 1;
+    }
+
+    /* Верхняя панель управления */
+    .top-bar {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      z-index: 1000;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      padding: 10px 16px;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .brand-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #2D6A4F;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .radius-selector {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #E8F5E9;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #1B5E20;
+    }
+
+    .radius-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #2D6A4F;
+      transition: all 0.2s;
+    }
+
+    .radius-btn.active {
+      background: #2D6A4F;
+      color: white;
+      box-shadow: 0 2px 6px rgba(45,106,79,0.3);
+    }
+
+    .city-pills {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+      flex: 1;
+    }
+
+    .city-pills::-webkit-scrollbar {
+      display: none;
+    }
+
+    .city-pill {
+      background: #F1F5F9;
+      border: 1px solid #CBD5E1;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .city-pill:hover {
+      background: #2D6A4F;
+      color: white;
+      border-color: #2D6A4F;
+    }
+
+    /* Легенда карты (плавающая панель слева внизу) */
+    .legend-card {
+      position: absolute;
+      bottom: 20px;
+      left: 14px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      padding: 14px 16px;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      max-width: 290px;
+      font-size: 12px;
+      transition: all 0.3s;
+    }
+
+    .legend-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-weight: 700;
+      font-size: 13px;
+      color: #1E293B;
+      cursor: pointer;
+    }
+
+    .legend-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .legend-marker {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+    }
+
+    .cat-I { background: #DC2626; }
+    .cat-II { background: #EA580C; }
+    .cat-III { background: #D97706; }
+    .cat-IV { background: #16A34A; }
+
+    /* Боковая панель результатов радиусного поиска (справа) */
+    .analysis-panel {
+      position: absolute;
+      top: 76px;
+      right: 14px;
+      bottom: 20px;
+      width: 380px;
+      max-width: calc(100vw - 28px);
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(16px);
+      border-radius: 20px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: translateX(420px);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .analysis-panel.open {
+      transform: translateX(0);
+    }
+
+    .panel-header {
+      padding: 16px;
+      background: #F8FAFC;
+      border-bottom: 1px solid #E2E8F0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .panel-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0F172A;
+    }
+
+    .panel-subtitle {
+      font-size: 11px;
+      color: #64748B;
+      margin-top: 3px;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #64748B;
+      line-height: 1;
+    }
+
+    .species-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .species-item {
+      display: flex;
+      gap: 12px;
+      padding: 10px;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .species-item:hover {
+      border-color: #2D6A4F;
+      box-shadow: 0 4px 12px rgba(45,106,79,0.15);
+      transform: translateY(-1px);
+    }
+
+    .species-thumb {
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #E2E8F0;
+    }
+
+    .species-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .species-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0F172A;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .species-lat {
+      font-size: 11px;
+      font-style: italic;
+      color: #64748B;
+      margin-bottom: 4px;
+    }
+
+    .badge-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cat-badge {
+      font-size: 9px;
+      font-weight: 700;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    .dist-badge {
+      font-size: 10px;
+      font-weight: 600;
+      color: #2D6A4F;
+      background: #D8F3DC;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    /* Подсказка при первом открытии */
+    .hint-banner {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 999;
+      background: rgba(15, 23, 42, 0.88);
+      color: white;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      pointer-events: none;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      animation: fadeInOut 6s forwards;
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translate(-50%, 10px); }
+      15% { opacity: 1; transform: translate(-50%, 0); }
+      85% { opacity: 1; transform: translate(-50%, 0); }
+      100% { opacity: 0; transform: translate(-50%, -10px); }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="map"></div>
+
+  <!-- Верхняя панель: Бренд + Радиус + Быстрый выбор городов -->
+  <div class="top-bar">
+    <div class="brand-title">
+      <span>🌲</span>
+      <span>ГИС-Атлас Беларуси</span>
+    </div>
+
+    <!-- Выбор радиуса поиска -->
+    <div class="radius-selector">
+      <span>Радиус:</span>
+      <button class="radius-btn" onclick="setRadius(3)">3 км</button>
+      <button class="radius-btn active" onclick="setRadius(5)">5 км</button>
+      <button class="radius-btn" onclick="setRadius(15)">15 км</button>
+      <button class="radius-btn" onclick="setRadius(30)">30 км</button>
+    </div>
+
+    <!-- Быстрые прыжки к городам и заповедникам -->
+    <div class="city-pills">
+      <div class="city-pill" onclick="jumpTo(53.9006, 27.5590, 11)">Минск</div>
+      <div class="city-pill" onclick="jumpTo(52.5724, 23.8016, 10)">Беловежская пуща</div>
+      <div class="city-pill" onclick="jumpTo(52.0210, 27.8100, 10)">Припятский НП</div>
+      <div class="city-pill" onclick="jumpTo(54.7300, 28.3500, 10)">Березинский</div>
+      <div class="city-pill" onclick="jumpTo(55.6300, 27.0500, 10)">Браславские озёра</div>
+      <div class="city-pill" onclick="jumpTo(54.8500, 26.8500, 10)">Нарочанский</div>
+      <div class="city-pill" onclick="jumpTo(52.0976, 23.7341, 11)">Брест</div>
+      <div class="city-pill" onclick="jumpTo(53.6884, 23.8258, 11)">Гродно</div>
+      <div class="city-pill" onclick="jumpTo(55.1904, 30.2049, 11)">Витебск</div>
+      <div class="city-pill" onclick="jumpTo(52.4345, 30.9754, 11)">Гомель</div>
+      <div class="city-pill" onclick="jumpTo(53.8938, 30.3353, 11)">Могилёв</div>
+    </div>
+  </div>
+
+  <!-- Плавающая интерактивная легенда карты -->
+  <div class="legend-card" id="legendCard">
+    <div class="legend-header" onclick="toggleLegend()">
+      <span>🗺️ Легенда карты Красной книги</span>
+      <span id="legendToggleIcon">▼</span>
+    </div>
+    <div class="legend-body" id="legendBody">
+      <div class="legend-item">
+        <span class="legend-marker cat-I"></span>
+        <span><b>I Категория (CR)</b> — На грани исчезновения</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-marker cat-II"></span>
+        <span><b>II Категория (EN)</b> — Исчезающие виды</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-marker cat-III"></span>
+        <span><b>III Категория (VU)</b> — Уязвимые виды</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-marker cat-IV"></span>
+        <span><b>IV Категория (NT)</b> — Требующие контроля</span>
+      </div>
+      <hr style="border: none; border-top: 1px solid #E2E8F0; margin: 4px 0;">
+      <div class="legend-item">
+        <span style="font-size: 14px;">🏞️</span>
+        <span>Национальные парки и биосферные заповедники</span>
+      </div>
+      <div class="legend-item">
+        <span style="font-size: 14px;">📍</span>
+        <span><b>Кликните в любую точку</b> для анализа радиуса 3-30 км</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Боковая панель результатов радиусного анализа -->
+  <div class="analysis-panel" id="analysisPanel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title" id="analysisTitle">Анализ биотопа</div>
+        <div class="panel-subtitle" id="analysisCoords">Координаты: 0.0000, 0.0000</div>
+      </div>
+      <button class="close-btn" onclick="closePanel()">✕</button>
+    </div>
+    <div class="species-list" id="speciesList">
+      <!-- Сюда динамически добавляются карточки видов -->
+    </div>
+  </div>
+
+  <!-- Подсказка -->
+  <div class="hint-banner">
+    💡 Нажмите в любую точку Беларуси или на город, чтобы просканировать радиус на редкие виды!
+  </div>
+
+  <script>
+    // 1. Инициализация карты Leaflet
+    const map = L.map('map', {
+      center: [53.7098, 27.9534], // Географический центр Беларуси
+      zoom: 7,
+      minZoom: 6,
+      maxZoom: 16,
+      maxBounds: [
+        [50.5, 22.0], // Юго-западный угол
+        [57.0, 34.0]  // Северо-восточный угол
+      ]
+    });
+
+    // 2. Добавление тайлового слоя OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors | Красная книга Республики Беларусь'
+    }).addTo(map);
+
+    let currentRadiusKm = 5;
+    let clickCircle = null;
+    let clickMarker = null;
+
+    // Цвета категорий
+    const CAT_COLORS = {
+      'I': '#DC2626',
+      'II': '#EA580C',
+      'III': '#D97706',
+      'IV': '#16A34A'
+    };
+
+    // 3. Формула гаверсинусов для расчета точного расстояния (км)
+    function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Радиус Земли в км
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    // 4. Отрисовка полигонов Национальных парков
+    if (typeof NATIONAL_PARKS !== 'undefined') {
+      NATIONAL_PARKS.forEach(park => {
+        const center = park.center;
+        // Круг зоны покоя
+        const parkCircle = L.circle(center, {
+          radius: Math.sqrt(park.area_sq_km) * 350,
+          color: '#2D6A4F',
+          weight: 2,
+          dashArray: '6, 6',
+          fillColor: '#40916C',
+          fillOpacity: 0.15
+        }).addTo(map);
+
+        parkCircle.bindPopup(`
+          <div style="font-family: sans-serif; font-size: 13px; line-height: 1.4;">
+            <b style="color: #2D6A4F; font-size: 14px;">🌲 ${park.name_ru}</b><br/>
+            <i>${park.name_be}</i><br/>
+            <b>Площадь:</b> ${park.area_sq_km.toLocaleString()} км²<br/>
+            <b>Основан:</b> ${park.established_year} г.<br/>
+            <p style="margin-top: 6px; font-size: 12px;">${park.description_ru}</p>
+          </div>
+        `);
+      });
+    }
+
+    // 5. Отрисовка маркеров видов Красной книги
+    const speciesMarkers = [];
+    if (typeof REDBOOK_SPECIES !== 'undefined') {
+      REDBOOK_SPECIES.forEach(sp => {
+        if (!sp.coordinates) return;
+
+        sp.coordinates.forEach(coord => {
+          const catColor = CAT_COLORS[sp.category] || '#2D6A4F';
+
+          // Пользовательский SVG маркер
+          const iconHtml = `
+            <div style="
+              background: ${catColor};
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              border: 2px solid white;
+              box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: white;
+              font-weight: 800;
+              font-size: 11px;
+            ">${sp.category}</div>
+          `;
+
+          const customIcon = L.divIcon({
+            html: iconHtml,
+            className: 'custom-species-pin',
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+          });
+
+          const marker = L.marker([coord[0], coord[1]], { icon: customIcon }).addTo(map);
+
+          marker.bindPopup(`
+            <div style="width: 220px; font-family: sans-serif;">
+              <img src="${sp.image_url}" style="width: 100%; height: 110px; object-fit: cover; border-radius: 8px; margin-bottom: 6px;" />
+              <b style="font-size: 14px; color: #0F172A;">${sp.name_ru}</b><br/>
+              <span style="font-size: 11px; font-style: italic; color: #64748B;">${sp.name_lat}</span><br/>
+              <span style="display: inline-block; margin-top: 4px; padding: 2px 6px; border-radius: 4px; background: ${catColor}; color: white; font-size: 10px; font-weight: bold;">
+                Категория ${sp.category}
+              </span>
+              <p style="font-size: 11px; margin-top: 6px; color: #334155;">${sp.habitat}</p>
+              <button onclick="parent.postMessage({action: 'open_species', id: '${sp.id}'}, '*')" style="
+                margin-top: 8px;
+                width: 100%;
+                background: #2D6A4F;
+                color: white;
+                border: none;
+                padding: 6px;
+                border-radius: 6px;
+                font-size: 11px;
+                font-weight: bold;
+                cursor: pointer;
+              ">Открыть паспорт вида →</button>
+            </div>
+          `);
+
+          speciesMarkers.push({
+            marker: marker,
+            species: sp,
+            lat: coord[0],
+            lon: coord[1]
+          });
+        });
+      });
+    }
+
+    // 6. Обработка клика в ЛЮБУЮ точку карты (Радиусный анализ)
+    map.on('click', function(e) {
+      performRadiusSearch(e.latlng.lat, e.latlng.lng);
+    });
+
+    function performRadiusSearch(lat, lng) {
+      // Удаляем старые метки клика
+      if (clickCircle) map.removeLayer(clickCircle);
+      if (clickMarker) map.removeLayer(clickMarker);
+
+      // Рисуем пульсирующий маркер в точке клика
+      clickMarker = L.circleMarker([lat, lng], {
+        radius: 7,
+        color: '#FFFFFF',
+        weight: 3,
+        fillColor: '#2D6A4F',
+        fillOpacity: 1
+      }).addTo(map);
+
+      // Рисуем круговую область радиуса поиска
+      clickCircle = L.circle([lat, lng], {
+        radius: currentRadiusKm * 1000,
+        color: '#2D6A4F',
+        weight: 2,
+        fillColor: '#40916C',
+        fillOpacity: 0.18
+      }).addTo(map);
+
+      // Поиск всех видов в заданном радиусе
+      const foundSpecies = [];
+      const checkedIds = new Set();
+
+      speciesMarkers.forEach(item => {
+        const dist = calculateDistanceKm(lat, lng, item.lat, item.lon);
+        // Проверяем попадание в радиус с расширенным допуском биотопа
+        if (dist <= currentRadiusKm * 2.5 && !checkedIds.has(item.species.id)) {
+          checkedIds.add(item.species.id);
+          foundSpecies.push({
+            species: item.species,
+            distance: dist
+          });
+        }
+      });
+
+      // Сортировка по расстоянию
+      foundSpecies.sort((a, b) => a.distance - b.distance);
+
+      // Отображение в боковой панели
+      document.getElementById('analysisTitle').innerText = `Биотоп: радиус ${currentRadiusKm} км`;
+      document.getElementById('analysisCoords').innerText = `Координаты: ${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E • Найдено видов: ${foundSpecies.length}`;
+
+      const listContainer = document.getElementById('speciesList');
+      listContainer.innerHTML = '';
+
+      if (foundSpecies.length === 0) {
+        listContainer.innerHTML = `
+          <div style="text-align: center; padding: 40px 10px; color: #64748B;">
+            <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
+            <b style="color: #0F172A; font-size: 14px;">Редких видов в этом радиусе не зафиксировано</b>
+            <p style="font-size: 12px; margin-top: 6px;">Попробуйте увеличить радиус поиска до 15 или 30 км на верхней панели, либо нажмите ближе к лесным массивам и нацпаркам.</p>
+          </div>
+        `;
+      } else {
+        foundSpecies.forEach(item => {
+          const sp = item.species;
+          const catColor = CAT_COLORS[sp.category] || '#2D6A4F';
+
+          const card = document.createElement('div');
+          card.className = 'species-item';
+          card.onclick = () => {
+            window.parent.postMessage({action: 'open_species', id: sp.id}, '*');
+          };
+          card.innerHTML = `
+            <img src="${sp.image_url}" class="species-thumb" />
+            <div class="species-info">
+              <div class="species-name">${sp.name_ru}</div>
+              <div class="species-lat">${sp.name_lat}</div>
+              <div class="badge-row">
+                <span class="cat-badge" style="background: ${catColor};">Кат. ${sp.category}</span>
+                <span class="dist-badge">~${item.distance.toFixed(1)} км</span>
+              </div>
+            </div>
+          `;
+          listContainer.appendChild(card);
+        });
+      }
+
+      // Открываем панель
+      document.getElementById('analysisPanel').classList.add('open');
+    }
+
+    // 7. Смена радиуса
+    function setRadius(r) {
+      currentRadiusKm = r;
+      document.querySelectorAll('.radius-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText.includes(r.toString()));
+      });
+
+      if (clickMarker) {
+        const center = clickMarker.getLatLng();
+        performRadiusSearch(center.lat, center.lng);
+      }
+    }
+
+    // 8. Быстрый переход к координатам (Города / Парки)
+    function jumpTo(lat, lng, zoom) {
+      map.flyTo([lat, lng], zoom, { duration: 1.2 });
+      setTimeout(() => {
+        performRadiusSearch(lat, lng);
+      }, 1300);
+    }
+
+    // 9. Закрыть панель
+    function closePanel() {
+      document.getElementById('analysisPanel').classList.remove('open');
+      if (clickCircle) map.removeLayer(clickCircle);
+      if (clickMarker) map.removeLayer(clickMarker);
+      clickCircle = null;
+      clickMarker = null;
+    }
+
+    // 10. Свернуть / Развернуть легенду
+    function toggleLegend() {
+      const body = document.getElementById('legendBody');
+      const icon = document.getElementById('legendToggleIcon');
+      if (body.style.display === 'none') {
+        body.style.display = 'flex';
+        icon.innerText = '▼';
+      } else {
+        body.style.display = 'none';
+        icon.innerText = '▲';
+      }
+    }
+  </script>
+</body>
+</html>
