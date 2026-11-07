@@ -453,30 +453,29 @@
       ]
     });
 
-    // 2. Базовые картографические слои (надежные, без блокировки file:// и 403 ошибок)
+    // 2. Базовые картографические слои (100% бесплатные, без водяных знаков и без API-ключей)
     const baseLayers = {
-      "🌿 Атлас природы (Carto Voyager)": L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      "🌲 Топографическая (Esri Topo)": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 18,
-        subdomains: 'abcd',
-        attribution: '&copy; OpenStreetMap &copy; CARTO | Красная книга Беларуси'
+        attribution: 'Tiles &copy; Esri Topo Map | Красная книга Республики Беларусь'
       }),
-      "🏔️ Топографическая (Рельеф и ООПТ)": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+      "🗺️ Подробная карта (OSM)": L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
         maxZoom: 18,
-        attribution: 'Tiles &copy; Esri World Topo Map'
+        subdomains: 'abc',
+        attribution: '&copy; OpenStreetMap contributors | Красная книга Беларуси'
       }),
-      "🛰️ Спутниковый снимок": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      "🛰️ Спутниковые снимки": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 18,
         attribution: 'Tiles &copy; Esri World Imagery'
       }),
-      "🗺️ Светлая карта (Carto Positron)": L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 18,
-        subdomains: 'abcd',
-        attribution: '&copy; CARTO'
+      "🧭 Атлас National Geographic": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 16,
+        attribution: 'Tiles &copy; Esri &mdash; National Geographic'
       })
     };
 
-    // Активируем по умолчанию детальный природный атлас
-    baseLayers["🌿 Атлас природы (Carto Voyager)"].addTo(map);
+    // Активируем по умолчанию красивую топографическую карту природы без водяных знаков
+    baseLayers["🌲 Топографическая (Esri Topo)"].addTo(map);
 
     // Добавляем переключатель слоев в правый угол под топ-панель
     L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
