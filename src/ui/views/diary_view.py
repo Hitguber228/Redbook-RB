@@ -43,7 +43,7 @@ class DiaryView(ft.Container):
             obs_cards.append(
                 ft.Container(
                     padding=30,
-                    alignment=ft.alignment.center,
+                    alignment=ft.Alignment.CENTER,
                     content=ft.Column(
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                         spacing=8,
@@ -91,7 +91,7 @@ class DiaryView(ft.Container):
 
         self.content = ft.ListView(
             expand=True,
-            padding=ft.padding.all(16),
+            padding=ft.Padding.all(16),
             spacing=16,
             controls=[
                 ft.Text(
@@ -119,7 +119,7 @@ class DiaryView(ft.Container):
                                     alignment=ft.MainAxisAlignment.END,
                                     controls=[
                                         ft.FilledButton(
-                                            text="Зафиксировать в дневнике" if lang == "ru" else "Зафіксаваць у дзённіку",
+                                            content="Зафиксировать в дневнике" if lang == "ru" else "Зафіксаваць у дзённіку",
                                             icon=ft.Icons.SAVE,
                                             on_click=self._save_observation
                                         )
@@ -157,3 +157,4 @@ class DiaryView(ft.Container):
         self.notes_field.value = ""
         self._build_ui()
         self.update()
+

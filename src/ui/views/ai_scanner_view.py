@@ -24,7 +24,7 @@ class AIScannerView(ft.Container):
             spacing=10,
             controls=[
                 ft.FilledButton(
-                    text="🔍 ИИ-Определитель" if lang == "ru" else "🔍 ІІ-Азначнік",
+                    content="🔍 ИИ-Определитель" if lang == "ru" else "🔍 ІІ-Азначнік",
                     icon=ft.Icons.CAMERA_ALT,
                     style=ft.ButtonStyle(
                         bgcolor=AppColors.PRIMARY if self.active_tab == 0 else ft.Colors.SURFACE_CONTAINER_HIGHEST,
@@ -33,7 +33,7 @@ class AIScannerView(ft.Container):
                     on_click=lambda e: self._switch_tab(0)
                 ),
                 ft.FilledButton(
-                    text="💬 Гид-натуралист" if lang == "ru" else "💬 Гід-натураліст",
+                    content="💬 Гид-натуралист" if lang == "ru" else "💬 Гід-натураліст",
                     icon=ft.Icons.CHAT,
                     style=ft.ButtonStyle(
                         bgcolor=AppColors.PRIMARY if self.active_tab == 1 else ft.Colors.SURFACE_CONTAINER_HIGHEST,
@@ -53,8 +53,8 @@ class AIScannerView(ft.Container):
             expand=True,
             spacing=14,
             controls=[
-                ft.Container(padding=ft.padding.only(left=16, right=16, top=16), content=tabs_header),
-                ft.Container(expand=True, padding=ft.padding.only(left=16, right=16, bottom=16), content=tab_content)
+                ft.Container(padding=ft.Padding.only(left=16, right=16, top=16), content=tabs_header),
+                ft.Container(expand=True, padding=ft.Padding.only(left=16, right=16, bottom=16), content=tab_content)
             ]
         )
 
@@ -82,7 +82,7 @@ class AIScannerView(ft.Container):
         ]
 
         chips = [
-            ft.ActionChip(
+            ft.Chip(
                 label=ft.Text(label, size=11),
                 on_click=lambda e, txt=hint: self._run_analysis(txt)
             )
@@ -107,12 +107,12 @@ class AIScannerView(ft.Container):
                                     ft.Row(
                                         spacing=8,
                                         controls=[
-                                            ft.Icon(ft.Icons.CHECK_CIRCLE, color=ft.Colors.GREEN, size=24),
+                                            ft.Icon(ft.Icons.CHECK_CIRCLE, bgcolor=ft.Colors.GREEN, size=24),
                                             ft.Text("Результат ИИ-анализа" if lang == "ru" else "Вынік ІІ-аналізу", weight=ft.FontWeight.BOLD, size=16)
                                         ]
                                     ),
                                     ft.Container(
-                                        padding=ft.padding.symmetric(horizontal=10, vertical=4),
+                                        padding=ft.Padding.symmetric(horizontal=10, vertical=4),
                                         border_radius=20,
                                         bgcolor=cat_color,
                                         content=ft.Text(f"Категория {res['category']}", color=ft.Colors.WHITE, size=12, weight=ft.FontWeight.BOLD)
@@ -126,7 +126,7 @@ class AIScannerView(ft.Container):
                                 padding=12,
                                 border_radius=8,
                                 bgcolor=ft.Colors.RED_50,
-                                border=ft.border.all(1, ft.Colors.RED_200),
+                                border=ft.Border.all(1, ft.Colors.RED_200),
                                 content=ft.Text(res["warning"], size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.RED_900)
                             ),
                             ft.Text(f"• {res['distinguishing_features']}", size=12),
@@ -135,7 +135,7 @@ class AIScannerView(ft.Container):
                                 alignment=ft.MainAxisAlignment.END,
                                 controls=[
                                     ft.FilledButton(
-                                        text="Открыть карточку вида" if lang == "ru" else "Адкрыць картку віду",
+                                        content="Открыть карточку вида" if lang == "ru" else "Адкрыць картку віду",
                                         icon=ft.Icons.ARROW_FORWARD,
                                         on_click=lambda e: self.on_select_species(res["species_id"])
                                     )
@@ -157,7 +157,7 @@ class AIScannerView(ft.Container):
                     controls=[
                         self.input_field,
                         ft.FilledButton(
-                            text="Определить",
+                            content="Определить",
                             icon=ft.Icons.AUTO_AWESOME,
                             on_click=lambda e: self._run_analysis(self.input_field.value)
                         )
@@ -226,7 +226,7 @@ class AIScannerView(ft.Container):
         ]
 
         q_chips = [
-            ft.ActionChip(
+            ft.Chip(
                 label=ft.Text(q, size=11),
                 on_click=lambda e, question=q: self._send_quick_question(question)
             )
@@ -272,3 +272,4 @@ class AIScannerView(ft.Container):
         self.chat_messages.append({"role": "assistant", "text": ans})
         self._build_ui()
         self.update()
+

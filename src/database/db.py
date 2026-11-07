@@ -249,3 +249,4 @@ class DatabaseManager:
             return [dict(r) for r in cursor.fetchall()]
 
 db_manager = DatabaseManager()
+

@@ -39,7 +39,7 @@ class SpeciesDetailView(ft.Container):
                     height=36,
                     border_radius=8,
                     bgcolor=AppColors.PRIMARY if is_active else ft.Colors.SURFACE_CONTAINER_HIGHEST,
-                    alignment=ft.alignment.center,
+                    alignment=ft.Alignment.CENTER,
                     content=ft.Text(
                         m_names[i - 1],
                         size=11,
@@ -56,7 +56,7 @@ class SpeciesDetailView(ft.Container):
                 padding=14,
                 border_radius=12,
                 bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
-                border=ft.border.all(1, AppColors.PRIMARY_CONTAINER),
+                border=ft.Border.all(1, AppColors.PRIMARY_CONTAINER),
                 content=ft.Row(
                     spacing=12,
                     controls=[
@@ -93,7 +93,7 @@ class SpeciesDetailView(ft.Container):
                 padding=14,
                 border_radius=12,
                 bgcolor=ft.Colors.AMBER_50,
-                border=ft.border.all(1, ft.Colors.AMBER_300),
+                border=ft.Border.all(1, ft.Colors.AMBER_300),
                 content=ft.Column(
                     spacing=6,
                     controls=[
@@ -116,7 +116,7 @@ class SpeciesDetailView(ft.Container):
 
         self.content = ft.ListView(
             expand=True,
-            padding=ft.padding.all(16),
+            padding=ft.Padding.all(16),
             spacing=16,
             controls=[
                 # Верхняя панель: кнопка назад и категория
@@ -125,11 +125,11 @@ class SpeciesDetailView(ft.Container):
                     controls=[
                         ft.FilledButton(
                             icon=ft.Icons.ARROW_BACK,
-                            text="Назад в каталог" if lang == "ru" else "Назад у каталог",
+                            content="Назад в каталог" if lang == "ru" else "Назад у каталог",
                             on_click=lambda e: self.on_back()
                         ),
                         ft.Container(
-                            padding=ft.padding.symmetric(horizontal=12, vertical=6),
+                            padding=ft.Padding.symmetric(horizontal=12, vertical=6),
                             border_radius=20,
                             bgcolor=cat_color,
                             content=ft.Text(
@@ -149,7 +149,7 @@ class SpeciesDetailView(ft.Container):
                         src=sp["image_url"],
                         height=280,
                         width=float("inf"),
-                        fit=ft.ImageFit.COVER
+                        fit="cover"
                     )
                 ),
                 # Заголовки
@@ -173,10 +173,10 @@ class SpeciesDetailView(ft.Container):
                         padding=16,
                         content=ft.Column(
                             spacing=8,
-                            cross_axis_alignment=ft.CrossAxisAlignment.START,
+                            horizontal_alignment=ft.CrossAxisAlignment.START,
                             controls=[
                                 ft.Text("Общая характеристика" if lang == "ru" else "Агульная характарыстыка", weight=ft.FontWeight.BOLD, size=15),
-                                ft.Text(desc, size=13, line_height=1.4)
+                                ft.Text(desc, size=13)
                             ]
                         )
                     )
@@ -187,10 +187,10 @@ class SpeciesDetailView(ft.Container):
                         padding=16,
                         content=ft.Column(
                             spacing=8,
-                            cross_axis_alignment=ft.CrossAxisAlignment.START,
+                            horizontal_alignment=ft.CrossAxisAlignment.START,
                             controls=[
                                 ft.Text("Морфологические признаки" if lang == "ru" else "Марфалагічныя прыкметы", weight=ft.FontWeight.BOLD, size=15),
-                                ft.Text(sp["morphology"], size=13, line_height=1.4)
+                                ft.Text(sp["morphology"], size=13)
                             ]
                         )
                     )
@@ -203,7 +203,7 @@ class SpeciesDetailView(ft.Container):
                         padding=16,
                         content=ft.Column(
                             spacing=10,
-                            cross_axis_alignment=ft.CrossAxisAlignment.START,
+                            horizontal_alignment=ft.CrossAxisAlignment.START,
                             controls=[
                                 ft.Text("Места обитания и ареал в Беларуси" if lang == "ru" else "Месцы пражывання і арэал у Беларусі", weight=ft.FontWeight.BOLD, size=15),
                                 ft.Text(f"🌲 {sp['habitat']}", size=13),
@@ -238,7 +238,7 @@ class SpeciesDetailView(ft.Container):
                         padding=16,
                         content=ft.Column(
                             spacing=10,
-                            cross_axis_alignment=ft.CrossAxisAlignment.START,
+                            horizontal_alignment=ft.CrossAxisAlignment.START,
                             controls=[
                                 ft.Text("Фенологический календарь активности" if lang == "ru" else "Фенадагічны каляндар актыўнасці", weight=ft.FontWeight.BOLD, size=15),
                                 ft.Text("Месяцы, когда вид активен, цветет или гнездится в Беларуси:" if lang == "ru" else "Месяцы, калі від актыўны, цвіце ці гняздуецца ў Беларусі:", size=12, color=AppColors.TEXT_MUTED_LIGHT),
@@ -253,12 +253,12 @@ class SpeciesDetailView(ft.Container):
                 ),
                 # Охрана и ответственность
                 ft.Card(
-                    color=ft.Colors.RED_50,
+                    bgcolor=ft.Colors.RED_50,
                     content=ft.Container(
                         padding=16,
                         content=ft.Column(
                             spacing=8,
-                            cross_axis_alignment=ft.CrossAxisAlignment.START,
+                            horizontal_alignment=ft.CrossAxisAlignment.START,
                             controls=[
                                 ft.Row(
                                     spacing=6,
@@ -282,3 +282,4 @@ class SpeciesDetailView(ft.Container):
             return
         # Для простоты можно открыть ссылку или проиграть через медиаплеер
         self.page.launch_url(url)
+

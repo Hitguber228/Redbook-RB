@@ -53,3 +53,4 @@ def get_category_label(cat: str, lang: str = "ru") -> str:
             "IV": "IV Категория (Требующие контроля)",
         }
     return labels.get(cat, f"Категория {cat}")
+

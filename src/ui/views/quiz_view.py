@@ -23,7 +23,7 @@ class QuizView(ft.Container):
             # Финал викторины / Сертификат
             cert = quiz_service.get_certificate_data("Учащийся", lang)
             self.content = ft.Container(
-                alignment=ft.alignment.center,
+                alignment=ft.Alignment.CENTER,
                 padding=24,
                 content=ft.Card(
                     elevation=4,
@@ -34,7 +34,7 @@ class QuizView(ft.Container):
                             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                             spacing=16,
                             controls=[
-                                ft.Icon(ft.Icons.EMOJI_EVENTS, size=64, color=ft.Colors.AMBER_600),
+                                ft.Icon(ft.Icons.EMOJI_EVENTS, size=64, bgcolor=ft.Colors.AMBER_600),
                                 ft.Text("ВИКТОРИНА ЗАВЕРШЕНА!" if lang == "ru" else "ВІКТАРЫНА ЗАВЯРШЫЛАСЯ!", size=20, weight=ft.FontWeight.BOLD),
                                 ft.Text(f"Ваш результат: {cert['score']} ({cert['percentage']})", size=16),
                                 ft.Container(
@@ -44,7 +44,7 @@ class QuizView(ft.Container):
                                     content=ft.Text(f"Присвоенный ранг: {cert['rank']}", weight=ft.FontWeight.BOLD, color=AppColors.PRIMARY)
                                 ),
                                 ft.FilledButton(
-                                    text="Пройти заново" if lang == "ru" else "Прайсці нанова",
+                                    content="Пройти заново" if lang == "ru" else "Прайсці нанова",
                                     icon=ft.Icons.REFRESH,
                                     on_click=self._restart_quizzes
                                 )
@@ -83,7 +83,7 @@ class QuizView(ft.Container):
                     padding=14,
                     border_radius=12,
                     bgcolor=btn_color,
-                    border=ft.border.all(2 if (is_selected or (self.answer_checked and i == current_quiz["correct_index"])) else 1, border_color),
+                    border=ft.Border.all(2 if (is_selected or (self.answer_checked and i == current_quiz["correct_index"])) else 1, border_color),
                     ink=not self.answer_checked,
                     on_click=(lambda e, idx=i: self._select_option(idx)) if not self.answer_checked else None,
                     content=ft.Row(
@@ -94,7 +94,7 @@ class QuizView(ft.Container):
                                 height=28,
                                 border_radius=14,
                                 bgcolor=AppColors.PRIMARY if is_selected else ft.Colors.SURFACE_CONTAINER_HIGHEST,
-                                alignment=ft.alignment.center,
+                                alignment=ft.Alignment.CENTER,
                                 content=ft.Text(
                                     chr(65 + i), # A, B, C, D
                                     size=12,
@@ -116,7 +116,7 @@ class QuizView(ft.Container):
                 padding=14,
                 border_radius=12,
                 bgcolor=ft.Colors.GREEN_50 if is_ok else ft.Colors.RED_50,
-                border=ft.border.all(1, ft.Colors.GREEN_300 if is_ok else ft.Colors.RED_300),
+                border=ft.Border.all(1, ft.Colors.GREEN_300 if is_ok else ft.Colors.RED_300),
                 content=ft.Column(
                     spacing=6,
                     controls=[
@@ -134,7 +134,7 @@ class QuizView(ft.Container):
 
         self.content = ft.ListView(
             expand=True,
-            padding=ft.padding.all(16),
+            padding=ft.Padding.all(16),
             spacing=16,
             controls=[
                 # Прогресс
@@ -150,7 +150,7 @@ class QuizView(ft.Container):
                 ft.Card(
                     content=ft.Container(
                         padding=18,
-                        content=ft.Text(q_text, size=17, weight=ft.FontWeight.BOLD, line_height=1.4)
+                        content=ft.Text(q_text, size=17, weight=ft.FontWeight.BOLD)
                     )
                 ),
                 # Варианты ответов
@@ -161,7 +161,7 @@ class QuizView(ft.Container):
                     alignment=ft.MainAxisAlignment.END,
                     controls=[
                         ft.FilledButton(
-                            text="Проверить ответ" if not self.answer_checked else ("Следующий вопрос" if lang == "ru" else "Наступнае пытанне"),
+                            content="Проверить ответ" if not self.answer_checked else ("Следующий вопрос" if lang == "ru" else "Наступнае пытанне"),
                             icon=ft.Icons.CHECK if not self.answer_checked else ft.Icons.ARROW_FORWARD,
                             disabled=(self.selected_option is None and not self.answer_checked),
                             on_click=self._handle_action_btn
@@ -200,3 +200,4 @@ class QuizView(ft.Container):
         self.last_result = None
         self._build_ui()
         self.update()
+

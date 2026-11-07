@@ -53,9 +53,9 @@ class RedBookApp:
                 controls=[
                     ft.Text(app_title, weight=ft.FontWeight.BOLD, size=18, color=ft.Colors.WHITE),
                     ft.Container(
-                        padding=ft.padding.symmetric(horizontal=8, vertical=2),
+                        padding=ft.Padding.symmetric(horizontal=8, vertical=2),
                         border_radius=12,
-                        bgcolor=ft.Colors.WHITE24,
+                        bgcolor=ft.Colors.WHITE_24,
                         content=ft.Text("4-е выданне", size=10, color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD)
                     )
                 ]
@@ -189,4 +189,6 @@ def main(page: ft.Page):
     RedBookApp(page)
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    runner = getattr(ft, "run", getattr(ft, "app", None))
+    runner(main)
+

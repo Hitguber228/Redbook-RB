@@ -35,27 +35,27 @@ class CatalogView(ft.Container):
             scroll=ft.ScrollMode.ADAPTIVE,
             spacing=8,
             controls=[
-                ft.FilterChip(
+                ft.Chip(
                     label=ft.Text("Все категории" if lang == "ru" else "Усе катэгорыі"),
                     selected=(self.selected_category is None),
                     on_select=lambda e: self._select_category(None)
                 ),
-                ft.FilterChip(
+                ft.Chip(
                     label=ft.Text("I (CR)", color=AppColors.CAT_I, weight=ft.FontWeight.BOLD),
                     selected=(self.selected_category == "I"),
                     on_select=lambda e: self._select_category("I")
                 ),
-                ft.FilterChip(
+                ft.Chip(
                     label=ft.Text("II (EN)", color=AppColors.CAT_II, weight=ft.FontWeight.BOLD),
                     selected=(self.selected_category == "II"),
                     on_select=lambda e: self._select_category("II")
                 ),
-                ft.FilterChip(
+                ft.Chip(
                     label=ft.Text("III (VU)", color=AppColors.CAT_III, weight=ft.FontWeight.BOLD),
                     selected=(self.selected_category == "III"),
                     on_select=lambda e: self._select_category("III")
                 ),
-                ft.FilterChip(
+                ft.Chip(
                     label=ft.Text("IV (NT)", color=AppColors.CAT_IV, weight=ft.FontWeight.BOLD),
                     selected=(self.selected_category == "IV"),
                     on_select=lambda e: self._select_category("IV")
@@ -68,22 +68,22 @@ class CatalogView(ft.Container):
             scroll=ft.ScrollMode.ADAPTIVE,
             spacing=8,
             controls=[
-                ft.FilterChip(
+                ft.Chip(
                     label=ft.Text("Все царства" if lang == "ru" else "Усе царствы"),
                     selected=(self.selected_kingdom is None),
                     on_select=lambda e: self._select_kingdom(None)
                 ),
-                ft.FilterChip(
+                ft.Chip(
                     label=ft.Text("🐾 Животные" if lang == "ru" else "🐾 Жывёлы"),
                     selected=(self.selected_kingdom == "animals"),
                     on_select=lambda e: self._select_kingdom("animals")
                 ),
-                ft.FilterChip(
+                ft.Chip(
                     label=ft.Text("🌿 Растения" if lang == "ru" else "🌿 Расліны"),
                     selected=(self.selected_kingdom == "plants"),
                     on_select=lambda e: self._select_kingdom("plants")
                 ),
-                ft.FilterChip(
+                ft.Chip(
                     label=ft.Text("🍄 Грибы" if lang == "ru" else "🍄 Грыбы"),
                     selected=(self.selected_kingdom == "fungi"),
                     on_select=lambda e: self._select_kingdom("fungi")
@@ -101,7 +101,7 @@ class CatalogView(ft.Container):
 
         self.content = ft.ListView(
             expand=True,
-            padding=ft.padding.all(16),
+            padding=ft.Padding.all(16),
             spacing=14,
             controls=[
                 self.search_field,
@@ -144,7 +144,7 @@ class CatalogView(ft.Container):
                 ft.Container(
                     col={"sm": 12},
                     padding=40,
-                    alignment=ft.alignment.center,
+                    alignment=ft.Alignment.CENTER,
                     content=ft.Column(
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                         controls=[
@@ -169,9 +169,9 @@ class CatalogView(ft.Container):
             col={"sm": 12, "md": 6, "lg": 4},
             border_radius=16,
             bgcolor=ft.Colors.SURFACE,
-            border=ft.border.all(1, ft.Colors.OUTLINE_VARIANT),
+            border=ft.Border.all(1, ft.Colors.OUTLINE_VARIANT),
             clip_behavior=ft.ClipBehavior.HARD_EDGE,
-            shadow=ft.BoxShadow(spread_radius=1, blur_radius=6, color=ft.Colors.BLACK12),
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=6, color=ft.Colors.BLACK_12),
             ink=True,
             on_click=lambda e, sid=sp["id"]: self.on_select_species(sid),
             content=ft.Column(
@@ -184,17 +184,17 @@ class CatalogView(ft.Container):
                                 src=sp["image_url"],
                                 height=180,
                                 width=float("inf"),
-                                fit=ft.ImageFit.COVER,
+                                fit="cover",
                             ),
                             # Бейдж категории
                             ft.Container(
                                 top=12,
                                 left=12,
-                                padding=ft.padding.symmetric(horizontal=10, vertical=4),
+                                padding=ft.Padding.symmetric(horizontal=10, vertical=4),
                                 border_radius=20,
                                 bgcolor=cat_color,
                                 content=ft.Row(
-                                    main_inside=ft.MainAxisSize.MIN,
+                                    tight=True,
                                     spacing=4,
                                     controls=[
                                         ft.Icon(ft.Icons.SHIELD, size=14, color=ft.Colors.WHITE),
@@ -207,9 +207,9 @@ class CatalogView(ft.Container):
                                 top=12,
                                 right=12,
                                 visible=bool(sp.get("sound_url")),
-                                padding=ft.padding.all(6),
+                                padding=ft.Padding.all(6),
                                 border_radius=20,
-                                bgcolor=ft.Colors.BLACK54,
+                                bgcolor=ft.Colors.BLACK_54,
                                 content=ft.Icon(ft.Icons.VOLUME_UP, size=16, color=ft.Colors.WHITE)
                             )
                         ]
@@ -219,7 +219,7 @@ class CatalogView(ft.Container):
                         padding=14,
                         content=ft.Column(
                             spacing=6,
-                            cross_axis_alignment=ft.CrossAxisAlignment.START,
+                            horizontal_alignment=ft.CrossAxisAlignment.START,
                             controls=[
                                 ft.Text(
                                     title,
@@ -262,3 +262,4 @@ class CatalogView(ft.Container):
                 ]
             )
         )
+

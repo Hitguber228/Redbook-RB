@@ -72,3 +72,4 @@ class ObservationModel(BaseModel):
     longitude: float
     date_created: str
     photo_path: Optional[str] = None
+

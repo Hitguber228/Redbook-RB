@@ -14,20 +14,20 @@ import os
 import flet as ft
 from src.main import main
 
-if __name__ == "__main__":
-    is_web = "--web" in sys.argv or "-w" in sys.argv
+def start_app(is_web: bool = False):
+    app_runner = getattr(ft, "run", getattr(ft, "app", None))
+    if not app_runner:
+        raise RuntimeError("Не найден метод запуска приложения в установленной версии Flet")
 
     if is_web:
         port = 8550
         print(f"🚀 Запуск «Красной книги Беларуси» в режиме Web/PWA на http://localhost:{port}")
-        ft.app(
-            target=main,
-            view=ft.AppView.WEB_BROWSER,
-            port=port
-        )
+        app_runner(main, view=ft.AppView.WEB_BROWSER, port=port)
     else:
         print("🌲 Запуск «Красной книги Беларуси» в десктопном режиме Windows...")
-        ft.app(
-            target=main,
-            view=ft.AppView.FLET_APP
-        )
+        app_runner(main, view=ft.AppView.FLET_APP)
+
+if __name__ == "__main__":
+    is_web_mode = "--web" in sys.argv or "-w" in sys.argv
+    start_app(is_web=is_web_mode)
+

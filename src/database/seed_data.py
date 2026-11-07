@@ -377,3 +377,4 @@ INITIAL_QUIZZES_DATA = [
         "related_species_id": "bison-bonasus"
     }
 ]
+

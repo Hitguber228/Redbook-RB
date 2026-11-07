@@ -42,12 +42,12 @@ class MapView(ft.Container):
                     padding=14,
                     border_radius=12,
                     bgcolor=AppColors.PRIMARY_CONTAINER if is_active else ft.Colors.SURFACE,
-                    border=ft.border.all(2 if is_active else 1, AppColors.PRIMARY if is_active else ft.Colors.OUTLINE_VARIANT),
+                    border=ft.Border.all(2 if is_active else 1, AppColors.PRIMARY if is_active else ft.Colors.OUTLINE_VARIANT),
                     ink=True,
                     on_click=lambda e, pid=p["id"]: self._select_park(pid),
                     content=ft.Column(
                         spacing=4,
-                        cross_axis_alignment=ft.CrossAxisAlignment.START,
+                        horizontal_alignment=ft.CrossAxisAlignment.START,
                         controls=[
                             ft.Text(title, weight=ft.FontWeight.BOLD, size=13, max_lines=2),
                             ft.Text(f"🌲 {p['area_sq_km']} км² • Осн. {p['established_year']} г.", size=11, color=AppColors.TEXT_MUTED_LIGHT),
@@ -74,7 +74,7 @@ class MapView(ft.Container):
                     padding=16,
                     content=ft.Column(
                         spacing=10,
-                        cross_axis_alignment=ft.CrossAxisAlignment.START,
+                        horizontal_alignment=ft.CrossAxisAlignment.START,
                         controls=[
                             ft.Row(
                                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -83,7 +83,7 @@ class MapView(ft.Container):
                                     ft.Text(f"📍 GPS: {selected_park['center'][0]:.2f}, {selected_park['center'][1]:.2f}", size=11, color=AppColors.PRIMARY)
                                 ]
                             ),
-                            ft.Text(selected_park["description_ru"], size=13, line_height=1.4),
+                            ft.Text(selected_park["description_ru"], size=13),
                             ft.Divider(height=1),
                             ft.Text("Особо охраняемые виды территории:" if lang == "ru" else "Асабліва ахоўныя віды тэрыторыі:", weight=ft.FontWeight.BOLD, size=12),
                             ft.Row(wrap=True, spacing=6, controls=key_species_chips)
@@ -102,7 +102,7 @@ class MapView(ft.Container):
                     padding=12,
                     border_radius=12,
                     bgcolor=ft.Colors.SURFACE,
-                    border=ft.border.all(1, ft.Colors.OUTLINE_VARIANT),
+                    border=ft.Border.all(1, ft.Colors.OUTLINE_VARIANT),
                     content=ft.Column(
                         spacing=4,
                         controls=[
@@ -121,7 +121,7 @@ class MapView(ft.Container):
 
         self.content = ft.ListView(
             expand=True,
-            padding=ft.padding.all(16),
+            padding=ft.Padding.all(16),
             spacing=16,
             controls=[
                 # Заголовок и пояснение
@@ -145,7 +145,7 @@ class MapView(ft.Container):
                     padding=12,
                     border_radius=10,
                     bgcolor=ft.Colors.BLUE_50,
-                    border=ft.border.all(1, ft.Colors.BLUE_200),
+                    border=ft.Border.all(1, ft.Colors.BLUE_200),
                     content=ft.Row(
                         spacing=10,
                         controls=[
@@ -187,3 +187,4 @@ class MapView(ft.Container):
             if s["name_ru"].lower() in species_name.lower() or s["name_be"].lower() in species_name.lower():
                 self.on_select_species(s["id"])
                 return
+
