@@ -4,6 +4,7 @@ import math
 import os
 from typing import Callable, Optional, List, Dict
 from ...database.db import db_manager
+from ...utils import open_target
 from ..theme import AppColors, get_category_color
 
 GEO_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "geo", "belarus_geo.json"))
@@ -107,7 +108,7 @@ class MapView(ft.Container):
                             icon=ft.Icons.OPEN_IN_NEW,
                             content=ft.Text("Открыть веб-карту Leaflet" if lang == "ru" else "Адкрыць вэб-карту Leaflet", weight=ft.FontWeight.BOLD),
                             style=ft.ButtonStyle(bgcolor=ft.Colors.WHITE, color=AppColors.PRIMARY),
-                            on_click=lambda e: self.page.launch_url("/map/index.html")
+                            on_click=lambda e: open_target("/map/index.html", self.page)
                         )
                     ]
                 )
@@ -433,7 +434,7 @@ class MapView(ft.Container):
                                         ft.FilledButton(
                                             icon=ft.Icons.MAP,
                                             content=ft.Text("Открыть динамический Leaflet-слой с зумом и перемещением" if lang == "ru" else "Адкрыць дынамічны Leaflet-слой з зумам", weight=ft.FontWeight.BOLD),
-                                            on_click=lambda e: self.page.launch_url("/map/index.html")
+                                            on_click=lambda e: open_target("/map/index.html", self.page)
                                         )
                                     ]
                                 )

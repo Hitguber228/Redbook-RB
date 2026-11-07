@@ -1,6 +1,7 @@
 import flet as ft
 from typing import Callable, Optional
 from ...database.db import db_manager
+from ...utils import open_target
 from ..theme import AppColors, get_category_color, get_category_label
 
 REGION_COLORS = {
@@ -446,4 +447,4 @@ class SpeciesDetailView(ft.Container):
     def _play_audio(self, url: Optional[str]):
         if not url:
             return
-        self.page.launch_url(url)
+        open_target(url, self.page)

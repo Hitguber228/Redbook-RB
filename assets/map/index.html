@@ -454,6 +454,15 @@
       'IV': '#16A34A'
     };
 
+    // Функция нормализации путей к изображениям (для file:/// и http://)
+    function resolveImageUrl(url) {
+      if (!url) return '../icon.png';
+      if (url.startsWith('/images/')) {
+        return '..' + url;
+      }
+      return url;
+    }
+
     // 3. Формула гаверсинусов для расчета точного расстояния (км)
     function calculateDistanceKm(lat1, lon1, lat2, lon2) {
       const R = 6371; // Радиус Земли в км
@@ -530,7 +539,7 @@
 
           marker.bindPopup(`
             <div style="width: 220px; font-family: sans-serif;">
-              <img src="${sp.image_url}" style="width: 100%; height: 110px; object-fit: cover; border-radius: 8px; margin-bottom: 6px;" />
+              <img src="${resolveImageUrl(sp.image_url)}" onerror="this.src='../icon.png'" style="width: 100%; height: 110px; object-fit: cover; border-radius: 8px; margin-bottom: 6px;" />
               <b style="font-size: 14px; color: #0F172A;">${sp.name_ru}</b><br/>
               <span style="font-size: 11px; font-style: italic; color: #64748B;">${sp.name_lat}</span><br/>
               <span style="display: inline-block; margin-top: 4px; padding: 2px 6px; border-radius: 4px; background: ${catColor}; color: white; font-size: 10px; font-weight: bold;">
@@ -635,7 +644,7 @@
             window.parent.postMessage({action: 'open_species', id: sp.id}, '*');
           };
           card.innerHTML = `
-            <img src="${sp.image_url}" class="species-thumb" />
+            <img src="${resolveImageUrl(sp.image_url)}" onerror="this.src='../icon.png'" class="species-thumb" />
             <div class="species-info">
               <div class="species-name">${sp.name_ru}</div>
               <div class="species-lat">${sp.name_lat}</div>
@@ -698,3 +707,4 @@
   </script>
 </body>
 </html>
+
