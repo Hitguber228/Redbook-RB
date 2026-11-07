@@ -158,11 +158,11 @@ class CatalogView(ft.Container):
         self.taxon_dropdown = ft.Dropdown(
             value=current_taxon_val,
             options=[ft.dropdown.Option(val, text) for val, text in t_opts],
-            prefix_icon=ft.Icons.CATEGORY_OUTLINED,
+            leading_icon=ft.Icons.CATEGORY_OUTLINED,
             border_radius=10,
             content_padding=ft.Padding.symmetric(horizontal=12, vertical=6),
             dense=True,
-            on_change=self._on_taxon_change,
+            on_select=self._on_taxon_change,
             width=210,
             tooltip="Фильтр по таксономической группе" if lang == "ru" else "Фільтр па таксанамічнай групе"
         )
@@ -188,11 +188,11 @@ class CatalogView(ft.Container):
         self.biotope_dropdown = ft.Dropdown(
             value=current_biotope_val,
             options=[ft.dropdown.Option(val, text) for val, text in b_opts],
-            prefix_icon=ft.Icons.FOREST_OUTLINED,
+            leading_icon=ft.Icons.FOREST_OUTLINED,
             border_radius=10,
             content_padding=ft.Padding.symmetric(horizontal=12, vertical=6),
             dense=True,
-            on_change=self._on_biotope_change,
+            on_select=self._on_biotope_change,
             width=210,
             tooltip="Фильтр по экосистеме обитания" if lang == "ru" else "Фільтр па экасістэме пражывання"
         )
@@ -232,11 +232,11 @@ class CatalogView(ft.Container):
         self.park_dropdown = ft.Dropdown(
             value=current_park_val,
             options=[ft.dropdown.Option(val, text) for val, text in p_opts],
-            prefix_icon=ft.Icons.PARK_OUTLINED,
+            leading_icon=ft.Icons.PARK_OUTLINED,
             border_radius=10,
             content_padding=ft.Padding.symmetric(horizontal=12, vertical=6),
             dense=True,
-            on_change=self._on_park_change,
+            on_select=self._on_park_change,
             width=230,
             tooltip="Фильтр по заповедникам и национальным паркам" if lang == "ru" else "Фільтр па запаведніках і нацпарках"
         )
@@ -266,11 +266,11 @@ class CatalogView(ft.Container):
         self.region_dropdown = ft.Dropdown(
             value=current_reg_val,
             options=[ft.dropdown.Option(val, text) for val, text in reg_opts],
-            prefix_icon=ft.Icons.MAP_OUTLINED,
+            leading_icon=ft.Icons.MAP_OUTLINED,
             border_radius=10,
             content_padding=ft.Padding.symmetric(horizontal=12, vertical=6),
             dense=True,
-            on_change=self._on_region_change,
+            on_select=self._on_region_change,
             width=210,
             tooltip="Фильтр по административным областям" if lang == "ru" else "Фільтр па адміністрацыйных абласцях"
         )
@@ -295,11 +295,11 @@ class CatalogView(ft.Container):
         self.sort_dropdown = ft.Dropdown(
             value=self.sort_by,
             options=[ft.dropdown.Option(val, text) for val, text in s_opts],
-            prefix_icon=ft.Icons.SORT_BY_ALPHA,
+            leading_icon=ft.Icons.SORT_BY_ALPHA,
             border_radius=10,
             content_padding=ft.Padding.symmetric(horizontal=12, vertical=6),
             dense=True,
-            on_change=self._on_sort_change,
+            on_select=self._on_sort_change,
             width=220,
             tooltip="Порядок сортировки реестра" if lang == "ru" else "Парадак сартавання рэестра"
         )
@@ -314,7 +314,7 @@ class CatalogView(ft.Container):
 
         reset_btn = ft.OutlinedButton(
             icon=ft.Icons.RESTART_ALT,
-            text="Сбросить все" if lang == "ru" else "Скінуць усё",
+            content=ft.Text("Сбросить все" if lang == "ru" else "Скінуць усё"),
             style=ft.ButtonStyle(
                 color=ft.Colors.RED_600,
                 side=ft.BorderSide(1, ft.Colors.RED_200)
@@ -497,9 +497,9 @@ class CatalogView(ft.Container):
                             ft.Icon(ft.Icons.SEARCH_OFF, size=56, color=ft.Colors.GREY_400),
                             ft.Text("Виды не найдены" if lang == "ru" else "Віды не знойдзены", size=18, weight=ft.FontWeight.BOLD),
                             ft.Text("Попробуйте сбросить фильтры или ввести другое название" if lang == "ru" else "Паспрабуйце скінуць фільтры ці ўвесці іншую назву", color=ft.Colors.GREY_600),
-                            ft.ElevatedButton(
+                            ft.OutlinedButton(
                                 icon=ft.Icons.RESTART_ALT,
-                                text="Сбросить все фильтры" if lang == "ru" else "Скінуць усе фільтры",
+                                content=ft.Text("Сбросить все фильтры" if lang == "ru" else "Скінуць усе фільтры"),
                                 on_click=self._reset_all_filters
                             )
                         ]
@@ -522,7 +522,7 @@ class CatalogView(ft.Container):
                 padding=ft.Padding.symmetric(vertical=16),
                 content=ft.FilledButton(
                     icon=ft.Icons.EXPAND_MORE,
-                    text=f"Показать ещё 36 видов (осталось {remaining})" if lang == "ru" else f"Паказаць яшчэ 36 відаў (засталося {remaining})",
+                    content=ft.Text(f"Показать ещё 36 видов (осталось {remaining})" if lang == "ru" else f"Паказаць яшчэ 36 відаў (засталося {remaining})"),
                     style=ft.ButtonStyle(
                         bgcolor=AppColors.PRIMARY,
                         color=ft.Colors.WHITE,
