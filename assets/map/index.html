@@ -28,6 +28,22 @@
       z-index: 1;
     }
 
+    .leaflet-top {
+      top: 76px !important;
+    }
+
+    .leaflet-control-layers {
+      border-radius: 14px !important;
+      border: 1px solid rgba(255, 255, 255, 0.6) !important;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+      background: rgba(255, 255, 255, 0.95) !important;
+      backdrop-filter: blur(10px) !important;
+      padding: 8px 14px !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      color: #1E293B !important;
+    }
+
     /* Верхняя панель управления */
     .top-bar {
       position: absolute;
@@ -437,10 +453,33 @@
       ]
     });
 
-    // 2. Добавление тайлового слоя OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors | Красная книга Республики Беларусь'
-    }).addTo(map);
+    // 2. Базовые картографические слои (надежные, без блокировки file:// и 403 ошибок)
+    const baseLayers = {
+      "🌿 Атлас природы (Carto Voyager)": L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        maxZoom: 18,
+        subdomains: 'abcd',
+        attribution: '&copy; OpenStreetMap &copy; CARTO | Красная книга Беларуси'
+      }),
+      "🏔️ Топографическая (Рельеф и ООПТ)": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 18,
+        attribution: 'Tiles &copy; Esri World Topo Map'
+      }),
+      "🛰️ Спутниковый снимок": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 18,
+        attribution: 'Tiles &copy; Esri World Imagery'
+      }),
+      "🗺️ Светлая карта (Carto Positron)": L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 18,
+        subdomains: 'abcd',
+        attribution: '&copy; CARTO'
+      })
+    };
+
+    // Активируем по умолчанию детальный природный атлас
+    baseLayers["🌿 Атлас природы (Carto Voyager)"].addTo(map);
+
+    // Добавляем переключатель слоев в правый угол под топ-панель
+    L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
 
     let currentRadiusKm = 5;
     let clickCircle = null;
