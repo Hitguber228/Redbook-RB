@@ -23,6 +23,12 @@ for sp in INITIAL_SPECIES_DATA:
         "taxon_group": sp["taxon_group"],
         "image_url": sp["image_url"],
         "habitat": sp["habitat"],
+        "description_ru": sp.get("description_ru", ""),
+        "description_be": sp.get("description_be", ""),
+        "morphology": sp.get("morphology", ""),
+        "look_alike_species": sp.get("look_alike_species", ""),
+        "sound_url": sp.get("sound_url", ""),
+        "sound_title": sp.get("sound_title", ""),
         "coordinates": sp.get("coordinates", [])
     })
 

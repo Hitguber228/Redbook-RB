@@ -256,8 +256,277 @@
     }
 
     .filter-select:focus {
-      border-color: #DC2626;
-      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+      border-color: #2D6A4F;
+      box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.12);
+    }
+
+    /* Кастомный красивый выпадающий список видов с живым поиском */
+    .custom-combobox-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .combobox-trigger {
+      width: 100%;
+      min-height: 42px;
+      padding: 8px 12px;
+      background: #FFFFFF;
+      border: 1.5px solid #CBD5E1;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .combobox-trigger:hover {
+      border-color: #2D6A4F;
+      background: #F8FAFC;
+    }
+
+    .custom-combobox-wrapper.open .combobox-trigger {
+      border-color: #2D6A4F;
+      box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.14);
+      background: #FFFFFF;
+    }
+
+    .combobox-trigger-left {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .trigger-thumb {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid #E2E8F0;
+    }
+
+    .trigger-label-group {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      line-height: 1.2;
+    }
+
+    .trigger-label-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0F172A;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .trigger-label-sub {
+      font-size: 11px;
+      font-style: italic;
+      color: #64748B;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .trigger-badge {
+      font-size: 9.5px;
+      font-weight: 800;
+      color: white;
+      padding: 1px 5px;
+      border-radius: 4px;
+      margin-left: 6px;
+      flex-shrink: 0;
+    }
+
+    .combobox-trigger-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .combobox-clear-btn {
+      background: #E2E8F0;
+      border: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      font-size: 10px;
+      font-weight: 800;
+      color: #475569;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .combobox-clear-btn:hover {
+      background: #DC2626;
+      color: #FFFFFF;
+    }
+
+    .trigger-chevron {
+      transition: transform 0.2s ease;
+    }
+
+    .custom-combobox-wrapper.open .trigger-chevron {
+      transform: rotate(180deg);
+    }
+
+    /* Выпадающее меню поиска */
+    .combobox-dropdown {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      z-index: 1500;
+      background: #FFFFFF;
+      border: 1.5px solid #CBD5E1;
+      border-radius: 14px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.16);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      animation: dropdownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes dropdownFade {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .custom-combobox-wrapper.open .combobox-dropdown {
+      display: flex;
+    }
+
+    .dropdown-search-header {
+      padding: 9px 12px;
+      background: #F8FAFC;
+      border-bottom: 1px solid #E2E8F0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dropdown-search-header input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #0F172A;
+    }
+
+    .dropdown-search-header input::placeholder {
+      color: #94A3B8;
+      font-weight: normal;
+    }
+
+    .search-clear-mini {
+      background: none;
+      border: none;
+      color: #94A3B8;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 0 4px;
+    }
+
+    .dropdown-list {
+      max-height: 250px;
+      overflow-y: auto;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .dropdown-item:hover {
+      background: #F1F5F9;
+    }
+
+    .dropdown-item.selected {
+      background: #ECFDF5;
+      border: 1px solid #A7F3D0;
+    }
+
+    .dropdown-item-left {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .dropdown-thumb {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #E2E8F0;
+      border: 1px solid #E2E8F0;
+    }
+
+    .dropdown-text-group {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .dropdown-sp-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #0F172A;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dropdown-sp-sub {
+      font-size: 11px;
+      font-style: italic;
+      color: #64748B;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dropdown-badge {
+      font-size: 9.5px;
+      font-weight: 800;
+      color: #FFFFFF;
+      padding: 2px 6px;
+      border-radius: 5px;
+      flex-shrink: 0;
+    }
+
+    .dropdown-empty {
+      padding: 18px 12px;
+      text-align: center;
+      font-size: 12px;
+      color: #94A3B8;
+      font-weight: 500;
     }
 
     /* Радиокнопки точь-в-точь как на скриншоте 21vek */
@@ -830,6 +1099,124 @@
     .cat-III { background: #D97706; }
     .cat-IV { background: #16A34A; }
 
+    /* Модальное окно паспорта вида на веб-карте */
+    .species-modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .species-modal-backdrop.active {
+      display: flex;
+    }
+
+    .species-modal-card {
+      background: #FFFFFF;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      overflow: hidden;
+      animation: modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalSlideUp {
+      from { opacity: 0; transform: translateY(20px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-hero {
+      position: relative;
+      height: 220px;
+      width: 100%;
+      background: #E2E8F0;
+    }
+
+    .modal-hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .modal-close-icon {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 32px;
+      height: 32px;
+      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.7);
+      color: white;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+
+    .modal-close-icon:hover {
+      background: #DC2626;
+    }
+
+    .modal-content-body {
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .modal-sp-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: #0F172A;
+      line-height: 1.2;
+    }
+
+    .modal-sp-lat {
+      font-size: 13px;
+      font-style: italic;
+      color: #64748B;
+      margin-top: 2px;
+    }
+
+    .modal-section-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #0F172A;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    .modal-text {
+      font-size: 13px;
+      color: #334155;
+      line-height: 1.5;
+    }
+
     /* Подсказка при первом открытии */
     .hint-banner {
       position: absolute;
@@ -960,14 +1347,43 @@
 
       <hr class="dotted-divider" />
 
-      <!-- 3. ВЫБОР КОНКРЕТНОГО ВИДА БЕЗ СТИКЕРОВ -->
+      <!-- 3. КРАСИВЫЙ КАСТОМНЫЙ ПОИСК И ВЫБОР ВИДА С ЖИВЫМ ПОИСКОМ -->
       <div class="filter-group">
         <label class="filter-label">
-          <span>Конкретный вид</span>
+          <span>Поиск и выбор вида</span>
         </label>
-        <select id="speciesSelect" class="filter-select" onchange="onSpeciesSelectChange()">
-          <option value="all">Все виды (показать все 19 видов)</option>
-        </select>
+        
+        <div class="custom-combobox-wrapper" id="speciesCombobox">
+          <div class="combobox-trigger" onclick="toggleSpeciesDropdown()" id="speciesTrigger">
+            <div class="combobox-trigger-left" id="speciesTriggerContent">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="trigger-search-icon">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <span class="trigger-label-title" id="speciesTriggerLabel">Все виды (показать все 19)</span>
+            </div>
+            <div class="combobox-trigger-actions">
+              <button type="button" class="combobox-clear-btn" id="speciesClearBtn" onclick="clearSpeciesSelection(event)" style="display: none;" title="Сбросить выбор вида">✕</button>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="trigger-chevron" id="speciesChevron">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Всплывающее меню с живым поиском и карточками видов -->
+          <div class="combobox-dropdown" id="speciesDropdown">
+            <div class="dropdown-search-header">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="text" id="speciesSearchInput" placeholder="Поиск (зубр, бусел, рысь, latin...)" oninput="onSpeciesSearchInput(this.value)" autocomplete="off" />
+              <button type="button" class="search-clear-mini" id="speciesInputClearMini" onclick="clearSearchInput()" style="display: none;">✕</button>
+            </div>
+
+            <div class="dropdown-list" id="speciesDropdownList">
+              <!-- Заполняется динамически из JavaScript -->
+            </div>
+          </div>
+        </div>
       </div>
 
       <hr class="dotted-divider" />
@@ -1122,6 +1538,65 @@
   <!-- Подсказка -->
   <div class="hint-banner">
     Кликните в любую точку Беларуси — в панели справа отобразится район, населённый пункт и редкие виды.
+  </div>
+
+  <!-- Модальное окно паспорта вида на веб-карте -->
+  <div class="species-modal-backdrop" id="speciesModalBackdrop" onclick="handleBackdropClick(event)">
+    <div class="species-modal-card" id="speciesModalCard">
+      <div class="modal-hero">
+        <img id="modalImg" src="../icon.png" alt="" />
+        <button type="button" class="modal-close-icon" onclick="closeSpeciesModal()" title="Закрыть окно">✕</button>
+      </div>
+      <div class="modal-content-body">
+        <div class="modal-title-row">
+          <div>
+            <div class="modal-sp-name" id="modalNameRu">Название вида</div>
+            <div class="modal-sp-lat" id="modalNameLat">Latin name</div>
+          </div>
+          <span class="cat-badge" id="modalCatBadge" style="font-size: 11px; padding: 4px 10px; border-radius: 6px;">Кат. I</span>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
+          <span style="font-size: 11.5px; background: #F1F5F9; color: #475569; padding: 3px 8px; border-radius: 6px; font-weight: 600;" id="modalKingdom">Царство: Животные</span>
+          <span style="font-size: 11.5px; background: #ECFDF5; color: #065F46; padding: 3px 8px; border-radius: 6px; font-weight: 600;" id="modalStatus">Статус: Под охраной</span>
+        </div>
+
+        <div class="modal-section-title">Среда обитания и распространение</div>
+        <div class="modal-text" id="modalHabitat">Биотоп</div>
+
+        <div class="modal-section-title">Биологическое описание</div>
+        <div class="modal-text" id="modalDescription">Описание</div>
+
+        <div id="modalMorphologyBlock" style="display: none;">
+          <div class="modal-section-title">Морфологические признаки</div>
+          <div class="modal-text" id="modalMorphology"></div>
+        </div>
+
+        <div id="modalLookAlikeBlock" style="display: none;">
+          <div class="modal-section-title">Сходные виды</div>
+          <div class="modal-text" id="modalLookAlike"></div>
+        </div>
+
+        <div id="modalAudioBlock" style="display: none; margin-top: 4px;">
+          <div class="modal-section-title">Голос / Звук вида в природе</div>
+          <audio id="modalAudioPlayer" controls style="width: 100%; height: 38px; margin-top: 4px;"></audio>
+        </div>
+
+        <div style="margin-top: 10px; display: flex; gap: 10px;">
+          <button type="button" id="modalFlyToBtn" style="
+            flex: 1; background: #2D6A4F; color: white; border: none; padding: 10px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.15s;
+          ">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+            Показать ареал на карте
+          </button>
+          <button type="button" onclick="closeSpeciesModal()" style="
+            padding: 10px 16px; background: #F1F5F9; color: #475569; border: 1.5px solid #CBD5E1; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer;
+          ">
+            Закрыть
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -1290,7 +1765,7 @@
                 Категория ${sp.category}
               </span>
               <p style="font-size: 11px; margin-top: 6px; color: #334155;">${sp.habitat}</p>
-              <button onclick="parent.postMessage({action: 'open_species', id: '${sp.id}'}, '*')" style="
+              <button onclick="openSpeciesPassport('${sp.id}')" style="
                 margin-top: 8px; width: 100%; background: #2D6A4F; color: white; border: none; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;
               ">Открыть паспорт вида →</button>
             </div>
@@ -1306,16 +1781,171 @@
       });
     }
 
-    // Заполнение выпадающего списка видов (без дубликатов, по алфавиту)
-    const speciesSelect = document.getElementById('speciesSelect');
-    if (speciesSelect) {
-      const sortedSpecies = Array.from(uniqueSpeciesMap.values()).sort((a, b) => a.name_ru.localeCompare(b.name_ru, 'ru'));
-      sortedSpecies.forEach(sp => {
-        const opt = document.createElement('option');
-        opt.value = sp.id;
-        opt.textContent = `${sp.name_ru} (${sp.name_lat}) — Кат. ${sp.category}`;
-        speciesSelect.appendChild(opt);
+    // 4.1. Кастомный красивый выпадающий список видов с живым поиском
+    let speciesSearchQuery = '';
+
+    function initSpeciesCombobox() {
+      renderSpeciesDropdown('');
+
+      // Закрытие выпадающего списка при клике снаружи
+      document.addEventListener('click', function(e) {
+        const combobox = document.getElementById('speciesCombobox');
+        if (combobox && !combobox.contains(e.target)) {
+          closeSpeciesDropdown();
+        }
       });
+    }
+
+    function toggleSpeciesDropdown() {
+      const combobox = document.getElementById('speciesCombobox');
+      if (!combobox) return;
+      if (combobox.classList.contains('open')) {
+        closeSpeciesDropdown();
+      } else {
+        openSpeciesDropdown();
+      }
+    }
+
+    function openSpeciesDropdown() {
+      const combobox = document.getElementById('speciesCombobox');
+      if (!combobox) return;
+      combobox.classList.add('open');
+      const input = document.getElementById('speciesSearchInput');
+      if (input) {
+        setTimeout(() => input.focus(), 60);
+      }
+    }
+
+    function closeSpeciesDropdown() {
+      const combobox = document.getElementById('speciesCombobox');
+      if (combobox) combobox.classList.remove('open');
+    }
+
+    function onSpeciesSearchInput(val) {
+      speciesSearchQuery = (val || '').trim().toLowerCase();
+      const clearMini = document.getElementById('speciesInputClearMini');
+      if (clearMini) clearMini.style.display = speciesSearchQuery ? 'block' : 'none';
+      renderSpeciesDropdown(speciesSearchQuery);
+    }
+
+    function clearSearchInput() {
+      const input = document.getElementById('speciesSearchInput');
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+      onSpeciesSearchInput('');
+    }
+
+    function renderSpeciesDropdown(query) {
+      const container = document.getElementById('speciesDropdownList');
+      if (!container) return;
+
+      const sorted = Array.from(uniqueSpeciesMap.values()).sort((a, b) => a.name_ru.localeCompare(b.name_ru, 'ru'));
+      const filtered = sorted.filter(sp => {
+        if (!query) return true;
+        const ru = (sp.name_ru || '').toLowerCase();
+        const be = (sp.name_be || '').toLowerCase();
+        const lat = (sp.name_lat || '').toLowerCase();
+        return ru.includes(query) || be.includes(query) || lat.includes(query);
+      });
+
+      let html = '';
+
+      // Пункт "Все виды"
+      if (!query) {
+        const isAllSelected = currentFilters.speciesId === 'all';
+        html += `
+          <div class="dropdown-item ${isAllSelected ? 'selected' : ''}" onclick="selectSpecies('all')">
+            <div class="dropdown-item-left">
+              <div style="width: 32px; height: 32px; border-radius: 8px; background: #F1F5F9; display: flex; align-items: center; justify-content: center; color: #475569; flex-shrink: 0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/>
+                </svg>
+              </div>
+              <div class="dropdown-text-group">
+                <span class="dropdown-sp-title">Все виды Беларуси</span>
+                <span class="dropdown-sp-sub">Показать все 19 редких видов</span>
+              </div>
+            </div>
+            <span class="dropdown-badge" style="background: #1E293B;">19</span>
+          </div>
+        `;
+      }
+
+      if (filtered.length === 0) {
+        html += `
+          <div class="dropdown-empty">
+            Видов по запросу «${query}» не найдено
+          </div>
+        `;
+      } else {
+        filtered.forEach(sp => {
+          const isSelected = currentFilters.speciesId === sp.id;
+          const catColor = CAT_COLORS[sp.category] || '#2D6A4F';
+
+          html += `
+            <div class="dropdown-item ${isSelected ? 'selected' : ''}" onclick="selectSpecies('${sp.id}')">
+              <div class="dropdown-item-left">
+                <img src="${resolveImageUrl(sp.image_url)}" onerror="this.src='../icon.png'" class="dropdown-thumb" alt="${sp.name_ru}" />
+                <div class="dropdown-text-group">
+                  <span class="dropdown-sp-title">${sp.name_ru}</span>
+                  <span class="dropdown-sp-sub">${sp.name_lat}</span>
+                </div>
+              </div>
+              <span class="dropdown-badge" style="background: ${catColor};">
+                ${sp.category}
+              </span>
+            </div>
+          `;
+        });
+      }
+
+      container.innerHTML = html;
+    }
+
+    function selectSpecies(spId) {
+      currentFilters.speciesId = spId;
+      closeSpeciesDropdown();
+
+      const triggerContent = document.getElementById('speciesTriggerContent');
+      const clearBtn = document.getElementById('speciesClearBtn');
+
+      if (spId === 'all') {
+        triggerContent.innerHTML = `
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="trigger-search-icon">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <span class="trigger-label-title" id="speciesTriggerLabel">Все виды (показать все 19)</span>
+        `;
+        if (clearBtn) clearBtn.style.display = 'none';
+      } else {
+        const sp = uniqueSpeciesMap.get(spId);
+        if (sp) {
+          const catColor = CAT_COLORS[sp.category] || '#2D6A4F';
+          triggerContent.innerHTML = `
+            <img src="${resolveImageUrl(sp.image_url)}" onerror="this.src='../icon.png'" class="trigger-thumb" alt="${sp.name_ru}" />
+            <div class="trigger-label-group">
+              <span class="trigger-label-title">${sp.name_ru}</span>
+              <span class="trigger-label-sub">${sp.name_lat}</span>
+            </div>
+            <span class="trigger-badge" style="background: ${catColor};">Кат. ${sp.category}</span>
+          `;
+          if (clearBtn) clearBtn.style.display = 'flex';
+
+          // Плавный перелёт карты к первому месту обитания вида
+          if (sp.coordinates && sp.coordinates.length > 0) {
+            map.flyTo(sp.coordinates[0], 10, { duration: 1.2 });
+          }
+        }
+      }
+
+      applyFilters();
+    }
+
+    function clearSpeciesSelection(e) {
+      if (e) e.stopPropagation();
+      selectSpecies('all');
     }
 
     // Применение фильтров к карте
@@ -1346,11 +1976,6 @@
         const center = clickMarker.getLatLng();
         updateRadiusResults(center.lat, center.lng);
       }
-    }
-
-    function onSpeciesSelectChange() {
-      currentFilters.speciesId = document.getElementById('speciesSelect').value;
-      applyFilters();
     }
 
     function selectKingdom(k, el) {
@@ -1387,7 +2012,7 @@
 
     function resetAllFilters() {
       currentFilters = { speciesId: 'all', kingdom: 'all', category: 'all' };
-      document.getElementById('speciesSelect').value = 'all';
+      selectSpecies('all');
       document.getElementById('locationSelect').value = 'all';
 
       currentRadiusKm = 5;
@@ -1517,7 +2142,7 @@
           const card = document.createElement('div');
           card.className = 'species-item';
           card.onclick = () => {
-            window.parent.postMessage({action: 'open_species', id: sp.id}, '*');
+            openSpeciesPassport(sp.id);
           };
           card.innerHTML = `
             <img src="${resolveImageUrl(sp.image_url)}" onerror="this.src='../icon.png'" class="species-thumb" />
@@ -1621,7 +2246,97 @@
       }
     }
 
-    // Старт
+    // 6. МОДАЛЬНОЕ ОКНО ПАСПОРТА ВИДА (АВТОНОМНОЕ + FLET POSTMESSAGE)
+    function openSpeciesPassport(spId) {
+      // Отправляем postMessage в родительское окно Flet, если открыто в WebView
+      try {
+        window.parent.postMessage({action: 'open_species', id: spId}, '*');
+      } catch (e) {}
+
+      // Открываем модальное окно прямо на карте
+      const sp = uniqueSpeciesMap.get(spId);
+      if (!sp) return;
+
+      const backdrop = document.getElementById('speciesModalBackdrop');
+      if (!backdrop) return;
+
+      document.getElementById('modalImg').src = resolveImageUrl(sp.image_url);
+      document.getElementById('modalNameRu').textContent = sp.name_ru;
+      document.getElementById('modalNameLat').textContent = sp.name_lat;
+
+      const catBadge = document.getElementById('modalCatBadge');
+      catBadge.textContent = `Кат. ${sp.category}`;
+      catBadge.style.backgroundColor = CAT_COLORS[sp.category] || '#2D6A4F';
+
+      const kingdomNames = { 'animals': 'Животные (Fauna)', 'plants': 'Растения (Flora)', 'fungi': 'Грибы (Fungi)' };
+      document.getElementById('modalKingdom').textContent = `Царство: ${kingdomNames[sp.kingdom] || sp.kingdom}`;
+
+      document.getElementById('modalHabitat').textContent = sp.habitat || 'Лесные массивы и водно-болотные угодья Беларуси';
+      document.getElementById('modalDescription').textContent = sp.description_ru || 'Вид занесён в Красную книгу Республики Беларусь и находится под особой государственной охраной.';
+
+      const morphBlock = document.getElementById('modalMorphologyBlock');
+      if (sp.morphology) {
+        morphBlock.style.display = 'block';
+        document.getElementById('modalMorphology').textContent = sp.morphology;
+      } else {
+        morphBlock.style.display = 'none';
+      }
+
+      const lookAlikeBlock = document.getElementById('modalLookAlikeBlock');
+      if (sp.look_alike_species) {
+        lookAlikeBlock.style.display = 'block';
+        document.getElementById('modalLookAlike').textContent = sp.look_alike_species;
+      } else {
+        lookAlikeBlock.style.display = 'none';
+      }
+
+      const audioBlock = document.getElementById('modalAudioBlock');
+      const audioPlayer = document.getElementById('modalAudioPlayer');
+      if (sp.sound_url) {
+        audioBlock.style.display = 'block';
+        audioPlayer.src = sp.sound_url;
+      } else {
+        audioBlock.style.display = 'none';
+        if (audioPlayer) {
+          audioPlayer.pause();
+          audioPlayer.src = '';
+        }
+      }
+
+      const flyBtn = document.getElementById('modalFlyToBtn');
+      flyBtn.onclick = () => {
+        closeSpeciesModal();
+        if (sp.coordinates && sp.coordinates.length > 0) {
+          map.flyTo(sp.coordinates[0], 10, { duration: 1.2 });
+        }
+      };
+
+      backdrop.classList.add('active');
+    }
+
+    function closeSpeciesModal() {
+      const backdrop = document.getElementById('speciesModalBackdrop');
+      if (backdrop) backdrop.classList.remove('active');
+      const audioPlayer = document.getElementById('modalAudioPlayer');
+      if (audioPlayer) audioPlayer.pause();
+    }
+
+    function handleBackdropClick(e) {
+      if (e.target.id === 'speciesModalBackdrop') {
+        closeSpeciesModal();
+      }
+    }
+
+    // Закрытие модального окна по клавише Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeSpeciesModal();
+        closeSpeciesDropdown();
+      }
+    });
+
+    // 7. СТАРТ ПРИЛОЖЕНИЯ
+    initSpeciesCombobox();
     applyFilters();
   </script>
 </body>

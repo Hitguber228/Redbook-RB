@@ -176,3 +176,4 @@ SPECIES_BE_TRANSLATIONS = {
         "protection_measures": "Поўная забарона збору і гандлю кветкамі, захаванне верасковых бораў."
     }
 }
+
