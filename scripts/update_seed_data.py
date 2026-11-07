@@ -30,3 +30,4 @@ with open('src/database/seed_data.py', 'w', encoding='utf-8') as f:
     f.write(header + part2)
 
 print("Updated seed_data.py successfully!")
+

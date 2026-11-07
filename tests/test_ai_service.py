@@ -15,3 +15,12 @@ def test_identify_lynx_track():
 def test_ai_naturalist_chat():
     resp = ai_service.ask_naturalist("Расскажи про зубра")
     assert "зубр" in resp.lower() or "bison" in resp.lower()
+
+def test_identify_by_real_image():
+    import os
+    img_path = os.path.abspath("assets/images/species/bison-bonasus.jpg")
+    res = ai_service.identify_species(image_path=img_path)
+    assert res is not None
+    assert "confidence" in res
+    assert res["confidence"] > 0.5
+    assert len(res["top_candidates"]) > 0

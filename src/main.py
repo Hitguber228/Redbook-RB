@@ -76,7 +76,7 @@ class RedBookApp:
                                         ft.Icon(
                                             ft.Icons.LANGUAGE,
                                             size=14,
-                                            color=AppColors.PRIMARY if lang == "ru" else ft.Colors.WHITE70
+                                            color=AppColors.PRIMARY if lang == "ru" else ft.Colors.WHITE_70
                                         ),
                                         ft.Text(
                                             "РУС",
@@ -101,7 +101,7 @@ class RedBookApp:
                                         ft.Icon(
                                             ft.Icons.TRANSLATE,
                                             size=14,
-                                            color=AppColors.PRIMARY if lang == "be" else ft.Colors.WHITE70
+                                            color=AppColors.PRIMARY if lang == "be" else ft.Colors.WHITE_70
                                         ),
                                         ft.Text(
                                             "БЕЛ",
