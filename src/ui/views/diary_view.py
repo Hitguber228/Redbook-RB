@@ -80,12 +80,26 @@ class DiaryView(ft.Container):
                                         alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                         controls=[
                                             ft.Text(obs["species_guess"], size=16, weight=ft.FontWeight.BOLD),
-                                            ft.Text(f"📅 {obs['date_created']}", size=11, color=AppColors.TEXT_MUTED_LIGHT)
+                                            ft.Row(
+                                                tight=True,
+                                                spacing=4,
+                                                controls=[
+                                                    ft.Icon(ft.Icons.CALENDAR_TODAY, size=12, color=AppColors.TEXT_MUTED_LIGHT),
+                                                    ft.Text(obs['date_created'], size=11, color=AppColors.TEXT_MUTED_LIGHT)
+                                                ]
+                                            )
                                         ]
                                     ),
                                     ft.Text(f"Наблюдатель: {obs['user_name']}", size=12, color=AppColors.PRIMARY, weight=ft.FontWeight.W_600),
                                     ft.Text(obs["notes"], size=13),
-                                    ft.Text(f"📍 GPS фиксация: {obs['latitude']:.4f}, {obs['longitude']:.4f}", size=11, color=ft.Colors.GREY_600)
+                                    ft.Row(
+                                        tight=True,
+                                        spacing=4,
+                                        controls=[
+                                            ft.Icon(ft.Icons.MY_LOCATION, size=12, color=ft.Colors.GREY_600),
+                                            ft.Text(f"GPS фиксация: {obs['latitude']:.4f}, {obs['longitude']:.4f}", size=11, color=ft.Colors.GREY_600)
+                                        ]
+                                    )
                                 ]
                             )
                         )
@@ -190,7 +204,7 @@ class DiaryView(ft.Container):
     def _export_to_csv(self, e):
         observations = db_manager.get_observations()
         if not observations:
-            self.export_status.value = "⚠️ Нет наблюдений для экспорта!"
+            self.export_status.value = "Нет наблюдений для экспорта!"
             self.export_status.color = ft.Colors.AMBER_800
             self.export_status.update()
             return
@@ -211,6 +225,6 @@ class DiaryView(ft.Container):
                     o["date_created"]
                 ])
 
-        self.export_status.value = f"✅ Отчет успешно экспортирован в {os.path.basename(export_path)} ({len(observations)} записей)!"
+        self.export_status.value = f"Отчет успешно экспортирован в {os.path.basename(export_path)} ({len(observations)} записей)!"
         self.export_status.color = ft.Colors.GREEN_700
         self.export_status.update()

@@ -24,7 +24,7 @@ class AIScannerView(ft.Container):
             spacing=10,
             controls=[
                 ft.FilledButton(
-                    content="🔍 ИИ-Определитель" if lang == "ru" else "🔍 ІІ-Азначнік",
+                    content="ИИ-Определитель" if lang == "ru" else "ІІ-Азначнік",
                     icon=ft.Icons.CAMERA_ALT,
                     style=ft.ButtonStyle(
                         bgcolor=AppColors.PRIMARY if self.active_tab == 0 else ft.Colors.SURFACE_CONTAINER_HIGHEST,
@@ -33,7 +33,7 @@ class AIScannerView(ft.Container):
                     on_click=lambda e: self._switch_tab(0)
                 ),
                 ft.FilledButton(
-                    content="💬 Гид-натуралист" if lang == "ru" else "💬 Гід-натураліст",
+                    content="Гид-натуралист" if lang == "ru" else "Гід-натураліст",
                     icon=ft.Icons.CHAT,
                     style=ft.ButtonStyle(
                         bgcolor=AppColors.PRIMARY if self.active_tab == 1 else ft.Colors.SURFACE_CONTAINER_HIGHEST,

@@ -156,6 +156,8 @@ class DatabaseManager:
         kingdom: Optional[str] = None,
         region: Optional[str] = None,
         taxon_group: Optional[str] = None,
+        national_park: Optional[str] = None,
+        has_sound_only: bool = False,
         featured_only: bool = False
     ) -> List[Dict[str, Any]]:
         with self._get_connection() as conn:
@@ -165,6 +167,8 @@ class DatabaseManager:
 
             if featured_only:
                 sql += " AND is_featured = 1"
+            if has_sound_only:
+                sql += " AND sound_url IS NOT NULL AND sound_url != ''"
             if category:
                 sql += " AND category = ?"
                 params.append(category)
@@ -174,9 +178,29 @@ class DatabaseManager:
             if taxon_group:
                 sql += " AND taxon_group = ?"
                 params.append(taxon_group)
+            if national_park:
+                sql += " AND national_parks LIKE ?"
+                params.append(f"%{national_park}%")
             if region:
+                # Нормализация для поиска в JSON
+                reg_clean = region.replace(" вобласць", "").replace(" область", "").strip()
+                # Соответствия белорусских и русских названий областей
+                reg_map = {
+                    "Брэсцкая": "Брест",
+                    "Брестская": "Брест",
+                    "Віцебская": "Витеб",
+                    "Витебская": "Витеб",
+                    "Гомельская": "Гомел",
+                    "Гродзенская": "Гродн",
+                    "Гродненская": "Гродн",
+                    "Мінская": "Минск",
+                    "Минская": "Минск",
+                    "Магілёўская": "Могилев",
+                    "Могилевская": "Могилев"
+                }
+                reg_root = reg_map.get(reg_clean, reg_clean[:4])
                 sql += " AND distribution_rb LIKE ?"
-                params.append(f"%{region}%")
+                params.append(f"%{reg_root}%")
             if query:
                 q = f"%{query.strip().lower()}%"
                 sql += " AND (LOWER(name_ru) LIKE ? OR LOWER(name_be) LIKE ? OR LOWER(name_lat) LIKE ? OR LOWER(habitat) LIKE ?)"

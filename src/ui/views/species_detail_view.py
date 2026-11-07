@@ -436,11 +436,20 @@ class SpeciesDetailView(ft.Container):
                                                 padding=8,
                                                 border_radius=8,
                                                 bgcolor=ft.Colors.RED_100,
-                                                content=ft.Text(
-                                                    "⚖️ Незаконное изъятие или уничтожение влечет административную ответственность по ст. 16.8 КоАП Республики Беларусь с возмещением вреда в тройном размере." if lang == "ru" else "⚖️ Незаконнае знішчэнне ці канфіскацыя цягне адказнасць паводле арт. 16.8 КаАП Рэспублікі Беларусь з пакрыццём шкоды ў трохразовым памеры.",
-                                                    size=11,
-                                                    weight=ft.FontWeight.BOLD,
-                                                    color=ft.Colors.RED_900
+                                                content=ft.Row(
+                                                    tight=True,
+                                                    spacing=6,
+                                                    vertical_alignment=ft.CrossAxisAlignment.START,
+                                                    controls=[
+                                                        ft.Icon(ft.Icons.GAVEL, size=15, color=ft.Colors.RED_900),
+                                                        ft.Text(
+                                                            "Незаконное изъятие или уничтожение влечет административную ответственность по ст. 16.8 КоАП Республики Беларусь с возмещением вреда в тройном размере." if lang == "ru" else "Незаконнае знішчэнне ці канфіскацыя цягне адказнасць паводле арт. 16.8 КаАП Рэспублікі Беларусь з пакрыццём шкоды ў трохразовым памеры.",
+                                                            size=11,
+                                                            weight=ft.FontWeight.BOLD,
+                                                            color=ft.Colors.RED_900,
+                                                            expand=True
+                                                        )
+                                                    ]
                                                 )
                                             )
                                         ]

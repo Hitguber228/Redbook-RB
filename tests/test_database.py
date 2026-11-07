@@ -112,4 +112,17 @@ def test_belarusian_localization_data(test_db):
         assert tax in TAXON_TRANSLATIONS
         assert "be" in TAXON_TRANSLATIONS[tax]
 
+def test_filter_by_sound_and_region_be(test_db):
+    # Фильтрация только видов с аудиозаписью
+    sound_species = test_db.get_species(has_sound_only=True)
+    assert len(sound_species) > 0
+    for s in sound_species:
+        assert s["sound_url"] and len(s["sound_url"]) > 0
+
+    # Фильтрация по белорусскому наименованию области
+    minsk_be = test_db.get_species(region="Мінская")
+    minsk_ru = test_db.get_species(region="Минская")
+    assert len(minsk_be) == len(minsk_ru)
+    assert len(minsk_be) > 0
+
 

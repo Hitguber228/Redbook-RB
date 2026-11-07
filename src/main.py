@@ -47,38 +47,79 @@ class RedBookApp:
         # Верхний AppBar
         app_bar = ft.AppBar(
             leading=ft.Icon(ft.Icons.ECO, color=ft.Colors.WHITE, size=28),
-            leading_width=48,
-            title=ft.Row(
-                spacing=8,
-                controls=[
-                    ft.Text(app_title, weight=ft.FontWeight.BOLD, size=18, color=ft.Colors.WHITE),
-                    ft.Container(
-                        padding=ft.Padding.symmetric(horizontal=8, vertical=2),
-                        border_radius=12,
-                        bgcolor=ft.Colors.WHITE_24,
-                        content=ft.Text("4-е выданне", size=10, color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD)
-                    )
-                ]
-            ),
+            leading_width=44,
+            title=ft.Text(app_title, weight=ft.FontWeight.BOLD, size=19, color=ft.Colors.WHITE),
             center_title=False,
             bgcolor=AppColors.PRIMARY,
             actions=[
-                # Переключатель языка РУС / БЕЛ
-                ft.TextButton(
+                # Сегментированный переключатель языка РУС | БЕЛ с визуальным выделением активного
+                ft.Container(
+                    margin=ft.Padding.only(right=6),
+                    border_radius=20,
+                    bgcolor=ft.Colors.WHITE_24,
+                    padding=ft.Padding.all(3),
                     content=ft.Row(
-                        spacing=4,
+                        tight=True,
+                        spacing=2,
                         controls=[
-                            ft.Icon(ft.Icons.LANGUAGE, color=ft.Colors.WHITE, size=18),
-                            ft.Text("БЕЛ" if lang == "ru" else "РУС", color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD)
+                            ft.Container(
+                                padding=ft.Padding.symmetric(horizontal=8, vertical=4),
+                                border_radius=16,
+                                bgcolor=ft.Colors.WHITE if lang == "ru" else ft.Colors.TRANSPARENT,
+                                ink=True,
+                                tooltip="Русский язык интерфейса",
+                                on_click=lambda e: self._set_language("ru"),
+                                content=ft.Row(
+                                    tight=True,
+                                    spacing=4,
+                                    controls=[
+                                        ft.Icon(
+                                            ft.Icons.LANGUAGE,
+                                            size=14,
+                                            color=AppColors.PRIMARY if lang == "ru" else ft.Colors.WHITE70
+                                        ),
+                                        ft.Text(
+                                            "РУС",
+                                            size=11,
+                                            weight=ft.FontWeight.BOLD if lang == "ru" else ft.FontWeight.NORMAL,
+                                            color=AppColors.PRIMARY if lang == "ru" else ft.Colors.WHITE
+                                        )
+                                    ]
+                                )
+                            ),
+                            ft.Container(
+                                padding=ft.Padding.symmetric(horizontal=8, vertical=4),
+                                border_radius=16,
+                                bgcolor=ft.Colors.WHITE if lang == "be" else ft.Colors.TRANSPARENT,
+                                ink=True,
+                                tooltip="Беларуская мова інтэрфейсу",
+                                on_click=lambda e: self._set_language("be"),
+                                content=ft.Row(
+                                    tight=True,
+                                    spacing=4,
+                                    controls=[
+                                        ft.Icon(
+                                            ft.Icons.TRANSLATE,
+                                            size=14,
+                                            color=AppColors.PRIMARY if lang == "be" else ft.Colors.WHITE70
+                                        ),
+                                        ft.Text(
+                                            "БЕЛ",
+                                            size=11,
+                                            weight=ft.FontWeight.BOLD if lang == "be" else ft.FontWeight.NORMAL,
+                                            color=AppColors.PRIMARY if lang == "be" else ft.Colors.WHITE
+                                        )
+                                    ]
+                                )
+                            ),
                         ]
-                    ),
-                    on_click=self._toggle_language
+                    )
                 ),
                 # Переключатель темы (Светлая / Темная)
                 ft.IconButton(
                     icon=ft.Icons.DARK_MODE if self.page.theme_mode == ft.ThemeMode.LIGHT else ft.Icons.LIGHT_MODE,
                     icon_color=ft.Colors.WHITE,
-                    tooltip="Переключить ночной режим для полевых выходов",
+                    tooltip="Переключить ночной режим для полевых выходов" if lang == "ru" else "Пераключыць начны рэжым для палявых выхадаў",
                     on_click=self._toggle_theme
                 )
             ]
@@ -183,6 +224,11 @@ class RedBookApp:
         self.current_nav_index = e.control.selected_index
         self.active_species_id = None
         self._build_layout()
+
+    def _set_language(self, lang: str):
+        if self.language != lang:
+            self.language = lang
+            self._build_layout()
 
     def _toggle_language(self, e):
         self.language = "be" if self.language == "ru" else "ru"
