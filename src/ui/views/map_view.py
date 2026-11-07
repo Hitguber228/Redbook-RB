@@ -141,7 +141,7 @@ class MapView(ft.Container):
         for loc in LOCATIONS_PRESETS:
             is_loc_active = (loc["id"] == self.selected_location["id"])
             loc_title = loc["name_be"] if lang == "be" else loc["name_ru"]
-            emoji = "🌲" if loc["type"] == "park" else ("🌾" if loc["type"] == "reserve" else "🏛️")
+            loc_icon = ft.Icons.PARK if loc["type"] == "park" else (ft.Icons.GRASS if loc["type"] == "reserve" else ft.Icons.LOCATION_CITY)
 
             location_chips.append(
                 ft.Container(
@@ -153,9 +153,9 @@ class MapView(ft.Container):
                     on_click=lambda e, l=loc: self._select_location(l),
                     content=ft.Row(
                         tight=True,
-                        spacing=4,
+                        spacing=5,
                         controls=[
-                            ft.Text(emoji, size=12),
+                            ft.Icon(loc_icon, size=13, color=AppColors.PRIMARY if is_loc_active else ft.Colors.ON_SURFACE_VARIANT),
                             ft.Text(
                                 loc_title,
                                 size=11,
@@ -321,14 +321,13 @@ class MapView(ft.Container):
                             spacing=12,
                             controls=[
                                 ft.Text("Обозначения на карте:", size=11, weight=ft.FontWeight.BOLD),
-                                ft.Text("🐾 Млекопитающие", size=11),
-                                ft.Text("🦅 Птицы", size=11),
-                                ft.Text("🦎 Рептилии/Амфибии", size=11),
-                                ft.Text("🐟 Рыбы", size=11),
-                                ft.Text("🐞 Насекомые", size=11),
-                                ft.Text("🌿 Растения", size=11),
-                                ft.Text("🍄 Грибы", size=11),
-                                ft.Text("🌲 ООПТ / Нацпарки", size=11, weight=ft.FontWeight.BOLD, color=AppColors.PRIMARY),
+                                ft.Row([ft.Icon(ft.Icons.PETS, size=13, color=AppColors.PRIMARY), ft.Text("Млекопитающие", size=11)], spacing=4, tight=True),
+                                ft.Row([ft.Icon(ft.Icons.FLIGHT, size=13, color=AppColors.PRIMARY), ft.Text("Птицы", size=11)], spacing=4, tight=True),
+                                ft.Row([ft.Icon(ft.Icons.WATER, size=13, color=AppColors.PRIMARY), ft.Text("Рыбы / Земноводные", size=11)], spacing=4, tight=True),
+                                ft.Row([ft.Icon(ft.Icons.BUG_REPORT, size=13, color=AppColors.PRIMARY), ft.Text("Насекомые", size=11)], spacing=4, tight=True),
+                                ft.Row([ft.Icon(ft.Icons.LOCAL_FLORIST, size=13, color=AppColors.PRIMARY), ft.Text("Растения", size=11)], spacing=4, tight=True),
+                                ft.Row([ft.Icon(ft.Icons.SPA, size=13, color=AppColors.PRIMARY), ft.Text("Грибы", size=11)], spacing=4, tight=True),
+                                ft.Row([ft.Icon(ft.Icons.PARK, size=13, color=AppColors.PRIMARY), ft.Text("ООПТ / Нацпарки", size=11, weight=ft.FontWeight.BOLD, color=AppColors.PRIMARY)], spacing=4, tight=True),
                             ]
                         )
                     ]
