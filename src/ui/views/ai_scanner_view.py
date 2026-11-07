@@ -30,20 +30,117 @@ class AIScannerView(ft.Container):
             self.page.update()
 
     def _open_camera_capture(self, e=None):
-        self.file_picker.pick_files(
-            dialog_title="Сфотографируйте вид камерой смартфона" if self.get_language() == "ru" else "Сфатаграфуйце від камерай смартфона",
-            file_type=ft.FilePickerFileType.IMAGE,
-            allow_multiple=False,
-            with_data=True
-        )
+        # На смартфонах через Web/PWA активирует камеру
+        if self.page:
+            try:
+                self.page.run_task(
+                    self.file_picker.pick_files,
+                    dialog_title="Сфотографируйте вид камерой смартфона" if self.get_language() == "ru" else "Сфатаграфуйце від камерай смартфона",
+                    file_type=ft.FilePickerFileType.IMAGE,
+                    allow_multiple=False,
+                    with_data=True
+                )
+            except Exception:
+                self._open_file_dialog()
 
     def _open_file_dialog(self, e=None):
-        self.file_picker.pick_files(
-            dialog_title="Выберите фото из медиатеки или папки" if self.get_language() == "ru" else "Выберыце фота з медыятэкі ці тэчкі",
-            file_type=ft.FilePickerFileType.IMAGE,
-            allow_multiple=False,
-            with_data=True
-        )
+        # 1. Если запущено на десктопе Windows — открываем нативный проводник Windows через tkinter
+        try:
+            import tkinter as tk
+            from tkinter import filedialog
+            root = tk.Tk()
+            root.withdraw()
+            root.attributes("-topmost", True)
+            selected = filedialog.askopenfilename(
+                title="Выберите фото животного или растения",
+                filetypes=[
+                    ("Изображения", "*.jpg;*.jpeg;*.png;*.webp;*.bmp;*.gif"),
+                    ("Все файлы", "*.*")
+                ]
+            )
+            root.destroy()
+            if selected and os.path.exists(selected):
+                self._run_image_analysis(selected)
+                return
+        except Exception:
+            pass
+
+        # 2. Если режим Web / PWA (или мобильный) — вызываем через асинхронный task Flet
+        if self.page:
+            self.page.run_task(
+                self.file_picker.pick_files,
+                dialog_title="Выберите фото из медиатеки или папки" if self.get_language() == "ru" else "Выберыце фота з медыятэкі ці тэчкі",
+                file_type=ft.FilePickerFileType.IMAGE,
+                allow_multiple=False,
+                with_data=True
+            )
+
+    def _paste_from_clipboard(self, e=None):
+        try:
+            from PIL import ImageGrab, Image
+            content = ImageGrab.grabclipboard()
+
+            # 1. Если в буфере обмена находится изображение (скриншот, скопированное фото)
+            if isinstance(content, Image.Image):
+                upload_dir = os.path.abspath(os.path.join("assets", "uploads"))
+                os.makedirs(upload_dir, exist_ok=True)
+                temp_filename = f"clipboard_{int(time.time() * 1000)}.jpg"
+                save_path = os.path.join(upload_dir, temp_filename)
+
+                img_rgb = content.convert("RGB") if content.mode in ("RGBA", "P", "LA") else content
+                img_rgb.save(save_path, "JPEG", quality=85)
+
+                if self.page:
+                    self.page.open(
+                        ft.SnackBar(
+                            content=ft.Row([
+                                ft.Icon(ft.Icons.CHECK_CIRCLE, color=ft.Colors.WHITE, size=18),
+                                ft.Text("Изображение успешно вставлено из буфера обмена!")
+                            ]),
+                            bgcolor=ft.Colors.GREEN_700
+                        )
+                    )
+                self._run_image_analysis(save_path)
+                return
+
+            # 2. Если в буфере обмена скопирован файл (например, через Ctrl+C в проводнике Windows)
+            elif isinstance(content, list) and len(content) > 0:
+                candidate = content[0]
+                if isinstance(candidate, str) and os.path.exists(candidate):
+                    ext = os.path.splitext(candidate)[1].lower()
+                    if ext in [".jpg", ".jpeg", ".png", ".webp", ".bmp"]:
+                        if self.page:
+                            self.page.open(
+                                ft.SnackBar(
+                                    content=ft.Row([
+                                        ft.Icon(ft.Icons.CHECK_CIRCLE, color=ft.Colors.WHITE, size=18),
+                                        ft.Text(f"Файл вставлен из буфера: {os.path.basename(candidate)}")
+                                    ]),
+                                    bgcolor=ft.Colors.GREEN_700
+                                )
+                            )
+                        self._run_image_analysis(candidate)
+                        return
+
+            # 3. Буфер пуст или не содержит картинки
+            if self.page:
+                self.page.open(
+                    ft.SnackBar(
+                        content=ft.Row([
+                            ft.Icon(ft.Icons.INFO_OUTLINE, color=ft.Colors.WHITE, size=18),
+                            ft.Text("В буфере обмена нет картинки. Скопируйте фото (или Win+Shift+S) и нажмите кнопку снова.")
+                        ]),
+                        bgcolor=ft.Colors.AMBER_800
+                    )
+                )
+        except Exception as ex:
+            if self.page:
+                self.page.open(
+                    ft.SnackBar(
+                        content=ft.Text(f"Ошибка чтения буфера обмена: {ex}"),
+                        bgcolor=ft.Colors.RED_700
+                    )
+                )
 
     def _on_file_picked(self, e: ft.FilePickerResultEvent):
         if e.files and len(e.files) > 0:
@@ -352,6 +449,11 @@ class AIScannerView(ft.Container):
                                         content=ft.Text("Медиатека / Файл" if lang == "ru" else "Медыятэка / Файл"),
                                         icon=ft.Icons.PHOTO_LIBRARY,
                                         on_click=self._open_file_dialog
+                                    ),
+                                    ft.FilledTonalButton(
+                                        content=ft.Text("Вставить из буфера (Ctrl+V)" if lang == "ru" else "Уставіць з буфера (Ctrl+V)"),
+                                        icon=ft.Icons.CONTENT_PASTE,
+                                        on_click=self._paste_from_clipboard
                                     )
                                 ]
                             )

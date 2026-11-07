@@ -24,3 +24,19 @@ def test_identify_by_real_image():
     assert "confidence" in res
     assert res["confidence"] > 0.5
     assert len(res["top_candidates"]) > 0
+
+def test_clipboard_image_format_support():
+    import os
+    from PIL import Image
+    # Test creating a test RGB image and identifying it
+    test_img_path = os.path.abspath("assets/uploads/test_paste.jpg")
+    os.makedirs(os.path.dirname(test_img_path), exist_ok=True)
+    img = Image.new("RGB", (100, 100), color=(73, 109, 137))
+    img.save(test_img_path)
+    try:
+        res = ai_service.identify_species(image_path=test_img_path)
+        assert res is not None
+        assert "species_id" in res
+    finally:
+        if os.path.exists(test_img_path):
+            os.remove(test_img_path)

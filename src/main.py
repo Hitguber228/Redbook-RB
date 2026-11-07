@@ -23,6 +23,7 @@ class RedBookApp:
         self.page.theme_mode = ft.ThemeMode.LIGHT
         self.page.padding = 0
         self.page.spacing = 0
+        self.page.on_keyboard_event = self._on_keyboard_event
         
         # Настройка цветовой темы
         self.page.theme = ft.Theme(
@@ -33,6 +34,19 @@ class RedBookApp:
             color_scheme_seed=AppColors.PRIMARY,
             font_family="Roboto"
         )
+
+    def _on_keyboard_event(self, e: ft.KeyboardEvent):
+        # Поддержка вставки фото из буфера обмена (Ctrl+V)
+        if (e.ctrl or e.meta) and e.key and e.key.upper() == "V":
+            if hasattr(self, "current_view_instance") and hasattr(self.current_view_instance, "_paste_from_clipboard"):
+                self.current_view_instance._paste_from_clipboard()
+            elif self.current_nav_index != 2:
+                # Если нажали Ctrl+V на другой вкладке, переключаемся на ИИ-сканер и вставляем снимок
+                self.current_nav_index = 2
+                self.active_species_id = None
+                self._build_layout()
+                if hasattr(self, "current_view_instance") and hasattr(self.current_view_instance, "_paste_from_clipboard"):
+                    self.current_view_instance._paste_from_clipboard()
 
     def get_language(self) -> str:
         return self.language
@@ -127,6 +141,7 @@ class RedBookApp:
 
         # Контент активного экрана
         content_view = self._get_active_view()
+        self.current_view_instance = content_view
 
         # Нижняя мобильная панель навигации (NavigationBar)
         bottom_nav = ft.NavigationBar(
