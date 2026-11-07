@@ -246,7 +246,22 @@ class SpeciesDetailView(ft.Container):
                         src=sp["image_url"],
                         height=300,
                         width=float("inf"),
-                        fit="cover"
+                        fit="cover",
+                        error_content=ft.Container(
+                            height=300,
+                            bgcolor=ft.Colors.SURFACE_CONTAINER_HIGH,
+                            alignment=ft.Alignment.CENTER,
+                            content=ft.Column(
+                                alignment=ft.MainAxisAlignment.CENTER,
+                                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                spacing=8,
+                                controls=[
+                                    ft.Icon(ft.Icons.ECO, size=48, color=AppColors.PRIMARY),
+                                    ft.Text(sp["name_ru"], size=14, color=ft.Colors.ON_SURFACE_VARIANT, weight=ft.FontWeight.BOLD),
+                                    ft.Text(sp["name_lat"], size=12, italic=True, color=ft.Colors.ON_SURFACE_VARIANT)
+                                ]
+                            )
+                        )
                     )
                 ),
                 # Колонка названий и статуса

@@ -1,4 +1,5 @@
 import os
+import time
 import flet as ft
 from typing import Callable, Optional
 from ...services.ai_service import ai_service
@@ -20,15 +21,48 @@ class AIScannerView(ft.Container):
         self._build_ui()
 
     def did_mount(self):
-        if self.page and self.file_picker not in self.page.overlay:
-            self.page.overlay.append(self.file_picker)
+        if self.page:
+            # В Flet 1.1+ FilePicker регистрируется в page.services (не в overlay, чтобы избежать ошибки Unknown control)
+            if hasattr(self.page, "services") and self.file_picker not in self.page.services:
+                self.page.services.append(self.file_picker)
+            if hasattr(self.page, "overlay") and self.file_picker in self.page.overlay:
+                self.page.overlay.remove(self.file_picker)
             self.page.update()
+
+    def _open_camera_capture(self, e=None):
+        self.file_picker.pick_files(
+            dialog_title="Сфотографируйте вид камерой смартфона" if self.get_language() == "ru" else "Сфатаграфуйце від камерай смартфона",
+            file_type=ft.FilePickerFileType.IMAGE,
+            allow_multiple=False,
+            with_data=True
+        )
+
+    def _open_file_dialog(self, e=None):
+        self.file_picker.pick_files(
+            dialog_title="Выберите фото из медиатеки или папки" if self.get_language() == "ru" else "Выберыце фота з медыятэкі ці тэчкі",
+            file_type=ft.FilePickerFileType.IMAGE,
+            allow_multiple=False,
+            with_data=True
+        )
 
     def _on_file_picked(self, e: ft.FilePickerResultEvent):
         if e.files and len(e.files) > 0:
-            file_path = e.files[0].path
-            if file_path:
-                self._run_image_analysis(file_path)
+            file_item = e.files[0]
+            # 1. Если передан прямой путь файловой системы (Windows Desktop)
+            if file_item.path and os.path.exists(file_item.path):
+                self._run_image_analysis(file_item.path)
+                return
+
+            # 2. Если фото снято на камеру смартфона или выбрано в браузере (iPhone / Android)
+            raw_bytes = getattr(file_item, "bytes", None)
+            if raw_bytes:
+                upload_dir = os.path.abspath(os.path.join("assets", "uploads"))
+                os.makedirs(upload_dir, exist_ok=True)
+                temp_filename = f"capture_{int(time.time() * 1000)}.jpg"
+                save_path = os.path.join(upload_dir, temp_filename)
+                with open(save_path, "wb") as f:
+                    f.write(raw_bytes)
+                self._run_image_analysis(save_path)
 
     def _build_ui(self):
         lang = self.get_language()
@@ -261,36 +295,65 @@ class AIScannerView(ft.Container):
                         )
                     ]
                 ),
-                # Кнопка загрузки реального фото из файла
+                # Блок загрузки и моментальной фотосъемки с мобильного / ПК
                 ft.Container(
                     padding=16,
                     border_radius=14,
                     border=ft.Border.all(1.5, AppColors.PRIMARY),
                     bgcolor=ft.Colors.SURFACE_CONTAINER_LOW,
-                    content=ft.Row(
-                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    content=ft.Column(
+                        spacing=12,
                         controls=[
                             ft.Row(
-                                spacing=12,
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                 controls=[
-                                    ft.Icon(ft.Icons.ADD_PHOTO_ALTERNATE, size=28, color=AppColors.PRIMARY),
-                                    ft.Column(
-                                        spacing=2,
+                                    ft.Row(
+                                        spacing=12,
                                         controls=[
-                                            ft.Text("Загрузить фото для ИИ-распознавания" if lang == "ru" else "Загрузіць фота для ІІ-распазнавання", size=14, weight=ft.FontWeight.BOLD),
-                                            ft.Text("Выберите снимок с компьютера (JPG, PNG, WebP)" if lang == "ru" else "Выберыце здымак з камп'ютара (JPG, PNG, WebP)", size=12, color=ft.Colors.ON_SURFACE_VARIANT)
+                                            ft.Icon(ft.Icons.ADD_A_PHOTO, size=28, color=AppColors.PRIMARY),
+                                            ft.Column(
+                                                spacing=2,
+                                                controls=[
+                                                    ft.Text("Сфотографировать или загрузить снимок" if lang == "ru" else "Сфатаграфаваць ці загрузіць здымак", size=14, weight=ft.FontWeight.BOLD),
+                                                    ft.Text("На iPhone и Android сразу активируется камера" if lang == "ru" else "На iPhone і Android адразу актывуецца камера", size=12, color=ft.Colors.ON_SURFACE_VARIANT)
+                                                ]
+                                            )
                                         ]
+                                    ),
+                                    ft.Container(
+                                        padding=ft.Padding.symmetric(horizontal=8, vertical=3),
+                                        border_radius=10,
+                                        bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+                                        content=ft.Row(
+                                            tight=True,
+                                            spacing=4,
+                                            controls=[
+                                                ft.Icon(ft.Icons.PHONE_IPHONE, size=13, color=ft.Colors.ON_SURFACE_VARIANT),
+                                                ft.Text("iOS • Android • ПК", size=11, color=ft.Colors.ON_SURFACE_VARIANT, weight=ft.FontWeight.BOLD)
+                                            ]
+                                        )
                                     )
                                 ]
                             ),
-                            ft.FilledButton(
-                                content=ft.Text("Выбрать файл" if lang == "ru" else "Выбраць файл"),
-                                icon=ft.Icons.FOLDER_OPEN,
-                                on_click=lambda e: self.file_picker.pick_files(
-                                    dialog_title="Выберите фото животного или растения",
-                                    file_type=ft.FilePickerFileType.IMAGE,
-                                    allow_multiple=False
-                                )
+                            ft.Row(
+                                wrap=True,
+                                spacing=10,
+                                controls=[
+                                    ft.FilledButton(
+                                        content=ft.Text("Сделать фото (Камера)" if lang == "ru" else "Зрабіць фота (Камера)"),
+                                        icon=ft.Icons.PHOTO_CAMERA,
+                                        style=ft.ButtonStyle(
+                                            bgcolor=AppColors.PRIMARY,
+                                            color=ft.Colors.WHITE
+                                        ),
+                                        on_click=self._open_camera_capture
+                                    ),
+                                    ft.OutlinedButton(
+                                        content=ft.Text("Медиатека / Файл" if lang == "ru" else "Медыятэка / Файл"),
+                                        icon=ft.Icons.PHOTO_LIBRARY,
+                                        on_click=self._open_file_dialog
+                                    )
+                                ]
                             )
                         ]
                     )

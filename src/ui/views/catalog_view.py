@@ -566,6 +566,20 @@ class CatalogView(ft.Container):
                                 height=200,
                                 width=float("inf"),
                                 fit="cover",
+                                error_content=ft.Container(
+                                    height=200,
+                                    bgcolor=ft.Colors.SURFACE_CONTAINER_HIGH,
+                                    alignment=ft.Alignment.CENTER,
+                                    content=ft.Column(
+                                        alignment=ft.MainAxisAlignment.CENTER,
+                                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                        spacing=6,
+                                        controls=[
+                                            ft.Icon(ft.Icons.ECO, size=38, color=AppColors.PRIMARY),
+                                            ft.Text(sp["name_ru"], size=12, color=ft.Colors.ON_SURFACE_VARIANT, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER)
+                                        ]
+                                    )
+                                )
                             ),
                             # Бейдж категории охраны
                             ft.Container(
