@@ -49,3 +49,4 @@ def open_target(target: str, page: Optional[ft.Page] = None) -> bool:
     except Exception as err:
         print(f"[open_target desktop error] {err}")
         return False
+

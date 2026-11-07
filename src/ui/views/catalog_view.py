@@ -1,6 +1,7 @@
 import flet as ft
 from typing import Callable, Optional
 from ...database.db import db_manager
+from ...database.species_be_data import SPECIES_BE_TRANSLATIONS
 from ..theme import AppColors, get_category_color
 
 class CatalogView(ft.Container):
@@ -296,7 +297,7 @@ class CatalogView(ft.Container):
                                     color=AppColors.TEXT_MUTED_LIGHT
                                 ),
                                 ft.Text(
-                                    sp["habitat"],
+                                    SPECIES_BE_TRANSLATIONS.get(sp["id"], {}).get("habitat", sp["habitat"]) if lang == "be" else sp["habitat"],
                                     size=12,
                                     max_lines=2,
                                     overflow=ft.TextOverflow.ELLIPSIS,

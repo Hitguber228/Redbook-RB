@@ -28,7 +28,7 @@
       z-index: 1;
     }
 
-    /* Расположение элементов Leaflet под панелью управления */
+    /* Расположение элементов Leaflet */
     .leaflet-top {
       top: 76px !important;
     }
@@ -45,7 +45,7 @@
       color: #1E293B !important;
     }
 
-    /* Верхняя панель управления */
+    /* Верхняя минималистичная панель управления */
     .top-bar {
       position: absolute;
       top: 14px;
@@ -53,23 +53,15 @@
       right: 14px;
       z-index: 1000;
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
       align-items: center;
       justify-content: space-between;
       background: rgba(255, 255, 255, 0.96);
       backdrop-filter: blur(14px);
       padding: 10px 18px;
       border-radius: 18px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-    }
-
-    .top-left {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      pointer-events: auto;
     }
 
     .brand-title {
@@ -78,428 +70,434 @@
       color: #2D6A4F;
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 8px;
       letter-spacing: -0.2px;
     }
 
-    .radius-selector {
+    .top-actions {
       display: flex;
       align-items: center;
-      gap: 5px;
-      background: #F1F5F9;
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 600;
-      color: #334155;
+      gap: 10px;
     }
 
-    .radius-btn {
-      background: transparent;
-      border: 1px solid transparent;
-      padding: 4px 9px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      color: #475569;
-      transition: all 0.2s;
-    }
-
-    .radius-btn.active {
-      background: #2D6A4F;
-      color: white;
-      box-shadow: 0 2px 6px rgba(45,106,79,0.3);
-    }
-
-    .top-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .action-btn {
+    .toggle-sidebar-btn {
       display: flex;
       align-items: center;
       gap: 6px;
-      background: #FFFFFF;
-      border: 1.5px solid #CBD5E1;
-      padding: 6px 12px;
+      background: #2D6A4F;
+      color: white;
+      border: none;
+      padding: 8px 14px;
       border-radius: 12px;
       font-size: 12px;
       font-weight: 700;
-      color: #1E293B;
       cursor: pointer;
+      box-shadow: 0 2px 8px rgba(45, 106, 79, 0.3);
       transition: all 0.2s;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 
-    .action-btn:hover {
-      background: #2D6A4F;
-      color: white;
-      border-color: #2D6A4F;
+    .toggle-sidebar-btn:hover {
+      background: #1B4332;
       transform: translateY(-1px);
     }
 
-    .action-btn.active {
-      background: #2D6A4F;
-      color: white;
-      border-color: #2D6A4F;
-    }
-
-    .btn-badge {
-      background: #DC2626;
-      color: white;
-      font-size: 10px;
-      font-weight: 800;
-      padding: 1px 6px;
-      border-radius: 10px;
-    }
-
-    /* Модальные окна (Фильтры и Локации) */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(15, 23, 42, 0.45);
-      backdrop-filter: blur(6px);
-      z-index: 2000;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-
-    .modal-overlay.open {
-      display: flex;
-    }
-
-    .modal-card {
-      background: #FFFFFF;
-      width: 540px;
-      max-width: 100%;
-      max-height: 85vh;
-      border-radius: 22px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
-      border: 1px solid rgba(255, 255, 255, 0.8);
+    /* ЕДИНОЕ БОКОВОЕ ПОЛЕ ФИЛЬТРОВ СПРАВА В СТИЛЕ 21VEK (Не закрывает карту!) */
+    .filter-sidebar {
+      position: absolute;
+      top: 76px;
+      right: 14px;
+      bottom: 14px;
+      width: 380px;
+      max-width: calc(100vw - 28px);
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      box-shadow: 0 16px 45px rgba(0,0,0,0.18);
+      border: 1px solid rgba(226, 232, 240, 0.9);
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateX(0);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    @keyframes modalFadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
+    .filter-sidebar.collapsed {
+      transform: translateX(430px);
+      pointer-events: none;
     }
 
-    .modal-header {
-      padding: 18px 20px;
-      background: #F8FAFC;
-      border-bottom: 1px solid #E2E8F0;
-      display: flex;
+    /* Плавающая кнопка возвращения панели на правом краю (когда скрыта) */
+    .reopen-tab-btn {
+      position: fixed;
+      top: 90px;
+      right: 0;
+      z-index: 999;
+      background: #FFFFFF;
+      color: #0F172A;
+      border: 1.5px solid #CBD5E1;
+      border-right: none;
+      padding: 11px 16px;
+      border-radius: 14px 0 0 14px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: -4px 6px 20px rgba(0,0,0,0.15);
+      display: none;
       align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .reopen-tab-btn:hover {
+      background: #F8FAFC;
+      transform: translateX(-4px);
+      box-shadow: -6px 8px 25px rgba(0,0,0,0.20);
+      color: #DC2626;
+    }
+
+    .reopen-tab-btn.visible {
+      display: flex;
+    }
+
+    /* Шапка боковой панели со стрелкой закрытия в углу в стиле 21vek */
+    .sidebar-header {
+      padding: 18px 20px 14px 20px;
+      background: #FFFFFF;
+      border-bottom: 1px solid #F1F5F9;
+      display: flex;
+      align-items: flex-start;
       justify-content: space-between;
     }
 
-    .modal-title {
-      font-size: 16px;
+    .sidebar-header-titles {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .sidebar-header-sub {
+      font-size: 12px;
+      color: #94A3B8;
+      font-weight: 600;
+      letter-spacing: -0.1px;
+    }
+
+    .sidebar-header-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #0F172A;
+      letter-spacing: -0.3px;
+    }
+
+    .close-arrow-btn {
+      background: #F1F5F9;
+      border: 1px solid #E2E8F0;
+      width: 32px;
+      height: 32px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 800;
+      color: #475569;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .close-arrow-btn:hover {
+      background: #DC2626;
+      border-color: #DC2626;
+      color: white;
+      transform: translateX(3px);
+    }
+
+    /* Содержимое боковой панели (скроллится внутри) */
+    .sidebar-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Секции фильтров в стиле 21vek */
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .filter-label {
+      font-size: 13.5px;
       font-weight: 800;
       color: #0F172A;
       display: flex;
       align-items: center;
-      gap: 8px;
-    }
-
-    .modal-close {
-      background: #E2E8F0;
-      border: none;
-      width: 28px;
-      height: 28px;
-      border-radius: 14px;
-      font-size: 15px;
-      font-weight: 700;
-      color: #475569;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .modal-close:hover {
-      background: #DC2626;
-      color: white;
-    }
-
-    .modal-body {
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .filter-section-title {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #64748B;
-      margin-bottom: 6px;
+      justify-content: space-between;
     }
 
     .filter-select {
       width: 100%;
-      padding: 10px 14px;
-      border-radius: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
       border: 1.5px solid #CBD5E1;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       color: #0F172A;
-      background: #F8FAFC;
+      background: #FFFFFF;
       outline: none;
       transition: all 0.2s;
+      cursor: pointer;
     }
 
     .filter-select:focus {
-      border-color: #2D6A4F;
-      background: white;
-      box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.15);
+      border-color: #DC2626;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
     }
 
-    .chip-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .filter-chip {
-      padding: 6px 12px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 700;
-      background: #F1F5F9;
-      border: 1.5px solid #CBD5E1;
-      color: #334155;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .filter-chip:hover {
-      border-color: #2D6A4F;
-      color: #2D6A4F;
-    }
-
-    .filter-chip.active {
-      background: #2D6A4F;
-      border-color: #2D6A4F;
-      color: white;
-    }
-
-    .modal-footer {
-      padding: 14px 20px;
-      background: #F8FAFC;
-      border-top: 1px solid #E2E8F0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    /* Стили для сетки локаций */
-    .locations-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 10px;
-    }
-
-    .location-card {
-      padding: 12px;
-      background: #F8FAFC;
-      border: 1.5px solid #E2E8F0;
-      border-radius: 14px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .location-card:hover {
-      background: #FFFFFF;
-      border-color: #2D6A4F;
-      box-shadow: 0 4px 12px rgba(45, 106, 79, 0.12);
-      transform: translateY(-2px);
-    }
-
-    .location-card-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: #0F172A;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .location-card-sub {
-      font-size: 11px;
-      color: #64748B;
-      margin-top: 3px;
-    }
-
-    /* Легенда карты (плавающая панель слева внизу) */
-    .legend-card {
-      position: absolute;
-      bottom: 20px;
-      left: 14px;
-      z-index: 1000;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(14px);
-      padding: 14px 16px;
-      border-radius: 18px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.18);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      max-width: 310px;
-      font-size: 12px;
-      transition: all 0.3s;
-    }
-
-    .legend-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: 800;
-      font-size: 13px;
-      color: #1E293B;
-      cursor: pointer;
-    }
-
-    .legend-body {
+    /* Радиокнопки точь-в-точь как на скриншоте 21vek */
+    .radio-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-top: 10px;
+      gap: 4px;
     }
 
-    .legend-item {
+    .radio-item {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      padding: 6px 6px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      user-select: none;
     }
 
-    .legend-marker {
-      width: 14px;
-      height: 14px;
+    .radio-item:hover {
+      background: #F8FAFC;
+    }
+
+    .radio-circle {
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
-      border: 2px solid white;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      border: 2px solid #CBD5E1;
+      background: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
       flex-shrink: 0;
     }
 
-    .cat-I { background: #DC2626; }
-    .cat-II { background: #EA580C; }
-    .cat-III { background: #D97706; }
-    .cat-IV { background: #16A34A; }
+    .radio-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #DC2626;
+      display: none;
+    }
 
-    /* Боковая панель результатов радиусного поиска (справа) */
-    .analysis-panel {
-      position: absolute;
-      top: 76px;
-      right: 14px;
-      bottom: 20px;
-      width: 400px;
-      max-width: calc(100vw - 28px);
-      z-index: 1000;
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(18px);
-      border-radius: 22px;
-      box-shadow: 0 16px 45px rgba(0,0,0,0.22);
-      border: 1px solid rgba(255, 255, 255, 0.7);
+    .radio-item.selected .radio-circle {
+      border-color: #DC2626;
+    }
+
+    .radio-item.selected .radio-dot {
+      display: block;
+    }
+
+    .radio-text {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: #1E293B;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .radio-item.selected .radio-text {
+      color: #0F172A;
+      font-weight: 700;
+    }
+
+    .radio-count {
+      font-size: 12px;
+      color: #94A3B8;
+      font-weight: 400;
+    }
+
+    /* Слайдер радиуса в стиле блока «Цена» со скриншота 21vek */
+    .radius-slider-box {
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-      transform: translateX(440px);
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      gap: 6px;
     }
 
-    .analysis-panel.open {
-      transform: translateX(0);
+    .radius-value-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 8px;
+      background: #FEE2E2;
+      color: #DC2626;
+      font-size: 12px;
+      font-weight: 800;
     }
 
-    .panel-header {
-      padding: 16px 18px;
-      background: #F8FAFC;
-      border-bottom: 1px solid #E2E8F0;
+    .redbook-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #E2E8F0;
+      outline: none;
+      margin: 8px 0 4px 0;
+    }
+
+    .redbook-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #DC2626;
+      border: 2.5px solid #FFFFFF;
+      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.45);
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+
+    .redbook-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .radius-pills {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .radius-pill {
+      border: 1px solid #CBD5E1;
+      background: #FFFFFF;
+      padding: 6px 0;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .radius-pill:hover {
+      border-color: #DC2626;
+      color: #DC2626;
+    }
+
+    .radius-pill.active {
+      background: #DC2626;
+      border-color: #DC2626;
+      color: white;
+      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
+    }
+
+    /* Пунктирные разделители между блоками точь-в-точь как в 21vek */
+    .dotted-divider {
+      border: none;
+      border-top: 1px dotted #CBD5E1;
+      margin: 6px 0;
+    }
+
+    /* Кнопка сброса всех фильтров в одном поле */
+    .btn-reset {
+      width: 100%;
+      padding: 10px;
+      background: #FFFFFF;
+      border: 1.5px solid #CBD5E1;
+      border-radius: 10px;
+      color: #475569;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
     }
 
-    .panel-title {
-      font-size: 15px;
+    .btn-reset:hover {
+      background: #FEE2E2;
+      border-color: #DC2626;
+      color: #DC2626;
+    }
+
+    .filter-divider {
+      border: none;
+      border-top: 1px solid #E2E8F0;
+      margin: 4px 0;
+    }
+
+    /* БЛОК РЕЗУЛЬТАТОВ РАДИУСА И РАЙОНА (В этом же боковом поле!) */
+    .analysis-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .analysis-header {
+      background: #F8FAFC;
+      border: 1.5px solid #E2E8F0;
+      padding: 12px;
+      border-radius: 14px;
+    }
+
+    .analysis-district-title {
+      font-size: 14px;
       font-weight: 800;
       color: #0F172A;
       line-height: 1.3;
     }
 
-    .panel-subtitle {
-      font-size: 12px;
+    .analysis-district-sub {
+      font-size: 11px;
       color: #2D6A4F;
       font-weight: 600;
-      margin-top: 4px;
+      margin-top: 3px;
     }
 
-    .panel-district-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
+    .analysis-count-badge {
+      display: inline-block;
       margin-top: 6px;
-      padding: 3px 8px;
+      padding: 2px 8px;
       border-radius: 8px;
       background: #EFF6FF;
       color: #1D4ED8;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       border: 1px solid #BFDBFE;
     }
 
-    .close-btn {
-      background: #E2E8F0;
-      border: none;
-      width: 26px;
-      height: 26px;
-      border-radius: 13px;
-      font-size: 14px;
-      cursor: pointer;
-      color: #475569;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .close-btn:hover {
-      background: #DC2626;
-      color: white;
-    }
-
-    .species-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 14px 18px;
+    .species-results-list {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .species-item {
       display: flex;
-      gap: 12px;
-      padding: 10px;
+      gap: 10px;
+      padding: 8px;
       background: #FFFFFF;
       border: 1.5px solid #E2E8F0;
-      border-radius: 16px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      border-radius: 14px;
       align-items: center;
       cursor: pointer;
       transition: all 0.2s;
@@ -507,14 +505,14 @@
 
     .species-item:hover {
       border-color: #2D6A4F;
-      box-shadow: 0 6px 16px rgba(45,106,79,0.15);
-      transform: translateY(-1.5px);
+      box-shadow: 0 4px 12px rgba(45, 106, 79, 0.12);
+      transform: translateY(-1px);
     }
 
     .species-thumb {
-      width: 64px;
-      height: 64px;
-      border-radius: 12px;
+      width: 54px;
+      height: 54px;
+      border-radius: 10px;
       object-fit: cover;
       flex-shrink: 0;
       background: #E2E8F0;
@@ -526,7 +524,7 @@
     }
 
     .species-name {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 800;
       color: #0F172A;
       white-space: nowrap;
@@ -535,51 +533,105 @@
     }
 
     .species-lat {
-      font-size: 11px;
+      font-size: 10.5px;
       font-style: italic;
       color: #64748B;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
     .badge-row {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
 
     .cat-badge {
       font-size: 9px;
       font-weight: 800;
       color: white;
-      padding: 2px 7px;
-      border-radius: 6px;
+      padding: 1px 6px;
+      border-radius: 5px;
     }
 
     .dist-badge {
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 700;
       color: #2D6A4F;
       background: #D8F3DC;
-      padding: 2px 7px;
-      border-radius: 6px;
+      padding: 1px 6px;
+      border-radius: 5px;
     }
+
+    /* Плавающая интерактивная легенда карты слева внизу */
+    .legend-card {
+      position: absolute;
+      bottom: 20px;
+      left: 14px;
+      z-index: 998;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(14px);
+      padding: 12px 14px;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      max-width: 280px;
+      font-size: 11.5px;
+      transition: all 0.3s;
+    }
+
+    .legend-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 800;
+      font-size: 12px;
+      color: #1E293B;
+      cursor: pointer;
+    }
+
+    .legend-body {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .legend-marker {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+    }
+
+    .cat-I { background: #DC2626; }
+    .cat-II { background: #EA580C; }
+    .cat-III { background: #D97706; }
+    .cat-IV { background: #16A34A; }
 
     /* Подсказка при первом открытии */
     .hint-banner {
       position: absolute;
-      bottom: 24px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 999;
+      z-index: 997;
       background: rgba(15, 23, 42, 0.90);
       color: white;
-      padding: 8px 20px;
+      padding: 8px 18px;
       border-radius: 20px;
       font-size: 12px;
       font-weight: 600;
       pointer-events: none;
       box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-      animation: fadeInOut 7s forwards;
+      animation: fadeInOut 6s forwards;
     }
 
     @keyframes fadeInOut {
@@ -594,141 +646,179 @@
 
   <div id="map"></div>
 
-  <!-- Верхняя панель: Бренд + Радиус + Кнопки модалок -->
+  <!-- Верхняя панель (минималистичная, не закрывает карту) -->
   <div class="top-bar">
-    <div class="top-left">
-      <div class="brand-title">
-        <span>🌲</span>
-        <span>Красная книга Беларуси • ГИС</span>
-      </div>
-
-      <!-- Выбор радиуса поиска -->
-      <div class="radius-selector">
-        <span>Радиус:</span>
-        <button class="radius-btn" onclick="setRadius(3)">3 км</button>
-        <button class="radius-btn active" onclick="setRadius(5)">5 км</button>
-        <button class="radius-btn" onclick="setRadius(15)">15 км</button>
-        <button class="radius-btn" onclick="setRadius(30)">30 км</button>
-      </div>
+    <div class="brand-title">
+      <span>🌲</span>
+      <span>Красная книга Беларуси • ГИС-Атлас</span>
     </div>
 
-    <!-- Кнопки вызова отдельных окон -->
-    <div class="top-right">
-      <button class="action-btn" id="filterModalBtn" onclick="openFilterModal()">
-        <span>🎯 Фильтры видов</span>
-        <span class="btn-badge" id="activeFilterBadge" style="display: none;">0</span>
-      </button>
-
-      <button class="action-btn" onclick="openLocationsModal()">
-        <span>📍 Города и парки</span>
-      </button>
-
-      <button class="action-btn" onclick="clearMapAnalysis()" title="Очистить радиус и границы">
-        <span>🧹 Сброс</span>
+    <div class="top-actions">
+      <button class="toggle-sidebar-btn" onclick="toggleSidebar()">
+        <span>⚙️ Фильтры и поиск</span>
       </button>
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО: ФИЛЬТРЫ ВИДОВ НА КАРТЕ -->
-  <div class="modal-overlay" id="filterModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title">
-          <span>🎯</span>
-          <span>Фильтрация видов на карте</span>
-        </div>
-        <button class="modal-close" onclick="closeFilterModal()">✕</button>
-      </div>
-      <div class="modal-body">
-        <!-- 1. Выбор конкретного вида (без дубликатов) -->
-        <div>
-          <div class="filter-section-title">Конкретный вид животного, растения или гриба:</div>
-          <select id="speciesSelect" class="filter-select" onchange="onSpeciesSelectChange()">
-            <option value="all">Все виды (показать все 19 видов)</option>
-          </select>
-        </div>
+  <!-- ПЛАВАЮЩАЯ КНОПКА ВОЗВРАЩЕНИЯ ПАНЕЛИ (когда панель свернута стрелкой) -->
+  <button class="reopen-tab-btn" id="reopenSidebarBtn" onclick="openSidebar()">
+    <span>◀</span>
+    <span>Фильтры и поиск</span>
+  </button>
 
-        <!-- 2. Царство природы -->
-        <div>
-          <div class="filter-section-title">Царство:</div>
-          <div class="chip-group" id="kingdomChips">
-            <div class="filter-chip active" onclick="setKingdomFilter('all', this)">Все</div>
-            <div class="filter-chip" onclick="setKingdomFilter('animals', this)">🐾 Животные</div>
-            <div class="filter-chip" onclick="setKingdomFilter('plants', this)">🌿 Растения</div>
-            <div class="filter-chip" onclick="setKingdomFilter('fungi', this)">🍄 Грибы</div>
+  <!-- ЕДИНОЕ ПОЛЕ ФИЛЬТРОВ СПРАВА (ГОРОДА, ВИДЫ, КАТЕГОРИИ, СБРОС И РЕЗУЛЬТАТЫ В 1 МЕСТЕ В СТИЛЕ 21VEK) -->
+  <div class="filter-sidebar" id="filterSidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-header-titles">
+        <span class="sidebar-header-sub">Красная книга Беларуси • 19 видов</span>
+        <h2 class="sidebar-header-title">Фильтры</h2>
+      </div>
+      <!-- Кнопка стрелки в углу для закрытия/сворачивания -->
+      <button class="close-arrow-btn" onclick="closeSidebar()" title="Свернуть фильтры (стрелка)">➔</button>
+    </div>
+
+    <div class="sidebar-body">
+      <!-- 1. ВЫБОР ГОРОДА / ЗАПОВЕДНИКА -->
+      <div class="filter-group">
+        <label class="filter-label">
+          <span>📍 Наличие в регионах / Заповедниках</span>
+        </label>
+        <select id="locationSelect" class="filter-select" onchange="onLocationSelectChange()">
+          <option value="all">🗺️ Вся Беларусь (общий обзор)</option>
+          <optgroup label="Областные центры">
+            <option value="53.9006,27.5590,11">🏛️ Минск</option>
+            <option value="52.0976,23.7341,11">🏰 Брест</option>
+            <option value="53.6884,23.8258,11">👑 Гродно</option>
+            <option value="55.1904,30.2049,11">🎨 Витебск</option>
+            <option value="52.4345,30.9754,11">🌳 Гомель</option>
+            <option value="53.8938,30.3353,11">🌊 Могилёв</option>
+          </optgroup>
+          <optgroup label="Национальные парки">
+            <option value="52.5724,23.8016,10">🌲 Беловежская пуща</option>
+            <option value="52.0512,28.0245,10">🌲 НП «Припятский»</option>
+            <option value="54.7300,28.3500,10">🌲 Березинский биосферный</option>
+            <option value="54.8900,26.8500,10">🌲 НП «Нарочанский»</option>
+            <option value="55.6300,27.0500,10">🌲 НП «Браславские озера»</option>
+          </optgroup>
+          <optgroup label="Заказники и биосферные зоны">
+            <option value="52.4167,25.1667,10">🌿 Заказник «Споровский»</option>
+            <option value="55.5500,27.8500,10">🌿 Заказник «Ельня»</option>
+            <option value="51.8500,27.3500,10">🌿 Заказник «Ольманские болота»</option>
+            <option value="53.9500,26.3500,10">🌿 Налибокская пуща</option>
+            <option value="55.9500,28.5000,10">🌿 Заказник «Красный Бор»</option>
+            <option value="52.1500,26.8000,10">🌿 Заказник «Средняя Припять»</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <hr class="dotted-divider" />
+
+      <!-- 2. РАДИУС СКАНИРОВАНИЯ ТОЧКИ В СТИЛЕ СЛАЙДЕРА 21VEK -->
+      <div class="filter-group">
+        <div class="filter-label">
+          <span>Радиус поиска</span>
+          <span id="radiusLabel" class="radius-value-badge">5 км</span>
+        </div>
+        <div class="radius-slider-box">
+          <input type="range" id="radiusSlider" min="1" max="50" value="5" step="1" oninput="onRadiusSliderChange(this.value)" class="redbook-slider" />
+          <div class="radius-pills">
+            <button class="radius-pill" onclick="setRadius(3, this)">3 км</button>
+            <button class="radius-pill active" onclick="setRadius(5, this)">5 км</button>
+            <button class="radius-pill" onclick="setRadius(15, this)">15 км</button>
+            <button class="radius-pill" onclick="setRadius(30, this)">30 км</button>
           </div>
         </div>
+      </div>
 
-        <!-- 3. Категория редкости -->
-        <div>
-          <div class="filter-section-title">Охранная категория в Красной книге РБ:</div>
-          <div class="chip-group" id="categoryChips">
-            <div class="filter-chip active" onclick="setCategoryFilter('all', this)">Все</div>
-            <div class="filter-chip" onclick="setCategoryFilter('I', this)">🔴 I Категория (CR)</div>
-            <div class="filter-chip" onclick="setCategoryFilter('II', this)">🟠 II Категория (EN)</div>
-            <div class="filter-chip" onclick="setCategoryFilter('III', this)">🟡 III Категория (VU)</div>
-            <div class="filter-chip" onclick="setCategoryFilter('IV', this)">🟢 IV Категория (NT)</div>
+      <hr class="dotted-divider" />
+
+      <!-- 3. ВЫБОР КОНКРЕТНОГО ЖИВОТНОГО / РАСТЕНИЯ / ГРИБА (без дубликатов) -->
+      <div class="filter-group">
+        <label class="filter-label">
+          <span>🐾 Конкретный вид</span>
+        </label>
+        <select id="speciesSelect" class="filter-select" onchange="onSpeciesSelectChange()">
+          <option value="all">Все виды (показать все 19 видов)</option>
+        </select>
+      </div>
+
+      <hr class="dotted-divider" />
+
+      <!-- 4. ЦАРСТВО (радиокнопки со счетчиком точь-в-точь как на скриншоте 21vek) -->
+      <div class="filter-group">
+        <label class="filter-label">Царство</label>
+        <div class="radio-list" id="kingdomRadioList">
+          <div class="radio-item selected" onclick="selectKingdom('all', this)">
+            <div class="radio-circle"><div class="radio-dot"></div></div>
+            <div class="radio-text">Все <span class="radio-count">(19)</span></div>
+          </div>
+          <div class="radio-item" onclick="selectKingdom('animals', this)">
+            <div class="radio-circle"><div class="radio-dot"></div></div>
+            <div class="radio-text">🐾 Животные <span class="radio-count">(14)</span></div>
+          </div>
+          <div class="radio-item" onclick="selectKingdom('plants', this)">
+            <div class="radio-circle"><div class="radio-dot"></div></div>
+            <div class="radio-text">🌿 Растения <span class="radio-count">(3)</span></div>
+          </div>
+          <div class="radio-item" onclick="selectKingdom('fungi', this)">
+            <div class="radio-circle"><div class="radio-dot"></div></div>
+            <div class="radio-text">🍄 Грибы <span class="radio-count">(2)</span></div>
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <span style="font-size: 12px; color: #64748B; font-weight: 600;" id="filterCountLabel">Отображается: 0 меток</span>
-        <div style="display: flex; gap: 8px;">
-          <button class="action-btn" onclick="resetAllFilters()">Сбросить всё</button>
-          <button class="action-btn active" onclick="closeFilterModal()">Готово</button>
+
+      <hr class="dotted-divider" />
+
+      <!-- 5. КАТЕГОРИЯ ОХРАНЫ (радиокнопки со счетчиком точь-в-точь как на скриншоте 21vek) -->
+      <div class="filter-group">
+        <label class="filter-label">Категория охраны Красной книги</label>
+        <div class="radio-list" id="categoryRadioList">
+          <div class="radio-item selected" onclick="selectCategory('all', this)">
+            <div class="radio-circle"><div class="radio-dot"></div></div>
+            <div class="radio-text">Все категории <span class="radio-count">(19)</span></div>
+          </div>
+          <div class="radio-item" onclick="selectCategory('I', this)">
+            <div class="radio-circle"><div class="radio-dot" style="background: #DC2626;"></div></div>
+            <div class="radio-text">🔴 I (CR) — На грани <span class="radio-count">(6)</span></div>
+          </div>
+          <div class="radio-item" onclick="selectCategory('II', this)">
+            <div class="radio-circle"><div class="radio-dot" style="background: #EA580C;"></div></div>
+            <div class="radio-text">🟠 II (EN) — Исчезающие <span class="radio-count">(6)</span></div>
+          </div>
+          <div class="radio-item" onclick="selectCategory('III', this)">
+            <div class="radio-circle"><div class="radio-dot" style="background: #D97706;"></div></div>
+            <div class="radio-text">🟡 III (VU) — Уязвимые <span class="radio-count">(5)</span></div>
+          </div>
+          <div class="radio-item" onclick="selectCategory('IV', this)">
+            <div class="radio-circle"><div class="radio-dot" style="background: #16A34A;"></div></div>
+            <div class="radio-text">🟢 IV (NT) — Контроль <span class="radio-count">(2)</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. КНОПКА СБРОСА ВСЕГО В ЭТОМ ЖЕ ПОЛЕ -->
+      <button class="btn-reset" onclick="resetAllFilters()">
+        <span>🔄 Сбросить все фильтры</span>
+      </button>
+
+      <hr class="dotted-divider" />
+
+      <!-- 7. РЕЗУЛЬТАТЫ СКАНИРОВАНИЯ ТОЧКИ / РАЙОНА (В ЭТОМ ЖЕ ПОЛЕ!) -->
+      <div class="analysis-container" id="analysisContainer">
+        <div class="analysis-header">
+          <div class="analysis-district-title" id="districtTitle">📍 Кликните в точку на карте</div>
+          <div class="analysis-district-sub" id="districtSub">Выделится район и найдутся редкие виды</div>
+          <div class="analysis-count-badge" id="districtCountBadge" style="display: none;">Найдено: 0 видов</div>
+        </div>
+
+        <div class="species-results-list" id="speciesResultsList">
+          <!-- Динамические карточки найденных видов -->
         </div>
       </div>
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО: ГОРОДА И ЗАПОВЕДНИКИ БЕЛАРУСИ -->
-  <div class="modal-overlay" id="locationsModal">
-    <div class="modal-card" style="width: 680px;">
-      <div class="modal-header">
-        <div class="modal-title">
-          <span>📍</span>
-          <span>Города, национальные парки и заказники Беларуси</span>
-        </div>
-        <button class="modal-close" onclick="closeLocationsModal()">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="filter-section-title">🏙️ Областные центры:</div>
-        <div class="locations-grid">
-          <div class="location-card" onclick="jumpToLocation(53.9006, 27.5590, 11, 'Минск')">
-            <div class="location-card-title">🏛️ Минск</div>
-            <div class="location-card-sub">Столица Республики Беларусь</div>
-          </div>
-          <div class="location-card" onclick="jumpToLocation(52.0976, 23.7341, 11, 'Брест')">
-            <div class="location-card-title">🏰 Брест</div>
-            <div class="location-card-sub">Юго-западный форпост Полесья</div>
-          </div>
-          <div class="location-card" onclick="jumpToLocation(53.6884, 23.8258, 11, 'Гродно')">
-            <div class="location-card-title">👑 Гродно</div>
-            <div class="location-card-sub">Бассейн реки Неман</div>
-          </div>
-          <div class="location-card" onclick="jumpToLocation(55.1904, 30.2049, 11, 'Витебск')">
-            <div class="location-card-title">🎨 Витебск</div>
-            <div class="location-card-sub">Белорусское Поозерье</div>
-          </div>
-          <div class="location-card" onclick="jumpToLocation(52.4345, 30.9754, 11, 'Гомель')">
-            <div class="location-card-title">🌳 Гомель</div>
-            <div class="location-card-sub">Долина реки Сож и Полесье</div>
-          </div>
-          <div class="location-card" onclick="jumpToLocation(53.8938, 30.3353, 11, 'Могилёв')">
-            <div class="location-card-title">🌊 Могилёв</div>
-            <div class="location-card-sub">Днепровские террасы</div>
-          </div>
-        </div>
-
-        <div class="filter-section-title" style="margin-top: 10px;">🌲 Национальные парки и ключевые заказники:</div>
-        <div class="locations-grid" id="protectedZonesGrid">
-          <!-- Заполняется динамически -->
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Плавающая интерактивная легенда карты -->
+  <!-- Плавающая интерактивная легенда карты слева внизу -->
   <div class="legend-card" id="legendCard">
     <div class="legend-header" onclick="toggleLegend()">
       <span>🗺️ Легенда карты</span>
@@ -737,57 +827,35 @@
     <div class="legend-body" id="legendBody">
       <div class="legend-item">
         <span class="legend-marker cat-I"></span>
-        <span><b>I Категория (CR)</b> — На грани исчезновения</span>
+        <span><b>I Категория (CR)</b> — На грани</span>
       </div>
       <div class="legend-item">
         <span class="legend-marker cat-II"></span>
-        <span><b>II Категория (EN)</b> — Исчезающие виды</span>
+        <span><b>II Категория (EN)</b> — Исчезающие</span>
       </div>
       <div class="legend-item">
         <span class="legend-marker cat-III"></span>
-        <span><b>III Категория (VU)</b> — Уязвимые виды</span>
+        <span><b>III Категория (VU)</b> — Уязвимые</span>
       </div>
       <div class="legend-item">
         <span class="legend-marker cat-IV"></span>
-        <span><b>IV Категория (NT)</b> — Требующие контроля</span>
+        <span><b>IV Категория (NT)</b> — Контроль</span>
       </div>
       <hr style="border: none; border-top: 1px solid #E2E8F0; margin: 4px 0;">
       <div class="legend-item">
-        <span style="display:inline-block; width:16px; height:12px; border:2px dashed #059669; background:rgba(16,185,129,0.25); border-radius:3px;"></span>
-        <span><b>Заповедники и нацпарки</b> (подсвечены всегда)</span>
+        <span style="display:inline-block; width:14px; height:10px; border:2px dashed #059669; background:rgba(16,185,129,0.25); border-radius:2px;"></span>
+        <span><b>Заповедники и нацпарки</b> (подсвечены)</span>
       </div>
       <div class="legend-item">
-        <span style="display:inline-block; width:16px; height:12px; border:2px dashed #2563EB; background:rgba(59,130,246,0.15); border-radius:3px;"></span>
-        <span><b>Границы района</b> (подсвечиваются при клике)</span>
+        <span style="display:inline-block; width:14px; height:10px; border:2px dashed #2563EB; background:rgba(59,130,246,0.15); border-radius:2px;"></span>
+        <span><b>Граница района</b> (при клике)</span>
       </div>
-      <div class="legend-item">
-        <span style="font-size: 14px;">📍</span>
-        <span><b>Клик в любую точку</b> — анализ радиуса 3–30 км</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Боковая панель результатов радиусного анализа -->
-  <div class="analysis-panel" id="analysisPanel">
-    <div class="panel-header">
-      <div>
-        <div class="panel-title" id="analysisTitle">Анализ биотопа</div>
-        <div class="panel-subtitle" id="analysisCoords">Координаты: 0.0000, 0.0000</div>
-        <div class="panel-district-badge" id="districtBadge">
-          <span>🏛️</span>
-          <span id="districtName">Определение района...</span>
-        </div>
-      </div>
-      <button class="close-btn" onclick="closePanel()">✕</button>
-    </div>
-    <div class="species-list" id="speciesList">
-      <!-- Сюда динамически добавляются карточки видов -->
     </div>
   </div>
 
   <!-- Подсказка -->
   <div class="hint-banner">
-    💡 Кликните в любую точку карты — определится район, населенный пункт и список редких видов!
+    💡 Кликните в любую точку Беларуси — в панели справа отобразится район, деревня и редкие виды!
   </div>
 
   <script>
@@ -859,14 +927,10 @@
     }
 
     // 3. ОТРИСОВКА ЗАПОВЕДНИКОВ И НАЦПАРКОВ (ВСЕГДА ПОДСВЕЧЕНЫ)
-    const protectedZoneLayers = [];
     if (typeof NATIONAL_PARKS !== 'undefined') {
-      const grid = document.getElementById('protectedZonesGrid');
-
       NATIONAL_PARKS.forEach(park => {
         let layer;
         if (park.polygon && park.polygon.length > 2) {
-          // Реальный полигон ООПТ
           layer = L.polygon(park.polygon, {
             color: '#059669',
             fillColor: '#10B981',
@@ -875,7 +939,6 @@
             dashArray: '6, 6'
           }).addTo(map);
         } else {
-          // Круг при отсутствии точного полигона
           layer = L.circle(park.center, {
             radius: Math.sqrt(park.area_sq_km) * 350,
             color: '#059669',
@@ -886,11 +949,9 @@
           }).addTo(map);
         }
 
-        // Постоянная или hover всплывающая подсказка
         layer.bindTooltip(`🌲 ${park.name_ru}`, {
           sticky: true,
-          direction: 'top',
-          className: 'park-tooltip'
+          direction: 'top'
         });
 
         layer.bindPopup(`
@@ -900,27 +961,15 @@
             <b>Площадь:</b> ${park.area_sq_km.toLocaleString()} км²<br/>
             <b>Основан:</b> ${park.established_year} г.<br/>
             <p style="margin-top: 6px; font-size: 11px; color: #475569;">${park.description_ru}</p>
-            <button onclick="jumpToLocation(${park.center[0]}, ${park.center[1]}, 10, '${park.name_ru}')" style="
+            <button onclick="performRadiusSearch(${park.center[0]}, ${park.center[1]})" style="
               margin-top: 8px; width: 100%; background: #059669; color: white; border: none; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;
-            ">Просканировать радиус этого парка →</button>
+            ">Просканировать этот парк →</button>
           </div>
         `);
-
-        // Добавляем карточку в модалку локаций
-        if (grid) {
-          const card = document.createElement('div');
-          card.className = 'location-card';
-          card.onclick = () => jumpToLocation(park.center[0], park.center[1], 10, park.name_ru);
-          card.innerHTML = `
-            <div class="location-card-title">🌲 ${park.name_ru}</div>
-            <div class="location-card-sub">${park.area_sq_km} км² • Основан в ${park.established_year} г.</div>
-          `;
-          grid.appendChild(card);
-        }
       });
     }
 
-    // 4. МАРКЕРЫ ВИДОВ КРАСНОЙ КНИГИ И СИСТЕМА ФИЛЬТРАЦИИ
+    // 4. МАРКЕРЫ РЕДКИХ ВИДОВ И СИСТЕМА ФИЛЬТРАЦИИ
     const speciesMarkers = [];
     const uniqueSpeciesMap = new Map();
 
@@ -991,7 +1040,7 @@
       });
     }
 
-    // Заполнение выпадающего списка видов в модалке (сортировка по алфавиту без дубликатов)
+    // Заполнение выпадающего списка видов (без дубликатов, по алфавиту)
     const speciesSelect = document.getElementById('speciesSelect');
     if (speciesSelect) {
       const sortedSpecies = Array.from(uniqueSpeciesMap.values()).sort((a, b) => a.name_ru.localeCompare(b.name_ru, 'ru'));
@@ -1003,10 +1052,8 @@
       });
     }
 
-    // ФУНКЦИЯ ПРИМЕНЕНИЯ ФИЛЬТРОВ
+    // Применение фильтров к карте
     function applyFilters() {
-      let visibleCount = 0;
-
       speciesMarkers.forEach(item => {
         const sp = item.species;
         let match = true;
@@ -1023,27 +1070,16 @@
 
         if (match) {
           if (!map.hasLayer(item.marker)) map.addLayer(item.marker);
-          visibleCount++;
         } else {
           if (map.hasLayer(item.marker)) map.removeLayer(item.marker);
         }
       });
 
-      // Обновляем бейдж активных фильтров
-      let activeCount = 0;
-      if (currentFilters.speciesId !== 'all') activeCount++;
-      if (currentFilters.kingdom !== 'all') activeCount++;
-      if (currentFilters.category !== 'all') activeCount++;
-
-      const badge = document.getElementById('activeFilterBadge');
-      if (activeCount > 0) {
-        badge.style.display = 'inline-block';
-        badge.textContent = activeCount;
-      } else {
-        badge.style.display = 'none';
+      // Пересчитываем текущий радиусный поиск, если маркер стоит
+      if (clickMarker) {
+        const center = clickMarker.getLatLng();
+        updateRadiusResults(center.lat, center.lng);
       }
-
-      document.getElementById('filterCountLabel').textContent = `Отображается: ${visibleCount} меток (из ${speciesMarkers.length})`;
     }
 
     function onSpeciesSelectChange() {
@@ -1051,31 +1087,89 @@
       applyFilters();
     }
 
-    function setKingdomFilter(k, btn) {
+    function selectKingdom(k, el) {
       currentFilters.kingdom = k;
-      document.querySelectorAll('#kingdomChips .filter-chip').forEach(el => el.classList.remove('active'));
-      btn.classList.add('active');
+      document.querySelectorAll('#kingdomRadioList .radio-item').forEach(item => item.classList.remove('selected'));
+      el.classList.add('selected');
       applyFilters();
     }
 
-    function setCategoryFilter(c, btn) {
+    function selectCategory(c, el) {
       currentFilters.category = c;
-      document.querySelectorAll('#categoryChips .filter-chip').forEach(el => el.classList.remove('active'));
-      btn.classList.add('active');
+      document.querySelectorAll('#categoryRadioList .radio-item').forEach(item => item.classList.remove('selected'));
+      el.classList.add('selected');
       applyFilters();
+    }
+
+    function onLocationSelectChange() {
+      const val = document.getElementById('locationSelect').value;
+      if (val === 'all') {
+        map.flyTo([53.7098, 27.9534], 7);
+        clearMapAnalysis();
+        return;
+      }
+      const parts = val.split(',');
+      const lat = parseFloat(parts[0]);
+      const lng = parseFloat(parts[1]);
+      const zoom = parseInt(parts[2]) || 10;
+
+      map.flyTo([lat, lng], zoom, { duration: 1.2 });
+      setTimeout(() => {
+        performRadiusSearch(lat, lng);
+      }, 1300);
     }
 
     function resetAllFilters() {
       currentFilters = { speciesId: 'all', kingdom: 'all', category: 'all' };
       document.getElementById('speciesSelect').value = 'all';
-      document.querySelectorAll('#kingdomChips .filter-chip').forEach((el, idx) => el.classList.toggle('active', idx === 0));
-      document.querySelectorAll('#categoryChips .filter-chip').forEach((el, idx) => el.classList.toggle('active', idx === 0));
+      document.getElementById('locationSelect').value = 'all';
+
+      currentRadiusKm = 5;
+      document.getElementById('radiusLabel').textContent = '5 км';
+      const slider = document.getElementById('radiusSlider');
+      if (slider) slider.value = 5;
+      document.querySelectorAll('.radius-pills .radius-pill').forEach((b, idx) => b.classList.toggle('active', idx === 1));
+
+      document.querySelectorAll('#kingdomRadioList .radio-item').forEach((el, idx) => el.classList.toggle('selected', idx === 0));
+      document.querySelectorAll('#categoryRadioList .radio-item').forEach((el, idx) => el.classList.toggle('selected', idx === 0));
+
       applyFilters();
+      clearMapAnalysis();
+    }
+
+    function setRadius(r, btn) {
+      currentRadiusKm = r;
+      document.getElementById('radiusLabel').textContent = `${r} км`;
+      const slider = document.getElementById('radiusSlider');
+      if (slider) slider.value = r;
+
+      document.querySelectorAll('.radius-pills .radius-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      if (clickMarker) {
+        const center = clickMarker.getLatLng();
+        performRadiusSearch(center.lat, center.lng);
+      }
+    }
+
+    function onRadiusSliderChange(val) {
+      currentRadiusKm = parseInt(val);
+      document.getElementById('radiusLabel').textContent = `${val} км`;
+      document.querySelectorAll('.radius-pills .radius-pill').forEach(b => {
+        const pVal = parseInt(b.textContent);
+        b.classList.toggle('active', pVal === currentRadiusKm);
+      });
+
+      if (clickMarker) {
+        const center = clickMarker.getLatLng();
+        performRadiusSearch(center.lat, center.lng);
+      }
     }
 
     // 5. РАДИУСНЫЙ АНАЛИЗ + РАСПОЗНАВАНИЕ РАЙОНА И НАСЕЛЕННОГО ПУНКТА
     map.on('click', function(e) {
       performRadiusSearch(e.latlng.lat, e.latlng.lng);
+      openSidebar(); // Открываем правую панель при клике
     });
 
     async function performRadiusSearch(lat, lng) {
@@ -1098,20 +1192,23 @@
         fillOpacity: 0.16
       }).addTo(map);
 
-      // Открываем панель сразу
-      document.getElementById('analysisPanel').classList.add('open');
-      document.getElementById('analysisCoords').textContent = `GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-      document.getElementById('districtName').textContent = 'Определение района и населенного пункта...';
+      // Обновляем шапку анализа в правой панели
+      document.getElementById('districtTitle').textContent = 'Определение района...';
+      document.getElementById('districtSub').textContent = `GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      document.getElementById('districtCountBadge').style.display = 'none';
 
-      // 5.1. Обратное геокодирование (Reverse Geocoding) через Nominatim с получением полигона района
+      // Геокодирование с границей района
       fetchDistrictInfo(lat, lng);
 
-      // 5.2. Поиск видов в радиусе
+      // Обновление списка видов
+      updateRadiusResults(lat, lng);
+    }
+
+    function updateRadiusResults(lat, lng) {
       const foundSpecies = [];
       const checkedIds = new Set();
 
       speciesMarkers.forEach(item => {
-        // Учитываем фильтры карты
         const sp = item.species;
         if (currentFilters.speciesId !== 'all' && sp.id !== currentFilters.speciesId) return;
         if (currentFilters.kingdom !== 'all' && sp.kingdom !== currentFilters.kingdom) return;
@@ -1129,15 +1226,19 @@
 
       foundSpecies.sort((a, b) => a.distance - b.distance);
 
-      const listContainer = document.getElementById('speciesList');
+      const listContainer = document.getElementById('speciesResultsList');
       listContainer.innerHTML = '';
+
+      const countBadge = document.getElementById('districtCountBadge');
+      countBadge.style.display = 'inline-block';
+      countBadge.textContent = `В радиусе ${currentRadiusKm} км: ${foundSpecies.length} видов`;
 
       if (foundSpecies.length === 0) {
         listContainer.innerHTML = `
-          <div style="text-align: center; padding: 40px 10px; color: #64748B;">
-            <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
-            <b style="color: #0F172A; font-size: 14px;">Редких видов в этом радиусе не зафиксировано</b>
-            <p style="font-size: 12px; margin-top: 6px;">Попробуйте увеличить радиус поиска до 15 или 30 км на панели сверху или кликните ближе к заповедникам.</p>
+          <div style="text-align: center; padding: 24px 8px; color: #64748B;">
+            <div style="font-size: 28px; margin-bottom: 6px;">🔍</div>
+            <b style="color: #0F172A; font-size: 13px;">Редких видов в этом радиусе не зафиксировано</b>
+            <p style="font-size: 11px; margin-top: 4px;">Увеличьте радиус до 15 или 30 км выше, либо кликните ближе к заповедникам.</p>
           </div>
         `;
       } else {
@@ -1186,8 +1287,8 @@
         let headerText = district ? district : (region || 'Беларусь');
         let placeText = place ? (district ? `${place}, ${district}` : place) : (district ? `${district}, ${region}` : region);
 
-        document.getElementById('analysisTitle').textContent = headerText;
-        document.getElementById('districtName').textContent = placeText || 'Территория Беларуси';
+        document.getElementById('districtTitle').textContent = headerText;
+        document.getElementById('districtSub').textContent = `📍 ${placeText} • GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 
         // Рисуем границы района, если получен GeoJSON полигон
         if (data.geojson && (data.geojson.type === 'Polygon' || data.geojson.type === 'MultiPolygon')) {
@@ -1202,30 +1303,9 @@
           }).addTo(map);
         }
       } catch (err) {
-        // Офлайн-фоллбэк: определяем область по координатам
-        document.getElementById('analysisTitle').textContent = 'Географическая зона Беларуси';
-        document.getElementById('districtName').textContent = 'Природный биотоп (офлайн)';
+        document.getElementById('districtTitle').textContent = 'Природный биотоп Беларуси';
+        document.getElementById('districtSub').textContent = `GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
       }
-    }
-
-    function setRadius(r) {
-      currentRadiusKm = r;
-      document.querySelectorAll('.radius-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.innerText.includes(r.toString()));
-      });
-
-      if (clickMarker) {
-        const center = clickMarker.getLatLng();
-        performRadiusSearch(center.lat, center.lng);
-      }
-    }
-
-    function jumpToLocation(lat, lng, zoom, name) {
-      closeLocationsModal();
-      map.flyTo([lat, lng], zoom, { duration: 1.2 });
-      setTimeout(() => {
-        performRadiusSearch(lat, lng);
-      }, 1300);
     }
 
     function clearMapAnalysis() {
@@ -1235,28 +1315,30 @@
       clickCircle = null;
       clickMarker = null;
       districtPolygonLayer = null;
-      document.getElementById('analysisPanel').classList.remove('open');
+      document.getElementById('districtTitle').textContent = '📍 Кликните в точку на карте';
+      document.getElementById('districtSub').textContent = 'Выделится район и найдутся редкие виды';
+      document.getElementById('districtCountBadge').style.display = 'none';
+      document.getElementById('speciesResultsList').innerHTML = '';
     }
 
-    function closePanel() {
-      clearMapAnalysis();
+    // УПРАВЛЕНИЕ БОКОВОЙ ПАНЕЛЬЮ (СВОРАЧИВАНИЕ ПО СТРЕЛКЕ / ВОЗВРАТ ПО КНОПКЕ)
+    function closeSidebar() {
+      document.getElementById('filterSidebar').classList.add('collapsed');
+      document.getElementById('reopenSidebarBtn').classList.add('visible');
     }
 
-    // Управление модалками
-    function openFilterModal() {
-      document.getElementById('filterModal').classList.add('open');
+    function openSidebar() {
+      document.getElementById('filterSidebar').classList.remove('collapsed');
+      document.getElementById('reopenSidebarBtn').classList.remove('visible');
     }
 
-    function closeFilterModal() {
-      document.getElementById('filterModal').classList.remove('open');
-    }
-
-    function openLocationsModal() {
-      document.getElementById('locationsModal').classList.add('open');
-    }
-
-    function closeLocationsModal() {
-      document.getElementById('locationsModal').classList.remove('open');
+    function toggleSidebar() {
+      const sidebar = document.getElementById('filterSidebar');
+      if (sidebar.classList.contains('collapsed')) {
+        openSidebar();
+      } else {
+        closeSidebar();
+      }
     }
 
     function toggleLegend() {
@@ -1271,7 +1353,7 @@
       }
     }
 
-    // Инициализация при загрузке
+    // Старт
     applyFilters();
   </script>
 </body>

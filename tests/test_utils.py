@@ -28,3 +28,4 @@ def test_open_target_external_url(monkeypatch):
     assert success is True
     assert len(opened_urls) == 1
     assert opened_urls[0] == url
+

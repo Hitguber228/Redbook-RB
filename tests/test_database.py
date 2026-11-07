@@ -84,3 +84,32 @@ def test_observations_diary(test_db):
     assert len(updated_obs) == initial_count + 1
     assert updated_obs[0]["user_name"] == "Студент-биолог"
 
+
+def test_belarusian_localization_data(test_db):
+    from src.database.species_be_data import (
+        SPECIES_BE_TRANSLATIONS,
+        REGION_TRANSLATIONS_BE,
+        PARK_TRANSLATIONS_BE,
+        TAXON_TRANSLATIONS,
+    )
+    # Все 19 видов должны иметь аутентичные белорусские данные
+    all_species = test_db.get_species()
+    assert len(all_species) == 19
+    for sp in all_species:
+        sid = sp["id"]
+        assert sid in SPECIES_BE_TRANSLATIONS, f"Вид {sid} отсутствует в белорусском научном словаре"
+        be = SPECIES_BE_TRANSLATIONS[sid]
+        assert "morphology" in be and len(be["morphology"]) > 20
+        assert "habitat" in be and len(be["habitat"]) > 10
+
+    # Проверка областей
+    for reg in ["Брестская", "Витебская", "Гомельская", "Гродненская", "Минская", "Могилевская"]:
+        assert reg in REGION_TRANSLATIONS_BE
+        assert len(REGION_TRANSLATIONS_BE[reg]) > 3
+
+    # Проверка таксонов
+    for tax in ["animals", "plants", "fungi", "mammals", "birds"]:
+        assert tax in TAXON_TRANSLATIONS
+        assert "be" in TAXON_TRANSLATIONS[tax]
+
+

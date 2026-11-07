@@ -1,6 +1,12 @@
 import flet as ft
 from typing import Callable, Optional
 from ...database.db import db_manager
+from ...database.species_be_data import (
+    SPECIES_BE_TRANSLATIONS,
+    REGION_TRANSLATIONS_BE,
+    PARK_TRANSLATIONS_BE,
+    TAXON_TRANSLATIONS,
+)
 from ...utils import open_target
 from ..theme import AppColors, get_category_color, get_category_label
 
@@ -38,6 +44,20 @@ class SpeciesDetailView(ft.Container):
         title = sp["name_be"] if lang == "be" else sp["name_ru"]
         subtitle_other_lang = sp["name_ru"] if lang == "be" else sp["name_be"]
         desc = sp["description_be"] if lang == "be" else sp["description_ru"]
+
+        # Аутентичные белорусские переводы
+        be_info = SPECIES_BE_TRANSLATIONS.get(self.species_id, {})
+        morphology_text = be_info.get("morphology", sp["morphology"]) if lang == "be" else sp["morphology"]
+        look_alike_text = be_info.get("look_alike_species", sp.get("look_alike_species", "")) if lang == "be" else sp.get("look_alike_species", "")
+        habitat_text = be_info.get("habitat", sp["habitat"]) if lang == "be" else sp["habitat"]
+        limiting_text = be_info.get("limiting_factors", sp["limiting_factors"]) if lang == "be" else sp["limiting_factors"]
+        protection_text = be_info.get("protection_measures", sp["protection_measures"]) if lang == "be" else sp["protection_measures"]
+
+        # Названия царств и таксонов
+        k_dict = TAXON_TRANSLATIONS.get(sp["kingdom"], {})
+        kingdom_name = k_dict.get(lang, sp["kingdom"].capitalize())
+        t_dict = TAXON_TRANSLATIONS.get(sp["taxon_group"], {})
+        taxon_name = t_dict.get(lang, sp["taxon_group"].capitalize())
 
         # Месяцы активности (фенологический календарь)
         months_names_ru = ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"]
@@ -105,7 +125,7 @@ class SpeciesDetailView(ft.Container):
 
         # Блок сравнения с видом-двойником (с ярким акцентом для распознавания в природе)
         doubles_section = ft.Container()
-        if sp.get("look_alike_species"):
+        if look_alike_text:
             doubles_section = ft.Card(
                 elevation=2,
                 bgcolor=ft.Colors.AMBER_50,
@@ -129,7 +149,7 @@ class SpeciesDetailView(ft.Container):
                                 ]
                             ),
                             ft.Text(
-                                sp["look_alike_species"],
+                                look_alike_text,
                                 size=13,
                                 color=ft.Colors.AMBER_900,
                                 weight=ft.FontWeight.W_500
@@ -143,6 +163,7 @@ class SpeciesDetailView(ft.Container):
         region_chips = []
         for reg in sp["distribution_rb"]:
             reg_color = REGION_COLORS.get(reg, AppColors.PRIMARY)
+            reg_display = REGION_TRANSLATIONS_BE.get(reg, reg) if lang == "be" else reg
             region_chips.append(
                 ft.Container(
                     padding=ft.Padding.symmetric(horizontal=10, vertical=5),
@@ -154,7 +175,7 @@ class SpeciesDetailView(ft.Container):
                         spacing=4,
                         controls=[
                             ft.Icon(ft.Icons.LOCATION_ON, size=13, color=reg_color),
-                            ft.Text(reg, size=11, weight=ft.FontWeight.BOLD, color=reg_color)
+                            ft.Text(reg_display, size=11, weight=ft.FontWeight.BOLD, color=reg_color)
                         ]
                     )
                 )
@@ -163,6 +184,7 @@ class SpeciesDetailView(ft.Container):
         # Чипсы нацпарков
         park_chips = []
         for park in sp["national_parks"]:
+            park_display = PARK_TRANSLATIONS_BE.get(park, park) if lang == "be" else park
             park_chips.append(
                 ft.Container(
                     padding=ft.Padding.symmetric(horizontal=10, vertical=5),
@@ -174,7 +196,7 @@ class SpeciesDetailView(ft.Container):
                         spacing=4,
                         controls=[
                             ft.Icon(ft.Icons.PARK, size=13, color=AppColors.PRIMARY),
-                            ft.Text(park, size=11, weight=ft.FontWeight.W_600, color=AppColors.PRIMARY)
+                            ft.Text(park_display, size=11, weight=ft.FontWeight.W_600, color=AppColors.PRIMARY)
                         ]
                     )
                 )
@@ -249,13 +271,13 @@ class SpeciesDetailView(ft.Container):
                                         padding=ft.Padding.symmetric(horizontal=8, vertical=3),
                                         border_radius=8,
                                         bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
-                                        content=ft.Text(f"Царство: {sp['kingdom'].capitalize()}", size=11, weight=ft.FontWeight.W_500)
+                                        content=ft.Text(f"{'Царства' if lang == 'be' else 'Царство'}: {kingdom_name}", size=11, weight=ft.FontWeight.W_500)
                                     ),
                                     ft.Container(
                                         padding=ft.Padding.symmetric(horizontal=8, vertical=3),
                                         border_radius=8,
                                         bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
-                                        content=ft.Text(f"Группа: {sp['taxon_group'].capitalize()}", size=11, weight=ft.FontWeight.W_500)
+                                        content=ft.Text(f"{'Група' if lang == 'be' else 'Группа'}: {taxon_name}", size=11, weight=ft.FontWeight.W_500)
                                     )
                                 ]
                             ),
@@ -298,7 +320,7 @@ class SpeciesDetailView(ft.Container):
                                                 ]
                                             ),
                                             ft.Divider(height=1),
-                                            ft.Text(sp["morphology"], size=13, color=ft.Colors.ON_SURFACE)
+                                            ft.Text(morphology_text, size=13, color=ft.Colors.ON_SURFACE)
                                         ]
                                     )
                                 )
@@ -333,7 +355,7 @@ class SpeciesDetailView(ft.Container):
                                                     )
                                                 ]
                                             ),
-                                            ft.Text(sp["habitat"], size=13),
+                                            ft.Text(habitat_text, size=13),
                                             ft.Text("Области обитания:" if lang == "ru" else "Вобласці пражывання:", weight=ft.FontWeight.BOLD, size=12),
                                             ft.Row(wrap=True, spacing=6, controls=region_chips),
                                             ft.Text("Заказники и нацпарки:" if lang == "ru" else "Заказнікі і нацпаркі:", weight=ft.FontWeight.BOLD, size=12),
@@ -401,12 +423,12 @@ class SpeciesDetailView(ft.Container):
                                                 ]
                                             ),
                                             ft.Text(
-                                                f"• Причины редкости: {sp['limiting_factors']}" if lang == "ru" else f"• Прычыны рэдкасці: {sp['limiting_factors']}",
+                                                f"• Причины редкости: {limiting_text}" if lang == "ru" else f"• Прычыны рэдкасці: {limiting_text}",
                                                 size=12,
                                                 color=ft.Colors.RED_900
                                             ),
                                             ft.Text(
-                                                f"• Охранные меры: {sp['protection_measures']}" if lang == "ru" else f"• Ахоўныя захады: {sp['protection_measures']}",
+                                                f"• Охранные меры: {protection_text}" if lang == "ru" else f"• Ахоўныя захады: {protection_text}",
                                                 size=12,
                                                 color=ft.Colors.RED_900
                                             ),
