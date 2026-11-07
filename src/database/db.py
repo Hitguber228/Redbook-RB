@@ -93,52 +93,46 @@ class DatabaseManager:
     def _seed_initial_data(self):
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) as cnt FROM species")
-            count = cursor.fetchone()["cnt"]
+            for s in INITIAL_SPECIES_DATA:
+                cursor.execute("""
+                INSERT OR REPLACE INTO species (
+                    id, name_ru, name_be, name_lat, kingdom, taxon_group, category,
+                    description_ru, description_be, morphology, look_alike_species,
+                    habitat, distribution_rb, national_parks, limiting_factors,
+                    protection_measures, phenology_months, image_url, sound_url,
+                    sound_title, coordinates_json, is_featured
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    s["id"],
+                    s["name_ru"],
+                    s["name_be"],
+                    s["name_lat"],
+                    s["kingdom"],
+                    s["taxon_group"],
+                    s["category"],
+                    s["description_ru"],
+                    s["description_be"],
+                    s["morphology"],
+                    s.get("look_alike_species"),
+                    s["habitat"],
+                    json.dumps(s["distribution_rb"], ensure_ascii=False),
+                    json.dumps(s["national_parks"], ensure_ascii=False),
+                    s["limiting_factors"],
+                    s["protection_measures"],
+                    json.dumps(s["phenology_months"]),
+                    s["image_url"],
+                    s.get("sound_url"),
+                    s.get("sound_title"),
+                    json.dumps(s.get("coordinates", [])),
+                    1 if s.get("is_featured") else 0
+                ))
 
-            if count == 0:
-                for s in INITIAL_SPECIES_DATA:
-                    cursor.execute("""
-                    INSERT INTO species (
-                        id, name_ru, name_be, name_lat, kingdom, taxon_group, category,
-                        description_ru, description_be, morphology, look_alike_species,
-                        habitat, distribution_rb, national_parks, limiting_factors,
-                        protection_measures, phenology_months, image_url, sound_url,
-                        sound_title, coordinates_json, is_featured
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, (
-                        s["id"],
-                        s["name_ru"],
-                        s["name_be"],
-                        s["name_lat"],
-                        s["kingdom"],
-                        s["taxon_group"],
-                        s["category"],
-                        s["description_ru"],
-                        s["description_be"],
-                        s["morphology"],
-                        s.get("look_alike_species"),
-                        s["habitat"],
-                        json.dumps(s["distribution_rb"], ensure_ascii=False),
-                        json.dumps(s["national_parks"], ensure_ascii=False),
-                        s["limiting_factors"],
-                        s["protection_measures"],
-                        json.dumps(s["phenology_months"]),
-                        s["image_url"],
-                        s.get("sound_url"),
-                        s.get("sound_title"),
-                        json.dumps(s.get("coordinates", [])),
-                        1 if s.get("is_featured") else 0
-                    ))
-
-            cursor.execute("SELECT COUNT(*) as cnt FROM quizzes")
-            if cursor.fetchone()["cnt"] == 0:
-                for q in INITIAL_QUIZZES_DATA:
-                    cursor.execute("""
-                    INSERT INTO quizzes (
-                        id, quiz_type, question_ru, question_be, options_ru, options_be,
-                        correct_index, explanation_ru, explanation_be, media_url, related_species_id
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            for q in INITIAL_QUIZZES_DATA:
+                cursor.execute("""
+                INSERT OR REPLACE INTO quizzes (
+                    id, quiz_type, question_ru, question_be, options_ru, options_be,
+                    correct_index, explanation_ru, explanation_be, media_url, related_species_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, (
                         q["id"],
                         q["quiz_type"],
