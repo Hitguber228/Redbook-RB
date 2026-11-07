@@ -1,0 +1,22 @@
+{
+  "name": "Интерактивная красная книга Республики Беларусь",
+  "short_name": "Красная книга РБ",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121A16",
+  "theme_color": "#2D6A4F",
+  "orientation": "portrait-primary",
+  "description": "Электронный научно-образовательный атлас редких и находящихся под угрозой исчезновения видов Республики Беларусь",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
