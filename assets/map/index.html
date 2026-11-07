@@ -1280,7 +1280,7 @@
   <div class="filter-sidebar" id="filterSidebar">
     <div class="sidebar-header">
       <div class="sidebar-header-titles">
-        <span class="sidebar-header-sub">Красная книга Беларуси • 19 видов</span>
+        <span class="sidebar-header-sub">Красная книга Беларуси • 515 видов (ред. 2025)</span>
         <h2 class="sidebar-header-title">Фильтры</h2>
       </div>
       <!-- Кнопка стрелки в углу для закрытия/сворачивания -->
@@ -1359,7 +1359,7 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="trigger-search-icon">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
               </svg>
-              <span class="trigger-label-title" id="speciesTriggerLabel">Все виды (показать все 19)</span>
+              <span class="trigger-label-title" id="speciesTriggerLabel">Все виды (все 515 видов)</span>
             </div>
             <div class="combobox-trigger-actions">
               <button type="button" class="combobox-clear-btn" id="speciesClearBtn" onclick="clearSpeciesSelection(event)" style="display: none;" title="Сбросить выбор вида">✕</button>
@@ -1784,7 +1784,53 @@
     // 4.1. Кастомный красивый выпадающий список видов с живым поиском
     let speciesSearchQuery = '';
 
+    function updateFilterCounts() {
+      const total = uniqueSpeciesMap.size;
+      let animalsCount = 0;
+      let plantsCount = 0;
+      let fungiCount = 0;
+      let catCounts = { 'I': 0, 'II': 0, 'III': 0, 'IV': 0 };
+
+      uniqueSpeciesMap.forEach(sp => {
+        if (sp.kingdom === 'animals') animalsCount++;
+        else if (sp.kingdom === 'plants') plantsCount++;
+        else if (sp.kingdom === 'fungi') fungiCount++;
+
+        if (catCounts[sp.category] !== undefined) {
+          catCounts[sp.category]++;
+        }
+      });
+
+      const subtitle = document.querySelector('.sidebar-header-sub');
+      if (subtitle) subtitle.textContent = `Красная книга Беларуси • ${total} видов (ред. 2025)`;
+
+      const triggerLabel = document.getElementById('speciesTriggerLabel');
+      if (triggerLabel && currentFilters.speciesId === 'all') {
+        triggerLabel.textContent = `Все виды (все ${total} видов)`;
+      }
+
+      // Обновление счётчиков царств
+      const kCounts = document.querySelectorAll('#kingdomRadioList .radio-count');
+      if (kCounts.length >= 4) {
+        kCounts[0].textContent = `(${total})`;
+        kCounts[1].textContent = `(${animalsCount})`;
+        kCounts[2].textContent = `(${plantsCount})`;
+        kCounts[3].textContent = `(${fungiCount})`;
+      }
+
+      // Обновление счётчиков категорий охраны
+      const catCountElems = document.querySelectorAll('#categoryButtonsList .cat-btn-count');
+      if (catCountElems.length >= 5) {
+        catCountElems[0].textContent = `(${total})`;
+        catCountElems[1].textContent = `(${catCounts['I'] || 0})`;
+        catCountElems[2].textContent = `(${catCounts['II'] || 0})`;
+        catCountElems[3].textContent = `(${catCounts['III'] || 0})`;
+        catCountElems[4].textContent = `(${catCounts['IV'] || 0})`;
+      }
+    }
+
     function initSpeciesCombobox() {
+      updateFilterCounts();
       renderSpeciesDropdown('');
 
       // Закрытие выпадающего списка при клике снаружи
@@ -1865,10 +1911,10 @@
               </div>
               <div class="dropdown-text-group">
                 <span class="dropdown-sp-title">Все виды Беларуси</span>
-                <span class="dropdown-sp-sub">Показать все 19 редких видов</span>
+                <span class="dropdown-sp-sub">Показать все ${uniqueSpeciesMap.size} редких видов</span>
               </div>
             </div>
-            <span class="dropdown-badge" style="background: #1E293B;">19</span>
+            <span class="dropdown-badge" style="background: #1E293B;">${uniqueSpeciesMap.size}</span>
           </div>
         `;
       }
@@ -1916,7 +1962,7 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="trigger-search-icon">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
-          <span class="trigger-label-title" id="speciesTriggerLabel">Все виды (показать все 19)</span>
+          <span class="trigger-label-title" id="speciesTriggerLabel">Все виды (все ${uniqueSpeciesMap.size} видов)</span>
         `;
         if (clearBtn) clearBtn.style.display = 'none';
       } else {

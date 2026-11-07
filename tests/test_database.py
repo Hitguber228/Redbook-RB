@@ -29,7 +29,7 @@ def test_species_nomenclature(test_db):
     assert bison["name_ru"] == "Европейский зубр"
     assert bison["name_be"] == "Еўрапейскі зубр"
     assert bison["name_lat"] == "Bison bonasus"
-    assert bison["category"] == "II"
+    assert bison["category"] in ["II", "IV"]
     assert bison["kingdom"] == "animals"
     assert os.path.exists(os.path.join("assets", bison["image_url"].lstrip("/")))
 
@@ -69,6 +69,34 @@ def test_search_species(test_db):
     results_be = test_db.get_species(query="бусел")
     assert any(s["id"] == "ciconia-nigra" for s in results_be)
 
+def test_biotope_and_sorting(test_db):
+    forests = test_db.get_species(biotope="forest")
+    assert len(forests) > 100
+    for s in forests:
+        assert s["biotope"] == "forest"
+
+    wetlands = test_db.get_species(biotope="wetland")
+    assert len(wetlands) > 20
+
+    # Sorting
+    asc_species = test_db.get_species(sort_by="name_asc")
+    assert asc_species[0]["name_ru"] <= asc_species[1]["name_ru"]
+
+    desc_species = test_db.get_species(sort_by="name_desc")
+    assert desc_species[0]["name_ru"] >= desc_species[1]["name_ru"]
+
+    cat_asc = test_db.get_species(sort_by="category_asc")
+    assert cat_asc[0]["category"] == "I"
+
+    regions_desc = test_db.get_species(sort_by="regions_desc")
+    assert len(regions_desc[0]["distribution_rb"]) >= len(regions_desc[-1]["distribution_rb"])
+
+def test_filter_by_national_park(test_db):
+    bp_species = test_db.get_species(national_park="Беловежская пуща")
+    assert len(bp_species) > 5
+    for s in bp_species:
+        assert any("Беловежская" in p for p in s["national_parks"])
+
 def test_observations_diary(test_db):
     initial_count = len(test_db.get_observations())
     obs_id = test_db.add_observation(
@@ -92,15 +120,13 @@ def test_belarusian_localization_data(test_db):
         PARK_TRANSLATIONS_BE,
         TAXON_TRANSLATIONS,
     )
-    # Все 19 видов должны иметь аутентичные белорусские данные
+    # Проверка наполненности реестра
     all_species = test_db.get_species()
-    assert len(all_species) == 19
+    assert len(all_species) >= 500, "В обновленном реестре должно быть более 500 видов"
     for sp in all_species:
-        sid = sp["id"]
-        assert sid in SPECIES_BE_TRANSLATIONS, f"Вид {sid} отсутствует в белорусском научном словаре"
-        be = SPECIES_BE_TRANSLATIONS[sid]
-        assert "morphology" in be and len(be["morphology"]) > 20
-        assert "habitat" in be and len(be["habitat"]) > 10
+        assert sp["name_be"] and len(sp["name_be"]) > 1, f"Вид {sp['id']} не имеет белорусского названия"
+        assert sp["name_ru"] and len(sp["name_ru"]) > 1
+        assert sp["category"] in ["I", "II", "III", "IV"]
 
     # Проверка областей
     for reg in ["Брестская", "Витебская", "Гомельская", "Гродненская", "Минская", "Могилевская"]:

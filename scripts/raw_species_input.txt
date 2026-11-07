@@ -1,0 +1,542 @@
+1. Дикие животные (210 видов)
+Класс Млекопитающие (22 вида)
+Обыкновенная летяга / Pteromys volans / Звычайная палятуха — I
+Крапчатый суслик / Spermophilus suslicus / Рабы суслік — III
+Полчок / Glis glis / Палчок — III
+Орешниковая соня / Muscardinus avellanarius / Арэшнікавая соня — IV
+Садовая соня / Eliomys quercinus / Садовая соня — III
+Обыкновенный хомяк / Cricetus cricetus / Звычайны хамяк — I
+Ночница Наттерера / Myotis nattereri / Начніца Натэрэра — III
+Усатая ночница / Myotis mystacinus / Вусатая начніца — III
+Ночница Брандта / Myotis brandti / Начніца Брандта — III
+Прудовая ночница / Myotis dasycneme / Сажалкавая начница — II
+Европейская широкоушка / Barbastella barbastellus / Еўрапейская шыракавушка — II
+Серый ушан / Plecotus austriacus / Шэры вушан — III
+Малая вечерница / Nyctalus leisleri / Малая вячэрнiца — III
+Северный кожанок / Eptesicus nilssoni / Паўночны кажанок — IV
+Гигантская вечерница / Nyctalus lasiopterus / Гiганцкая вячэрнiца — I
+Бурый медведь / Ursus arctos / Буры мядзведзь — IV
+Горностай / Mustela erminea / Гарнастай — IV
+Европейская норка / Mustela lutreola / Еўрапейская норка — I
+Обыкновенный барсук / Meles meles / Звычайны барсук — IV
+Рысь / Lynx lynx / Рысь — IV
+Зубр / Bison bonasus / Зубр — IV
+Лошадь Пржевальского / Equus przewalskii / Конь Пржэвальскага — I
+Класс Птицы (71 вид)
+Гусь-пискулька / Anser erythropus / Гусь-пiскулька — IV
+Шилохвость / Anas acuta / Качка-шылахвостка — III
+Белоглазая чернеть / Aythya nyroca / Белавокi нырок — I
+Луток / Mergellus albellus / Савук-луток — I
+Большой крохаль / Mergus merganser / Вялiкi савук — III
+Длинноносый крохаль / Mergus serrator / Даўганосы савук — II
+Белая куропатка / Lagopus lagopus / Пардва — I
+Серощекая поганка / Podiceps grisegena / Шэрашчокая коўра — IV
+Обыкновенная горлица / Streptopelia turtur / Звычайная туркаўка — IV
+Коростель / Crex crex / Драч — IV
+Малый погоныш / Zapornia parva / Малы пагонiч — IV
+Серый журавль / Grus grus / Шэры журавель — III
+Кулик-сорока / Haematopus ostralegus / Крывок — III
+Золотистая ржанка / Pluvialis apricaria / Залацiстая сеўка — III
+Галстучник / Charadrius hiaticula / Вялiкi зуёк — II
+Средний кроншнеп / Numenius phaeopus / Сярэднi кулён — III
+Большой кроншнеп / Numenius arquata / Вялiкi кулён — II
+Большой веретенник / Limosa limosa / Вялiкi грыцук — III
+Турухтан / Calidris pugnax / Баталён — III
+Гаршнеп / Lymnocryptes minimus / Стучок — IV
+Дупель / Gallinago media / Дубальт — II
+Мородунка / Xenus cinereus / Кулiк-марадунка — III
+Большой улит / Tringa nebularia / Кулiк-селянец — III
+Поручейник / Tringa stagnatilis / Кулiк-паручайнiк — III
+Малая чайка / Hydrocoloeus minutus / Малая чайка — III
+Сизая чайка / Larus canus / Шызая чайка — IV
+Малая крачка / Sternula albifrons / Малая крычка — II
+Чернозобая гагара / Gavia arctica / Чорнаваллёвы гагач — II
+Черный аист / Ciconia nigra / Чорны бусел — III
+Большая выпь / Botaurus stellaris / Чапля-бутай — III
+Малая выпь / Ixobrychus minutus / Чапля-лазянiк — III
+Кваква / Nycticorax nycticorax / Чапля-кваква — IV
+Скопа / Pandion haliaetus / Скапа — II
+Змееяд / Circaetus gallicus / Арол-вужаед — II
+Малый подорлик / Clanga pomarina / Малы арлец — III
+Большой подорлик / Clanga clanga / Вялiкi арлец — I
+Беркут / Aquila chrysaetos / Арол-маркут — I
+Орел-карлик / Hieraaetus pennatus / Арол-карлiк — I
+Полевой лунь / Circus cyaneus / Палявы лунь — III
+Черный коршун / Milvus migrans / Чорны каршун — III
+Красный коршун / Milvus milvus / Чырвоны каршун — III
+Орлан-белохвост / Haliaeetus albicilla / Арлан-белахвост — III
+Сипуха / Tyto alba / Сiпуха — II
+Сплюшка / Otus scops / Соўка-сплюшка — IV
+Филин / Bubo bubo / Пугач — II
+Воробьиный сыч / Glaucidium passerinum / Вераб’iны сычык — IV
+Домовый сыч / Athene noctua / Сыч-сiпель — IV
+Длиннохвостая неясыть / Strix uralensis / Даўгахвостая кугакаўка — III
+Бородатая неясыть / Strix nebulosa / Барадатая кугакаўка — II
+Болотная сова / Asio flammeus / Сава балотная — IV
+Мохноногий сыч / Aegolius funereus / Касматаногi сыч — IV
+Обыкновенный зимородок / Alcedo atthis / Звычайны зiмародак — III
+Золотистая щурка / Merops apiaster / Шчурка-пчалаедка — IV
+Сизоворонка / Coracias garrulus / Сiнi сiваграк — I
+Трехпалый дятел / Picoides tridactylus / Жоўтагаловы дзяцел — IV
+Белоспинный дятел / Dendrocopos leucotos / Беласпiнны дзяцел — IV
+Зеленый дятел / Picus viridis / Зялёная жаўна — III
+Обыкновенная пустельга / Falco tinnunculus / Сокал-пустальга — III
+Кобчик / Falco vespertinus / Сокал-шулёнак — I
+Дербник / Falco columbarius / Сокал-дрымлюк — III
+Чеглок / Falco subbuteo / Сокал-кабец — IV
+Сапсан / Falco peregrinus / Сокал-падарожнiк — I
+Чернолобый сорокопут / Lanius minor / Чарналобы грычун — II
+Белая лазоревка / Cyanistes cyanus / Белая сiнiца — III
+Хохлатый жаворонок / Galerida cristata / Жаўрук-смяцюх — IV
+Усатая синица / Panurus biarmicus / Вусатая сiнiца — IV
+Вертлявая камышевка / Acrocephalus paludicola / Вяртлявая чаротаўка — I
+Мухоловка-белошейка / Ficedula albicollis / Валасянiца-белашыйка — IV
+Полевой конек / Anthus campestris / Палявы свiрстун — IV
+Садовая овсянка / Emberiza hortulana / Садовая стрынатка — II
+Просянка / Miliaria calandra / Гуменная стрынатка — IV
+Класс Земноводные (2 вида)
+Гребенчатый тритон / Triturus cristatus / Грабенчаты трытон — IV
+Камышовая жаба / Bufo calamita / Чаротавая рапуха — III
+Класс Рептилии (2 вида)
+Болотная черепаха / Emys orbicularis / Балотная чарапаха — III
+Медянка / Coronella austriaca / Мядзянка — III
+Класс Миноги (1 вид)
+Проходная речная минога / Lampetra fluviatilis morpha fluviatilis / Праходная рачная мiнога — I
+Класс Рыбы (9 видов)
+Стерлядь / Acipenser ruthenus / Сцерлядзь — I
+Атлантический лосось / Salmo salar / Ласось — I
+Кумжа / Salmo trutta morpha trutta / Кумжа — I
+Ручьевая форель / Salmo trutta morpha fario / Ручаёвая стронга — III
+Европейский хариус / Thymallus thymallus / Лiпень — II
+Европейская корюшка / Osmerus eperlanus / Стынка — IV
+Обыкновенный усач / Barbus barbus / Мiрон — III
+Рыбец / Vimba vimba / Рыбец — III
+Озерный гольян / Rhynchocypris percnurus / Азерны гальян — I
+Класс Насекомые (96 видов)
+Поденка щитовидная / Prosopistoma foliaceum / Аўсянiк шчыткападобны — II
+Стрелка Йохансона / Coenagrion johanssoni / Стрэлка Ёхансана — II
+Стрелка зеленоватая / Coenagrion armatum / Стрэлка зеленаватая — II
+Нехаления красивая / Nehalennia speciosa / Нехаленiя прыгожая — III
+Дедка рогатый / Ophiogomphus cecilia / Дзедка рагаты — IV
+Булавобрюх кольчатый / Cordulegaster boltonii / Кардулегастэр кольчаты — III
+Коромысло зеленое / Aeshna viridis / Каромысел зялёны — III
+Коромысло городчатое / Aeshna crenata / Каромысел гародчаты — II
+Белонос хвостатый / Leucorrhinia caudalis / Беланоска таўстахвостая — IV
+Водомерка сфагновая / Gerris sphagnetorum / Вадамер сфагнавы — III
+Поводень двухполосный / Graphoderus bilineatus / Павадзень двухпалосны — III
+Плавунец широчайший / Dytiscus latissimus / Плывунец найшырэйшы — III
+Ризод желобчатый / Rhysodes sulcatus / Рызод жалабаты — II
+Красотел бронзовый / Calosoma inquisitor / Красацел бронзавы — III
+Жужелица Менетрие / Carabus menetriesi / Жужаль Менетрые — III
+Жужелица путаная / Carabus intricatus / Жужаль блытаны — III
+Жужелица блестящая / Carabus nitens / Жужаль бліскучы — III
+Жужелица золотистоямчатая / Carabus clathratus / Жужаль залацістаямчаты — III
+Жужелица фиолетовая / Carabus violaceus / Жужаль фiялетавы — IV
+Жужелица замечательная / Carabus excellens / Жужаль цудоўны — II
+Жужелица шагреневая / Carabus coriaceus / Жужаль шчытрынавы — IV
+Жужелица окаймленная / Carabus marginalis / Жужаль аблямаваны — II
+Слизнеед ребристый / Agostenus striatus / Слiмажэр рабрысты — II
+Слизнеед четырехбороздчатый / Agostenus quadrifossulatus / Слiмажэр чатырохбаразнаваты — I
+Слизнеед бороздчатый / Agostenus sulcatus / Слiмажэр баразнаваты — II
+Рогачик скромный / Ceruchus chrysomelinus / Рагачык сцiплы — III
+Жук-олень / Lucanus cervus / Жук-алень — III
+Бронзовка большая зеленая / Protactia aeruginosa / Бронзаўка вялiкая зялёная — IV
+Бронзовка мраморная / Protactia marmorata / Бронзаўка мармуровая — IV
+Бронзовка Фибера / Protactia fieberi / Бронзаўка Фiбера — IV
+Восковик-отшельник / Osmoderma barnabita / Васкавiк-пустэльнiк — IV
+Пестряк зеленый / Gnorimus nobilis / Стракач зялёны — II
+Пестряк изменчивый / Gnorimus variabilis / Стракач зменлiвы — III
+Плоскотелка красная / Cucujus cinnaberinus / Пласкацел чырвоны — IV
+Плоскотелка багряная / Cucujus haematodes / Пласкацел барвовая — IV
+Борос Шнейдера / Bostrichus schneideri / Борас Шнэйдэра — IV
+Усач косматогрудый / Tragosoma depsarium / Вусач калматагруды — II
+Усач-плотник / Ergates faber / Вусач-цясляр — III
+Усач дубовый большой / Cerambyx cerdo / Вусач дубовы вялiкi — III
+Усач Келера / Purpuricenus kaehleri / Вусач Келера — II
+Стафилин волосатый / Emus hirtus / Стафiлiн валасаты — IV
+Щелкун чешуйчатый / Lacon lepidopterus / Шчаўкун лускаваты — III
+Щелкун ржаво-красный / Elater ferrugineus / Шчаўкун iржава-чырвоны — III
+Землерой многорогий / Ceratophyus polyceros / Землярой мнагароты — I
+Бражник прозерпина / Proserpinus proserpina / Бражнiк празерпiна — II
+Аполлон черный / Parnassius mnemosyne / Апалон чорны — III
+Зеринтия обыкновенная / Zerynthia polyxena / Зярынція звычайная — II
+Желтушка торфяниковая / Colias palaeno / Жаўтушка тарфянiкавая — IV
+Желтушка ракитниковая / Colias myrmidone / Жаўтушка зяноўнiкавая — III
+Многоглазка голубоватая / Lycaena helle / Мнагавочка блакiтнаватая — II
+Голубянка алексис / Glaucopsyche alexis / Блакiтнiца алексiс — IV
+Голубянка алькон / Maculinea alcon / Блакiтнiца алькон — III
+Голубянка черноватая / Phengaris nausithous / Блакiтнiца чарнаватая — II
+Голубянка телей / Phengaris teleius / Блакiтнiца тэлей — II
+Голубянка арион / Phengaris arion / Блакiтнiца арыён — IV
+Голубянка донниковая / Polyommatus dorylas / Блакiтнiца баркуновая — I
+Голубянка эроидес / Polyommatus eros / Блакiтнiца эроiдэс — I
+Голубянка торфяниковая / Agriades optilete / Блакiтнiца тарфянiкавая — IV
+Голубянка Шиффермюллера / Pseudophilotes vicrama / Блакiтнiца Шыфермюлера — III
+Перламутровка фрейя / Clossiana freja / Перламутраўка фрэя — I
+Перламутровка фригга / Clossiana frigga / Перламутраўка фрыга — I
+Перламутровка альпийская / Clossiana thore / Перламутраўка альпiйская — I
+Перламутровка болотная / Boloria aquilonaris / Перламутраўка балотная — III
+Шашечница авриння / Euphydryas aurinia / Шашачнiца аўрынiя — III
+Шашечница большая / Euphydryas maturna / Шашачнiца вялiкая — IV
+Пеструшка таволговая / Neptis rivularis / Стракатка вятроўнiкавая — III
+Бархатница петербуржская / Lasiommata petropolitana / Аксамiтнiца пецярбургская — I
+Бархатница ахние / Lopinga achine / Аксамiтнiца ахiнэ — III
+Сенница эдипп (луговая) / Coenonympha oedippus / Сеннiца эдып (лугавая) — III
+Чернушка эфиопка / Erebia aethiops / Чарнушка эфiопка — II
+Чернушка кофейная / Erebia ligea / Чарнушка кававая — III
+Сатир железный / Hipparchia statilinus / Сатыр жалезны — IV
+Бархатница (сатир) дриада / Minois dryas / Аксамiтнiца (сатыр) дрыяда — IV
+Бархатница ютта / Oeneis jutta / Аксамiтнiца юта — IV
+Пяденица красивая / Chariaspilates formosaria / Пядзенiк прыгожы — III
+Пяденица стрельчатая / Gagitodes sagittata / Пядзенiк стрэлкавы — II
+Эверсманния украшенная / Eversmannia exornata / Эверсманiя ўпрыгожаная — I
+Медведица Метельки / Diacrisia metelkana / Мядзведзiца Мiцелькi — I
+Медведица-хозяйка / Arctia matronula / Мядзведзiца-гаспадыня — IV
+Медведица геба / Arctia festiva / Мядзведзiца геба — I
+Медведица сельская / Arctia villica / Мядзведзiца вясковая — II
+Медведица царская / Epatolmis lucifera / Мядзведзiца царская — II
+Совка мышастая / Agyrtia musculus / Саўка мышастая — II
+Орденская лента розовая / Catocala paeta / Стужачнiца ружовая — III
+Шелкопряд дубовый гемнокрылый / Ocneria detrita / Шаўкапрад дубовы цёмнакрылы — I
+Металловидка кровохлебковая / Diachrysia zosinii / Металавiдка крывасмокавая — III
+Металловидка микротамма / Syngrapha microgamma / Металавiдка мiкрагама — IV
+Аконтия светлая / Acontia lucida / Аконцiя светлая — III
+Коконопряд падуболистный / Phyllodesma ilicifolia / Каканапрад падубалiстны — I
+Окончатый мотылек / Thyris fenestrella / Акенцавы матылёк — I
+Шмель-чесальщик / Bombus distinguendus / Чмель-часальшчiк — III
+Шмель моховой / Bombus muscorum / Чмель мохавы — III
+Шмель Шренка / Bombus schrenckii / Чмель Шрэнка — III
+Пчела-плотник обыкновенная / Xylocopa valga / Пчала-цясляр звычайная — IV
+Парнопес крупный / Parnopes grandior / Парнопэс буйны — IV
+Сколия-гигант / Megascolia maculata / Сколiя-гiгант — III
+Класс Поясковые черви (1 вид)
+Медицинская пиявка / Hirudo medicinalis / Медыцынская п’яўка — II
+Класс Веслоногие ракообразные (2 вида)
+Длиннохвостый цимнокалянус / Limnocalanus macrurus / Даўгахвосты лiмнакалянус — III
+Озерная эвритемора / Eurytemora lacustris / Азёрная эўрытэмора — III
+Класс Высшие раки (4 вида)
+Реликтовая мизида / Mysis relicta / Рэлiктавая мiзiда — III
+Родственная монопорея / Monoporeia affinis / Роднасная манапарэя — III
+Бокоплав Палласа / Pallascopsis quadrispinosa / Бакаплаў Паласа — III
+Широкопалый рак / Astacus astacus / Шляхетны рак — II
+Класс Паукообразные (1 вид)
+Паук сплавной большой / Dolomedes plantarius / Павук сплаўны вялiкi — IV
+Класс Двустворчатые моллюски (2 вида)
+Перловица толстая / Unio crassus / Перламутраўка тоўстая — III
+Беззубка узкая / Pseudanodonta complanata / Бяззубка вузкая — II
+2. Дикорастущие растения и грибы (310 видов)
+Водоросли (23)
+Носток сливовидный / Nostoc pruniforme Agardh C. / Насток слівападобны — III
+Хризоликос планктонный / Chrysolykos planktonicus var. recticollis Nauwerck A. / Хрызалікас планктонны — I
+Хризоликос угловатый / Chrysolykos angulatus (Willén T.) Nauwerck A. / Хрызалікас вуглаваты — I
+Центронелла Рейхельта / Centronella reicheltii Max Voigt / Цэнтранэла Рэйхельта — II
+Ханнея аркообразная / Hannaea arcus (Ehrenberg) Patrick / Ханэя аркападобная — III
+Пиннулярия полионка / Pinnularia polyonca (Brébisson) W. Smith / Пінулярыя паліёнка — I
+Гомфоцимбеллопсис изогнутый / Gomphocymbellopsis ancyli (Cleve) Krammer / Гомфацымбелопсіс выгнуты — I
+Иконелла искривленная / Iconella curvula (W.Smith) Ruck ex Nakov / Іканэла скрыўленая — I
+Иконелла нежнейшая / Iconella delicatissima (F.W.Lewis) Ruck ex Nakov / Іканэла пяшчотненькая — II
+Табеллярия звездчатая / Tabellaria stellata Kulikovskiy / Табелярыя зорчатая — II
+Эгагропила Линнея / Aegagropila linnaei Kützing / Эгаграпіла Лінэя — III
+Нителла волосовидная (тонкая) / Nitella capillaris (Krock.) Groves J. et Bull.-Webst. / Нітэла воласападобная (тонкая) — II
+Нителла грациозная (стройная) / Nitella gracilis (Smith J.E.) Agardh C.A. / Нітэла грацыёзная (стройная) — III
+Хара войлочная / Chara tomentosa Linnaeus C. / Хара лямцавая — III
+Хара нитевидная / Chara filiformis Hertzsch / Хара ніткападобная — II
+Хара сосочковая / Chara papillosa Kützing / Хара сасочкавая — III
+Хара щетинистая / Chara strigosa Braun A. / Хара шчаціністая — II
+Хара щетинистоволосистая / Chara hispida Linnaeus / Хара шчацініставаласістая — II
+Батрахоспермум слизистый (четковидный) / Batrachospermum gelatinosum (Linnaeus) De Candolle / Батрахаспермум слізісты (ружанцападобны) — IV
+Болотяница (Палудикола) торфяная / Paludicola turfosa (Bory) M.L. Vis et Necchi / Балацяніца (Палудзікала) тарфяная — II
+Паралеманея цепочечная / Paralemanea catenata (Kützing) M.L. Vis et Sheath / Паралеманэя ланцужковая — II
+Торея реснитчатая / Thorea hispida (Thore) Desvaux / Тарэя раснічастая — II
+Ручейница речная / Riverina rivularis (Liebmann) C.W.Vieira ex G.W.Saunders / Ручайніца рачная — III
+Мхи (37)
+Гимноколея вздутая / Gymnocolea inflata (Huds.) Dum. / Гімнакалея ўздутая — I
+Лофозия восходящая / Lophozia ascendens (Warnst.) Schust. / Лафозія ўзыходзячая — II
+Схистохилопсис рыхлый / Schistochilopsis laxa (Lindb.) Konstant. / Схістахілопсіс рыхлы — II
+Тритомария почтивырезанная / Tritomaria exsectiformis (Breidl.) Schiffn. ex Loeske / Трытамарыя амальвыразаная — I
+Скапания заостренная / Scapania apiculata Spruce / Скапанія завостраная — II
+Цефалозия ленточная / Cephalozia catenulata (Hueb.) Lindb. / Цэфалозія стужкавая — III
+Цефалозия мелкодольчатая / Cephalozia lacinulata (J.B. Jack ex Gottsche et Rabenh.) Spruce / Цэфалазія дробнадольчатая — II
+Цефалозиелла нежненькая / Cephaloziella elachista (Jack ex Gott. et Rabenh.) Schiffn. / Цэфалазіелла пяшчотненькая — II
+Порелла плосколистная / Porella platyphylla (L.) Preiff. / Парэла пласкалістая — III
+Риччия Бейриха / Riccia beyrichiana Hampe ex Lehm. et Lindend. / Рычыя Бейрыха — I
+Риччия желобчатая / Riccia canaliculata Hoffm. / Рычыя жалабатая — III
+Сфагнум Линдберга / Sphagnum lindbergii Schimp. / Сфагнум Ліндберга — II
+Сфагнум мягкий / Sphagnum molle Sull. / Сфагнум мяккі — III
+Андрея скальная / Andreaea rupestris Hedw. / Андрэя скальная — I
+Кампилопус извилистый / Campylopus flexuosus (Hedw.) Brid. / Кампілопус звілісты — I
+Дикранум зеленый / Dicranum viride (Sull. et Lesq. in Sull.) Lindb. / Дыкранум зялёны — III
+Паралевкобриум длиннолистный / Paraleucobryum longifolium (Ehrh. ex Hedw.) Loeske / Паралеўкобрыум даўгалісты — III
+Схистостега перистая / Schistostega pennata Hedw. / Схістастэга перыстая — I
+Тортелла извилистая / Tortella tortuosa (Hedw.) Limpr. / Тартэла звілістая — II
+Цинклидотус дунайский / Cinclidotus danubicus Schiffn. et Baumb. / Цынклідотус дунайскі — I
+Меезия трехгранная / Meesia triquetra (Jolycl.) Aongstr. / Меезія трохгранная — III
+Филонотис бранденбургский / Philonotis marchica (Hedw.) Brid. / Філанатыс брандэнбургскі — III
+Ортотрихум Лайеля / Orthotrichum lyellii Hook. et Tayl. / Артотрыхум Лайеля — II
+Бриум Клинггреффа / Bryum klinggraeffii Schimp. / Брыум Клінгрэфа — II
+Бриум прибрежный / Bryum warneum (Roehl.) Bland ex Brid. / Брыум прябярэжны — I
+Бриум Шлейхера / Bryum schleicheri DC. / Брыум Шлейхера — II
+Псевдобриум цинклидиевидный / Pseudobryum cinclidioides (Hueb.) T.J. Kop. / Псеўдабрыум цынклідыяпадобны — III
+Цинклидиум стигийский / Cinclidium stygium Sw. / Цынклідыум стыгійскі — II
+Дихелима серповидная / Dichelyma falcatum (Hedw.) Myr. / Дыхеліна серпападобная — I
+Плагиотециум волнистый / Plagiothecium undulatum (Hedw.) Bruch et al. / Плагіятэцыум хвалісты — I
+Птеригинандрум нитевидный / Pterigynandrum filiforme Hedw. / Птэрыгінандрум ніткападобны — II
+Неккера перистая / Neckera pennata Hedw. / Някера перыстая — IV
+Ринхостегиум стенной / Rhynchostegium murale (Hedw.) Bruch et al. / Рынхастэгіум сцянны — I
+Гаплокладиум мелколистный / Haplocladium microphyllum (Hedw.) Broth. / Гаплакладыум дробналісты — II
+Пелекиум мельчайший / Pelekium minutulum (Hedw.) Touw. / Пялекіум драбнейшы — II
+Псевдокаллиергон плауновидный / Pseudocalliergon lycopodioides (Brid.) Warnst. / Псеўдакаліергон дзеразападобны — II
+Псевдокаллиергон трехрядный / Pseudocalliergon trifarium (Web. et Mohr) Loeske / Псеўдакаліергон трохрадковы — I
+Грибы (32)
+Спатулярия желтоватая (булавовидная) / Spathularia flavida Pers. / Спатулярыя жаўтлявая (булавападобная) — II
+Гиднотрия Тюляна / Hydnotrya tulasnei (Berk.) Berk. et Broome. / Гіднотрыя Цюляна — II
+Стефензия атласная / Stephensia bombycina (Vittad.) Tul. / Стэфензія атласная — II
+Трюфель Борха / Tuber borchii Vittad. / Труфля Борха — II
+Трюфель летний / Tuber aestivum Vittad. / Труфля летняя — II
+Ожибвайя красивая / Ojibwaya perpulchra B. Satton. / Ажыбвая прыгожая — II
+Гриб-зонтик девичий / Leucoagaricus nympharum (Kalchbr.) Bon. / Грыб-парасонік дзявочы — II
+Гигрофор дубравный / Hygrophorus nemoreus (Pers.) Fr. / Гіграфор дубраўны — II
+Калоцибе фиалковая / Calocybe ionides (Bull.) Donk / Калоцыбе фіялкавая — III
+Лисичка серая Cantharellus cinereus (Pers.) Fr. / Лісічка шэрая — III
+Вороночник рожковидный / Craterellus cornucopioides (L.) Pers. / Вароначнік ражкавідны — IV
+Паутинник золотисто-рыжий / Cortinarius aureofulvus Moser / Павуцінавік залацістарыжы — III
+Клаваридельфус пестиковый / Clavariadelphus pistillaris (L.) Donk. / Клаврыядэльфус песцікавы — II
+Спарассис курчавый / Sparassis crispa (Wulfen) Fr. / Спарасіс курчавы — IV
+Фистулина печеночная / Fistulina hepatica (Schaeff.) With. / Фістуліна пячоначная — II
+Ганодерма блестящая / Ganoderma lucidum (Curtis) P. Karst. / Ганадэрма бліскучая — II
+Дентипеллис ломкий / Dentipellis fragilis (Pers.) Donk. / Дэнтыпеліс ломкі — II
+Гериций коралловидный / Hericium coralloides (Scop.) Pers. / Герыцый каралападобны — II
+Кальвация гигантская / Calvatia gigantea (Batsch) Lloyd. / Порхаўка вялізная — III
+Звездовик полевой / Geastrum campestre Morgan. / Зорачнік палявы — II
+Грифола многошляпочная / Grifola frondosa (Dicks.) Gray. / Грыфала мнагашапкавая — III
+Фомитопсис розовый / Fomitopsis rosea (Alb. et Schwein.) P. Karst. Фамітопсіс ружовы III
+Пикнопорус киноварнокрасный / Pycnoporus cinnabarinus (Jacq.) P. Karst. / Пікнапорус кінаварначырвоны — II
+Полипорус зонтичный / Polyporus umbellatus (Pers.) Fr. / Паліпорус парасонавы — II
+Систострема терковидная / Sistotrema raduloides (p. Karst.) Donk / Сістастрэма таркападобная — III
+Банкера черно-белая / Bankera fuligineoalba (J.C. Schmidt) Coker et Beers ex Pouzar. / Банкера чорна-белая — II
+Болетопсис бело-черный / Boletopsis leucomelaena (Pers.) Fayod. / Балетопсіс бела-чорны — II
+Сыроежка золотистая / Russula aurea Pers. / Сыраежка залацістая — II
+Сыроежка сардониксовая (темно-фиолетовая) / Russula sardonia Fr. Сыраежка сарданіксавая (цёмна-фіялетавая) — II
+Вольвариелла шелковистая / Volvariella bombycina (Schaeff.) Singer / Вальварыела шаўкавістая — II
+Ксилоболюс панцирный / Xylobolus frustulatus (Pers.) P. Karst. / Ксілаболус панцырны — IV
+Гиропорус каштановый (Каштановик) / Gyroporus castaneus (Bull.) Quél. / Круглакіправік каштанавы (Паддубнік) — III
+Лишайники (29)
+Калициум усыпанный / Calicium adspersum Pers. / Каліцыум абсыпаны — II
+Хенотека зеленоватая / Chaenotheca chlorella (Ach.) Müll. Arg. / Хенатэка зеленаватая — II
+Хенотека тонкая / Chaenotheca gracilenta (Ach.) Mattson & Middleb. / Хенатэка тонкая — I
+Лептогиум насыщенный / Leptogium saturninum (Dicks.) Nyl. / Ляптогіум насычаны — II
+Скитиниум лишайниковидный / Scytinium lichenoides (L.) Otalora et al. / Скыцыніум лішайнікападобны — II
+Скитиниум тонкий / Scytinium subtile (Schrad.) Otálora, P.M. Jørg. & Wedin / Скыцыніум тонкі — I
+Кладония дернистая / Cladonia caespiticia (Pers.) Flörke / Кладонія дзірваністая — I
+Кладония листоватая / Cladonia foliacea (Huds.) Willd. / Кладонія ліставатая — II
+Гипотрахина отогнутая / Hypotrachyna revoluta (Flörke) Hale / Гіпатрахіна адагнутая — III
+Монтанелия соредиозная / Montanelia sorediata (Ach.) Divakar, A. Crespo, Wedin & Essl. / Мантанэлія сарэдыёзная — III
+Менегацция пробуравленная / Menegazzia terebrata (Hoffm.) A. Massal. / Менегацыя прасвідраваная — III
+Пармелиопсис темный / Parmeliopsis hyperopta (Ach.) Vain. / Пармеліопсіс цёмны — II
+Пармотрема паклевидная / Parmotrema stuppeum (Taylor) Hale / Парматрэма пакуллепадобная / II
+Пунктелия грубоватая / Punctelia subrudecta (Nyl.) Krog / Пунктэлія грубаватая — I
+Уснея ороговевшая / Usnea ceratina Ach. / Уснея арагавелая — I
+Уснея цветущая / Usnea florida (L.) Weber ex F.H. Wigg. / Уснея квітнеючая — I
+Цетрелия цетрариевидная / Cetrelia cetrarioides (Delise) W.L. Culb. & C.F.Culb / Цэтрэлія цэтрарыепадобная — III
+Цетрелия оливковая / Cetrelia olivetorum (Nyl.) W.L. Culb. & C.F. Culb. / Цэтрэлія аліўкавая — II
+Эверния распростертая / Evernia divaricata (L.) Ach. / Эвернія распасцёртая — II
+Телотрема чешуйчатая / Thelotrema lepadinum (Ach.) Ach. / Тэлатрема лускаватая — II
+Рамалина длинноволосатая / Ramalina thrausta (Ach.) Nyl. / Рамаліна доўгавалосая — I
+Рамалина балтийская / Ramalina baltica Lettau / Рамаліна балтыйская — II
+Умбиликария обугленная / Umbilicaria deusta (L.) Baumg. / Умбілікарыя апаленая — I
+Ризокарпон географический / Rhizocarpon geographicum (L.) DC. / Рызакарпан геаграфічны — II
+Бактроспора дубовая / Bactrospora dryina (Ach.) A. Massal. / Бактраспора дубовая — II
+Лобария легочная / Lobaria pulmonaria (L.) Hoffm. / Лабарыя лёгачная — III
+Пельтигера горизонтальная / Peltigera horizontalis (Huds.) Baumg. / Пельтыгера гарызантальная — I
+Пельтигера пупырчатая / Peltigera aphthosa (L.) Willd. Пельтыгера пупырыстая — I
+Пельтигера чешуеносная / Peltigera lepidophora (Nyl.) Bitter / Пельтыгера лусканосная — I
+Сосудистые растения (189)
+Баранец обыкновенный / Huperzia selago (L.) Bernh. ex Schrank et C. Mart. s.l. / Баранец звычайны — IV
+Плаунок заливаемый / Lycopodiella inundata (L.) Holub / Дзярэзка заліўная — IV
+Полушник озёрный / Isoёtes lacustris L. s.l. (incl. I. ecshinospora Durieu) / Палушнік азёрны — II
+Хвощ большой / Equisetum telmateia Ehrh. / Хвошч вялікі — I
+Ботрипус пупавковидный / Botrypus anthemoides (C. Presl.) Val. Tikhom. / Батрыпус пупочкападобны — I
+Гроздовник простой / Botrychium simplex E. Hitchc. / Граздоўнік просты — I
+Гроздовник ромашколистный / Botrychium matricariifolium (Retz.) A.Br. ex W.D.J. Koch / Граздоўнік рамонкалісты — II
+Скипетровидник (Сцептридиум) многораздельный / Sceptridium multifidum (S.G. Gmel.) M. Nishida ex Tagawa / Скіпетрападобнік (Сцэптрыдыум)многараздзельны — III
+Чистоуст величавый (королевский) / Osmunda regalis L. / Чыставуст каралеўскі — I
+Многоножка обыкновенная / Polypodium vulgare L. / Мнаганожка звычайная — IV
+Костенец чёрный / Asplenium adiantum-nigrum L. / Касцянец чорны — I
+Многорядник Брауна / Polystichum braunii (Spenn.) Fée / Шматраднік Браўна — I
+Многорядник шиповатый / Polystichum aculeatum (L.) Roth / Шматраднік шыпаваты — I
+Сальвиния плавающая / Salvinia natans (L.) All. / Сальвінія плаваючая — IV
+Пихта белая / Abies alba Mill. / Піхта белая — I
+Кубышка малая / Nuphar pumila (Timm) DC. / Гарлачык малы — II
+Кувшинка белая / Nymphaea alba L. / Гарлачык белы — III
+Борец обыкновенный (северный) / Aconitum lycoctonum L. / Боцікі звычайныя (паўночныя) — I
+Борец шерстистоустый / Aconitum lasiostomum Reichenb. ex Bess. / Боцікі шарсцістагубыя — II
+Ветреница лесная / Anemone sylvestris L. / Кураслеп лясны — III
+Воронец европейский / Actaea europaea (Schipcz.) J. Compton / Варанец еўрапейскі I
+Живокость высокая / Delphinium elatum L. / Рагулькі высокія — II
+Купальница европейская / Trollius europaeus L. / Пярэсна еўрапейская — III
+Ломонос прямой / Clematis recta L. / Павойнік прамы — II
+Лютик (Шелковник) / Кауфмана Ranunculus kauffmannii Clerc / Казялец (Шаўкоўнік) Каўфмана — III
+Лютик (Шелковник) неукореняющийся / Ranunculus confervoides (Fr.) Fr. / Казялец (Шаўкоўнік) неўкаранёны — II
+Прострел луговой / Pulsatilla pratensis (L.) Mill. s.l. (incl. P. bohemica (Skalický) Tzvelev) / Сон лугавы — IV
+Прострел раскрытый / Pulsatilla patens (L.) Mill. s.l. / Сон раскрыты — IV
+Равноплодник василистниковый / Isopyrum thalictroides L. / Раўнаплоднік пылюшнікавы — II
+Хохлатка полая / Corydalis cava (L.) Schweigg. et Körte / Чубатка пустая — IV
+Хохлатка промежуточная / Corydalis intermedia (L.) Merat / Чубатка прамежкавая — II
+Крапива киевская / Urtica kioviensis Rogow. / Крапіва кіеўская — III
+Дуб скальный (сидячецветный) / Quercus petraea (Mattuschka) Liebl. / Дуб скальны (сядзячакветны) — II
+Береза карликовая / Betula nana L. / Бяроза карлікавая — II
+Береза низкая / Betula humilis Schrank / Бяроза нізкая — III
+Волдырник ягодный / Cucubalus baccifer L. / Пухірнік ягадны — IV
+Звездчатка толстолистная / Stellaria crassifolia Ehrh. / Зоркаўка таўсталістая — I
+Мерингия бокоцветковая / Moehringia lateriflora (L.) Fenzl / Мерынгія бакакветкавая — II
+Пустынница скальная / Eremogone saxatilis (L.) Ikonn. / Пустэльніца скальная — III
+Зверобой волосистый (жестковолосый) / Hypericum hirsutum L. / Святаяннік валасісты (жорсткавалосы) — I
+Зверобой горный / Hypericum montanum L. / Святаяннік горны — III
+Зверобой четырехкрылый / Hypericum tetrapterum Fr. / Святаяннік чатырохкрылы — I
+Повойничек водноперечный / Elatine hydropiper L. / Павойнічак воднаперцавы — II
+Фиалка высокая (горная) / Viola elatior Fr., nom. cons. / Фіялка высокая (горная) — I
+Фиалка топяная / Viola uliginosa Bess. / Фіялка багнавая — IV
+Сердечник клубненосный / Cardamine bulbifera (L.) Crantz / Сардэчнік клубняносны — IV
+Лунник оживающий / Lunaria rediviva L. / Луннік ажываючы — IV
+Ива лапландская (лопарская) / Salix lapponum L. / Вярба лапландская (лапарская) — IV
+Ива черничная / Salix myrtilloides L. / Вярба чарнічная — III
+Клюква мелкоплодная / Vaccinium microcarpum (Turcz. ex Rupr.) Schmalh. ex Busch / Журавіны дробнаплодныя — IV
+Одноцветка одноцветковая / Moneses uniflora (L.) A.Gray / Аднацветка аднакветкавая — III
+Рододендрон желтый / Rhododendron luteum Sweet / Рададэндран жоўты — III
+Волчник боровой / Daphne cneorum L. / Воўчнік баравы — I
+Молодило русское / Sempervivum ruthenicum Schnittsp. et C.B.Lehm. / Скочкі рускія — I
+Камнеломка болотная / Saxifraga hirculus L. / Каменяломнік балотны — I
+Камнеломка зернистая / Saxifraga granulata L. / Каменяломнік зярністы — III
+Альдрованда пузырчатая / Aldrovanda vesiculosa L. / Альдраванда пухіраватая — II
+Росянка промежуточная / Drosera intermedia Hayne / Расіца прамежкавая — III
+Волжанка двудомная (обыкновенная) / Aruncus dioicus (Walter) Fernald / Валжанка двухдомная (звычайная) — III
+Кизильник рыхлоцветковый (черноплодный) / Cotoneaster laxiflorus J. Jacq. ex Lindl. s.l. (incl. C. rannensis B. Hylmö et J. Fryer) / Кізільнік рыхлакветкавы (чарнаплодны) — II
+Лапчатка белая / Potentilla alba L. / Дуброўка белая — III
+Лапчаточник скальный / Drymocallis rupestris (L.) Soják / Дубровачнік скальны — I
+Морошка приземистая / Rubus chamaemorus L. / Марошка прысадзістая — II
+Горошек гороховидный / Vicia pisiformis L. / Гарошак гарохападобны — I
+Горошек зарослевый / Vicia dumetorum L. / Гарошак зараснікавы — I
+Дрок германский / Genista germanica L. / Жаўтазель германскі — IV
+Клевер красноватый / Trifolium rubens L. / Канюшына чырванаватая — II
+Остролодочник волосистый / Oxytropis pilosa (L.) DC. / Вастралодачнік валасісты — III
+Чина гладкая / Lathyrus laevigatus (Waldst. et Kit.) Gren. / Чына гладкая — III
+Чина гороховидная / Lathyrus pisiformis L. / Чына гарохападобная — II
+Чина льнолистная (горная) / Lathyrus linifolius (Reichard) Bässler / Чына льналістая (горная) — IV
+Рогульник плавающий / Trapa natans L. s.l. / Рагульнік плаваючы — IV
+Плющ обыкновенный / Hedera helix L. / Плюшч звычайны — II
+Щитолистник обыкновенный / Hydrocotyle vulgaris L. / Шчыталіснік звычайны — II
+Астранция большая / Astrantia major L. / Астранцыя вялікая — I
+Гирчовник татарский / Conioselinum tataricum Hoffm. / Гірчоўнік татарскі — II
+Гладыш широколистный / Laserpitium latifolium L. / Гладыш шыракалісты — III
+Маточник болотный / Ostericum palustre (Bess.) Bess. / Матачнік балотны — II
+Оленник Ривиниуса / Cervaria rivinii Gaertn. / Аленнік Рывініуса — III
+Поречница прямостоячая / Berula erecta (Huds.) Cov. / Парэчніца прамастаячая — IV
+Пустореберник Фишера (обнаженный) / Cenolophium fischeri (Spreng.) W.D.J. Koch / Пустарэбрышнік Фішара (аголены) — III
+Реброплодник австрийский / Pleurospermum austriacum (L.) Hoffm. / Рэбраплоднік аўстрыйскі — I
+Ленец бесприцветничковый / Thesium ebracteatum Hayne / Ядранец беспрыкветнікавы — IV
+Омела сосновая (рыхлая) / Viscum laxum Boiss. et Reut. / Амела хваёвая (рыхлая) — II
+Валериана двудомная / Valeriana dioica L. / Валер’ян двухдомны — I
+Линнея северная / Linnaea borealis L. / Лінея паўночная — III
+Скабиоза голубиная / Scabiosa columbaria L. / Скабіёза галубковая — I
+Горечавочка горьковатая / Gentianella amarella (L.) Börner s.l. (incl.G. lingulata C. Agardh; G. uliginosa (Willd.) Börner)) / Гарычкавачка гаркаватая — II
+Горечавка крестообразная / Gentiana cruciata L. / Гарычка крыжападобная — III
+Сверция многолетняя / Swertia perennis L. / Сверцыя шматгадовая — I
+Подмаренник трехцветковый / Galium triflorum Michx. / Павіліца (Маруна) трохкветкавая — I
+Ясменник красильный / Asperula tinctoria L. / Дзерачка фарбавальная — II
+Воробейник лекарственный / Lithospermum officinale L. / Верабейнік лекавы — II
+Медуница мягонькая / Pulmonaria mollis J.F. Wolff. ex Hornem. / Шчамяліца (Медуніца) мякенькая — III
+Медуница узколистная / Pulmonaria angustifolia L. / Шчамяліца (Медуніца) вузкалістая — IV
+Линдерния лежачая / Lindernia procumbens (Krock.) Philcox / Ліндэрнія ляжачая — II
+Заразиха сетчатая / Orobanche reticulata Wallr. / Заразіха сеткаватая — I
+Мытник Кауфмана / Pedicularis kaufmannii Pinzg. / Увярэднік Каўфмана — I
+Мытник лесной / Pedicularis sylvatica L. / Увярэднік лясны — II
+Мытник скипетровидный / Pedicularis sceptrumcarolinum L. / Увярэднік скіпетрападобны — II
+Жирянка обыкновенная / Pinguicula vulgaris L. / Тлушчанка звычайная — I
+Вероника ложная (ненастоящая) / Veronica spuria L. / Крынічнік несапраўдны — I
+Прибрежница одноцветковая / Littorella uniflora (L.) Aschers. / Прыбярэжнік аднакветкавы — I
+Живучка пирамидальная / Ajuga pyramidalis L. / Гарлянка пірамідальная — III
+Змееголовник Руйша / Dracocephalum ruyschiana L. / Змеегалоўнік Руйша — II
+Кадило сарматское / Melittis sarmatica Klok. / Кадзіла сармацкае — III
+Черноголовка крупноцветковая / Prunella grandiflora (L.) Turra / Чорнагалоў буйнакветкавы — III
+Шалфей луговой / Salvia pratensis L. / Шалфей лугавы — IV
+Бубенчик лилиелистный / Adenophora lilifolia (L.) A. DC. / Званок лілеялісты — II
+Колокольчик жестковолосистый (олений) / Campanula cervicaria L. / Званочак жорсткаваласісты (алені) — IV
+Колокольчик широколистный / Campanula latifolia L. / Званочак шыракалісты — IV
+Кольник черный / Phyteuma nigrum F.W. Schmidt / Кольнік чорны — I
+Лобелия Дортмана / Lobelia dortmanna L. / Лабелія Дортмана — I
+Арника горная / Arnica montana L. / Арнік (Купальнік) горны — IV
+Астра степная (ромашковая) / Aster amellus L. / Астра стэпавая (дзікая) — I
+Бодяк паннонский (венгерский) Cirsium pannonicum (L. f.) Link / Бадзяк (Чартапалох) панонскі — I
+Бодяк разнолистный / Cirsium heterophyllum (L.) Hill / Бадзяк (Чартапалох) разналісты — II
+Бодяк серый / Cirsium canum (L.) All. / Бадзяк (Чартапалох) шэры — I
+Козелец пурпуровый / Scorzonera purpurea L. / Чарнакорань пурпуровы — I
+Крестовник приречный / (сарацинский) Senecio sarracenicus L. / Старасцень прырэчны (сарацынскі) — III
+Пепельник курчавый / Tephroseris crispa (Jacq.) Rchb. / Попельнік кучаравы — I
+Пижма щитковая / Tanacetum corymbosum (L.) Sch. Bip. / Піжма шчытковая — II
+Репейник (Лопух) дубравный / Arctium nemorosum Lej. / Лопух дуброўны — II
+Скерда мягкая / Crepis mollis (Jacq.) Aschers. / Зубнік мяккі — III
+Солонечник льновидный (обыкновенный) / Galatella linosyris (L.) Rchb. f. / Саланечнік лёнападобны (звычайны) — I
+Солонечник очитколистный (русский) / Galatella sedifolia (L.) Greuter / Саланечнік расходнікалісты (рускі) — II
+Тахтаджанианта голая / Takhtajaniantha glabra (Rupr.) Chepinoga / Тахтаджаніянта голая — I
+Якобея водная / Jacobaea aquatica (Hill) G. Gaertn., B. Mey. et Scherb. / Якабея водная — I
+Гидрилла мутовчатая / Hydrilla verticillata (L. f.) Royle / Гідрыла (Вадзяніца) кальчаковая — II
+Наяда гибкая / Najas flexilis (Willd.) Rostk. et W.L.E. Schmidt / Наяда гнуткая — I
+Наяда малая / Najas minor All. Наяда малая — III
+Наяда морская (большая) / Najas marina L. s.l. (incl. N. major All.) / Наяда марская (вялікая) — IV
+Гусиный лук покрывальцевый / Gagea spathacea (Hayne) Salisb. / Гусіная цыбуля пакрывальцавая — I
+Лилия кудреватая / Lilium martagon L. / Лілея кучаравістая — IV
+Тофильдия чашечковая / Tofieldia calyculata (L.) Wahlenb. / Тафільдыя чашачкавая — I
+Лук медвежий / Allium ursinum L. / Цыбуля мядзведжая — III
+Лук скорода / Allium schoenoprasum L. / Цыбуля скарада — I
+Чемерица Лобеля / Veratrum lobelianum Bernh. / Чамярыца Лобеля III
+Касатик безлистный / Iris aphylla L. / Касач бязлісты I
+Касатик сибирский / Iris sibirica L. / Касач сібірскі IV
+Шпажник (Гладиолус) черепитчатый / Gladiolus imbricatus L. / Шпажнік (Гладыёлус) чарапіцавы — IV
+Анакамптис дремлик / Anacamptis morio (L.) R.M. Bateman, A.M. Pridgeon, M.W. Chase / Анакамптыс дрэмлік — I
+Анакамптис клопоносный / Anacamptis coriophora (L.) R.M. Bateman, A.M. Pridgeon, M.W. Chase / Анакамптыс клапаносны — II
+Бровник одноклубневый / Herminium monorchis (L.) R. Br. / Броўнік аднаклубневы — I
+Венерин башмачок настоящий / Cypripedium calceolus L. / Венерын чаравічак сапраўдны — II
+Гнездовка сердцевидная / Neottia cordata (L.) Rich. / Гняздоўнік сэрцападобны — II
+Гнездовка яйцевидная (овальная) / Neottia ovata (L.) Bluff et Fingerh. / Гняздоўнік яйцападобны (авальны) — IV
+Дремлик темно-красный / Epipactis atrorubens (Hoffm. ex Bernh.) Bess. / Гайнік цёмна-чырвоны — III
+Кокушник комарниковый (длиннорогий) / Gymnadenia conopsea (L.) R.Br. s.l. (incl. G. densiflora (Wahlenb.) A. Dietr.)) / Ядрушка камарнікавая(даўгарогая) — III
+Ладьян трехнадрезный / Corallorhiza trifida Chatel. / Ладдзян трохнадрэзаны — II
+Лосняк Лёзеля / Liparis loeselii (L.) Rich. / Ласняк Лёзеля — II
+Любка зеленоцветковая / Platanthera chlorantha (Cust.) Reichenb. / Чараўнік зеленакветкавы — IV
+Мякотница однолистная / Malaxis monophyllos (L.) Sw. / Мякатніца адналістая — II
+Надбородник безлистный / Epipogium aphyllum (F.W. Schmidt) Sw. / Надбароднік бязлісты — I
+Неотинея обожженная Neotinea ustulata (L.) R.M. Bateman, A.M. Pridgeon, M.W. Chase / Неатынэя абпаленая — I
+Офрис насекомоносная / Ophrys insectifera L. / Офрыс насякоманосны — I
+Пальчатокоренник бледножелтый / Dactylorhiza incarnata subsp. ochroleuca (Wüstnei ex Boll) P.F. Hunt et Summerh. / Пальчатакарэннік бледнажоўты — II
+Пальчатокоренник майский / Dactylorhiza majalis (Reichenb.) P.F.Hunt et Summerhayes / Пальчатакарэннік майскі — III
+Пололепестник зеленый / Coeloglossum viride (L.) C.Hartm. / Пустапялёснік зялёны — II
+Пыльцеголовник длиннолистный / Cephalanthera longifolia (L.) Fritsch / Пылкагалоўнік даўгалісты — III
+Пыльцеголовник красный / Cephalanthera rubra (L.) Rich. / Пылкагалоўнік чырвоны — III
+Хаммарбия болотная / Hammarbya paludosa (L.) O. Kuntze / Хамарбія балотная — II
+Хемипилия клобучковая / Hemipilia cucullata (L.) Y. Tang, H. Peng et T. Yukawa / Хеміпілія клабучковая — II
+Ятрышник мужской / Orchis mascula (L.) L. / Ятрышнік мужчынскі — II
+Ятрышник шлемоносный / Orchis militaris L. / Ятрышнік шлеманосны — II
+Ситник стигийский / Juncus stygius L. / Сіт стыгійскі — I
+Болотница пятицветковая / Eleocharis quinqueflora (Hartmann) O.Schwarz / Балотніца пяцікветкавая — III
+Меч-трава обыкновенная / Cladium mariscus (L.) Pohl / Меч-трава звычайная — I
+Осока болотолюбивая / Carex heleonastes Ehrh ex L. f. / Асака балоталюбівая — I
+Осока Буксбаума / Carex buxbaumii Wahlenb. / Асака Буксбаума — I
+Осока волосовидная / Carex capillaris L. / Асака воласападобная — II
+Осока Дэвелла / Carex davalliana Smith / Асака Дэвела — I
+Осока заливная / Carex paupercula Michx. / Асака заліўная — III
+Осока корневищная / Carex rhizina Blytt ex Lindbl. / Асака карэнішчавая — IV
+Осока малоцветковая / Carex pauciflora Lightf. / Асака малакветкавая — III
+Осока нитевидная (войлочная) / Carex filiformis L. / Асака ніткападобная (лямцаватая) — I
+Осока птиценожковая / Carex ornithopoda Willd. / Асака птушканожкавая — I
+Осока теневая / Carex umbrosa Host / Асака ценявая — IV
+Осока Хоста / Carex hostiana DC. Асака Хоста — I
+Пухонос альпийский / Trichophorum alpinum (L.) Pers. / Пуханос альпійскі — IV
+Пушица стройная / Eriophorum gracile W.D.J. Koch / Падвей стройны III
+Костер Бенекена / Bromus benekenii (Lange) Trimen / Каласоўнік (Касцёр) Бенякена — II
+Овсяница высокая / Festuca altissima All. / Аўсяніца (Мурожніца) высокая — IV
+Манник литовский / Glyceria lithuanica (Gorski) Gorski / Маннік літоўскі — II
+Сибирощетинник сибирский / Sibirotrisetum sibiricum (Rupr.) Barberá / Сібірашчаціннік сібірскі — II
+Цинна широколистная / Cinna latifolia (Trevir. ex Göpp.) Griseb. / Цына шыракалістая — I
+Ячменеволоснец (Хорделимус) европейский / Hordelymus europaeus (L.) Harz / Ячменеваласнец (Хардэлімус) еўрапейскі — I
+Ежеголовник злаковидный / Sparganium gramineum Georgi / Плюшчай злакападобны — I
+Ежеголовник скученный / Sparganium glomeratum (Laest. ex Beurl.) Beurl. / Плюшчай скучаны — I

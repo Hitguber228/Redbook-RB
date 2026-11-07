@@ -35,10 +35,10 @@ def start_app(is_web: bool = False):
     if is_web:
         port = 8550
         local_ip = get_local_ip()
-        print(f"🚀 Запуск «Красной книги Беларуси» в режиме Web/PWA:")
-        print(f"   💻 На этом компьютере: http://localhost:{port}")
-        print(f"   📱 На iPhone / Android в той же сети Wi-Fi: http://{local_ip}:{port}")
-        print(f"   💡 На iPhone: откройте ссылку в Safari -> нажмите «Поделиться» -> «На экран Домой»\n")
+        print(f"[WEB] Запуск «Красной книги Беларуси» в режиме Web/PWA:")
+        print(f"   [ПК] На этом компьютере: http://localhost:{port}")
+        print(f"   [СМАРТФОН] На iPhone / Android в той же сети Wi-Fi: http://{local_ip}:{port}")
+        print(f"   [ИНФО] На iPhone: откройте ссылку в Safari -> нажмите «Поделиться» -> «На экран Домой»\n")
         app_runner(
             main,
             host="0.0.0.0",
@@ -47,7 +47,7 @@ def start_app(is_web: bool = False):
             assets_dir=assets_path
         )
     else:
-        print("🌲 Запуск «Красной книги Беларуси» в десктопном режиме Windows...")
+        print("[DESKTOP] Запуск «Красной книги Беларуси» в десктопном режиме Windows...")
         app_runner(main, view=ft.AppView.FLET_APP, assets_dir=assets_path)
 
 if __name__ == "__main__":

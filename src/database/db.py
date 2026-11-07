@@ -45,7 +45,8 @@ class DatabaseManager:
                 sound_url TEXT,
                 sound_title TEXT,
                 coordinates_json TEXT,          -- JSON list of [lat, lng]
-                is_featured INTEGER DEFAULT 0
+                is_featured INTEGER DEFAULT 0,
+                biotope TEXT DEFAULT 'forest'
             )
             """)
 
@@ -100,8 +101,8 @@ class DatabaseManager:
                     description_ru, description_be, morphology, look_alike_species,
                     habitat, distribution_rb, national_parks, limiting_factors,
                     protection_measures, phenology_months, image_url, sound_url,
-                    sound_title, coordinates_json, is_featured
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    sound_title, coordinates_json, is_featured, biotope
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     s["id"],
                     s["name_ru"],
@@ -124,7 +125,8 @@ class DatabaseManager:
                     s.get("sound_url"),
                     s.get("sound_title"),
                     json.dumps(s.get("coordinates", [])),
-                    1 if s.get("is_featured") else 0
+                    1 if s.get("is_featured") else 0,
+                    s.get("biotope", "forest")
                 ))
 
             for q in INITIAL_QUIZZES_DATA:
@@ -157,6 +159,9 @@ class DatabaseManager:
         region: Optional[str] = None,
         taxon_group: Optional[str] = None,
         national_park: Optional[str] = None,
+        biotope: Optional[str] = None,
+        sort_by: str = "name_asc",
+        language: str = "ru",
         has_sound_only: bool = False,
         featured_only: bool = False
     ) -> List[Dict[str, Any]]:
@@ -178,6 +183,9 @@ class DatabaseManager:
             if taxon_group:
                 sql += " AND taxon_group = ?"
                 params.append(taxon_group)
+            if biotope:
+                sql += " AND biotope = ?"
+                params.append(biotope)
             if national_park:
                 sql += " AND national_parks LIKE ?"
                 params.append(f"%{national_park}%")
@@ -206,6 +214,17 @@ class DatabaseManager:
                 sql += " AND (LOWER(name_ru) LIKE ? OR LOWER(name_be) LIKE ? OR LOWER(name_lat) LIKE ? OR LOWER(habitat) LIKE ?)"
                 params.extend([q, q, q, q])
 
+            # Сортировка на уровне SQL
+            name_col = "name_be" if language == "be" else "name_ru"
+            if sort_by == "name_asc":
+                sql += f" ORDER BY {name_col} ASC"
+            elif sort_by == "name_desc":
+                sql += f" ORDER BY {name_col} DESC"
+            elif sort_by == "category_asc":
+                sql += f" ORDER BY category ASC, {name_col} ASC"
+            elif sort_by == "category_desc":
+                sql += f" ORDER BY category DESC, {name_col} ASC"
+
             cursor.execute(sql, params)
             rows = cursor.fetchall()
             result = []
@@ -217,6 +236,10 @@ class DatabaseManager:
                 item["coordinates"] = json.loads(item["coordinates_json"] or "[]")
                 item["is_featured"] = bool(item["is_featured"])
                 result.append(item)
+
+            if sort_by == "regions_desc":
+                result.sort(key=lambda s: len(s.get("distribution_rb", [])), reverse=True)
+
             return result
 
     def get_species_by_id(self, species_id: str) -> Optional[Dict[str, Any]]:

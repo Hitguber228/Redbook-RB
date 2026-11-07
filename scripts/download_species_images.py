@@ -33,7 +33,7 @@ headers = {
     "User-Agent": "RedBookBelarusAcademicProject/1.0 (contact: student@edu.by; educational research)"
 }
 
-print(f"🌲 Загрузка научных изображений для 19 видов в {OUTPUT_DIR}...")
+print(f"[DOWNLOAD] Загрузка научных изображений для 19 видов в {OUTPUT_DIR}...")
 
 client = httpx.Client(headers=headers, timeout=20.0, follow_redirects=True)
 
@@ -81,5 +81,5 @@ for sp_id, query in SPECIES_WIKI_MAP.items():
         print(f"⚠️ Исключение: {ex}")
 
 client.close()
-print(f"\n🎉 Успешно сохранено: {success_count}/{len(SPECIES_WIKI_MAP)} видов!")
+print(f"\n[ГОТОВО] Успешно сохранено: {success_count}/{len(SPECIES_WIKI_MAP)} видов!")
 
