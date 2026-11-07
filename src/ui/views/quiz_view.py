@@ -34,7 +34,7 @@ class QuizView(ft.Container):
                             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                             spacing=16,
                             controls=[
-                                ft.Icon(ft.Icons.EMOJI_EVENTS, size=64, bgcolor=ft.Colors.AMBER_600),
+                                ft.Icon(ft.Icons.EMOJI_EVENTS, size=64, color=ft.Colors.AMBER_600),
                                 ft.Text("ВИКТОРИНА ЗАВЕРШЕНА!" if lang == "ru" else "ВІКТАРЫНА ЗАВЯРШЫЛАСЯ!", size=20, weight=ft.FontWeight.BOLD),
                                 ft.Text(f"Ваш результат: {cert['score']} ({cert['percentage']})", size=16),
                                 ft.Container(

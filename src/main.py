@@ -122,9 +122,19 @@ class RedBookApp:
             ]
         )
 
+        centered_shell = ft.Container(
+            expand=True,
+            alignment=ft.Alignment.TOP_CENTER,
+            content=ft.Container(
+                expand=True,
+                max_width=1140,
+                content=content_view
+            )
+        )
+
         self.page.appbar = app_bar
         self.page.navigation_bar = bottom_nav
-        self.page.add(content_view)
+        self.page.add(centered_shell)
         self.page.update()
 
     def _get_active_view(self) -> ft.Control:

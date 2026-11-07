@@ -107,7 +107,7 @@ class AIScannerView(ft.Container):
                                     ft.Row(
                                         spacing=8,
                                         controls=[
-                                            ft.Icon(ft.Icons.CHECK_CIRCLE, bgcolor=ft.Colors.GREEN, size=24),
+                                            ft.Icon(ft.Icons.CHECK_CIRCLE, color=ft.Colors.GREEN, size=24),
                                             ft.Text("Результат ИИ-анализа" if lang == "ru" else "Вынік ІІ-аналізу", weight=ft.FontWeight.BOLD, size=16)
                                         ]
                                     ),
