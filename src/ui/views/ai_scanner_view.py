@@ -262,6 +262,8 @@ class AIScannerView(ft.Container):
             cat_color = get_category_color(res.get("category", "IV"))
             conf = res.get("confidence", 0.0)
             conf_percent = int(conf * 100) if conf <= 1.0 else int(conf)
+            is_uncertain = res.get("is_uncertain", False)
+            top_candidates = res.get("top_candidates", [])
 
             # Блок миниатюры фото, если было проанализировано изображение
             img_preview = None
@@ -277,97 +279,235 @@ class AIScannerView(ft.Container):
                     )
                 )
 
-            # Кандидаты k-NN
-            candidates_controls = []
-            if res.get("top_candidates") and len(res["top_candidates"]) > 1:
-                candidates_controls.append(
-                    ft.Text("Ближайшие совпадения в Красной книге (k-NN векторы):" if lang == "ru" else "Бліжэйшыя супадзенні ў Чырвонай кнізе:", size=12, weight=ft.FontWeight.BOLD)
-                )
-                for cand in res["top_candidates"][:3]:
-                    c_sim = int(cand.get("confidence", 0) * 100)
-                    candidates_controls.append(
-                        ft.Row(
-                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                            controls=[
-                                ft.Text(f"• {cand.get('name_ru', cand.get('id'))}", size=12),
-                                ft.Text(f"{c_sim}%", size=12, weight=ft.FontWeight.BOLD, color=AppColors.PRIMARY)
-                            ]
-                        )
-                    )
+            # Функция создания красивой карточки кандидата
+            def _create_candidate_card(cand: dict, is_primary_choice: bool = False):
+                c_conf = cand.get("confidence", 0.0)
+                c_pct = int(c_conf * 100) if c_conf <= 1.0 else int(c_conf)
+                c_cat_col = get_category_color(cand.get("category", "IV"))
+                name_disp = cand.get("name_be" if lang == "be" else "name_ru", cand.get("id"))
+                img_src = cand.get("image_url", "")
 
-            result_container = ft.Card(
-                elevation=3,
-                content=ft.Container(
-                    padding=16,
-                    content=ft.Column(
+                return ft.Container(
+                    padding=12,
+                    border_radius=12,
+                    bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST if not is_primary_choice else ft.Colors.SURFACE,
+                    border=ft.Border.all(1.5, AppColors.PRIMARY if is_primary_choice else ft.Colors.OUTLINE_VARIANT),
+                    shadow=ft.BoxShadow(spread_radius=1, blur_radius=4, color=ft.Colors.BLACK_12) if is_primary_choice else None,
+                    content=ft.Row(
                         spacing=12,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
                         controls=[
-                            ft.Row(
-                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            ft.Container(
+                                width=68,
+                                height=68,
+                                border_radius=10,
+                                clip_behavior=ft.ClipBehavior.HARD_EDGE,
+                                content=ft.Image(
+                                    src=img_src,
+                                    fit="cover",
+                                    error_content=ft.Container(
+                                        bgcolor=ft.Colors.SURFACE_CONTAINER_HIGH,
+                                        alignment=ft.Alignment.CENTER,
+                                        content=ft.Icon(ft.Icons.ECO, color=AppColors.PRIMARY, size=26)
+                                    )
+                                )
+                            ),
+                            ft.Column(
+                                expand=True,
+                                spacing=3,
                                 controls=[
                                     ft.Row(
-                                        spacing=8,
+                                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                         controls=[
-                                            ft.Icon(ft.Icons.CHECK_CIRCLE, color=ft.Colors.GREEN_600, size=24),
-                                            ft.Text("Результат локального ИИ-анализа" if lang == "ru" else "Вынік лакальнага ІІ-аналізу", weight=ft.FontWeight.BOLD, size=16)
+                                            ft.Text(name_disp, size=14, weight=ft.FontWeight.BOLD),
+                                            ft.Container(
+                                                padding=ft.Padding.symmetric(horizontal=8, vertical=2),
+                                                border_radius=6,
+                                                bgcolor=c_cat_col,
+                                                content=ft.Text(f"Кат. {cand.get('category', 'IV')}", size=10, color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD)
+                                            )
                                         ]
                                     ),
-                                    ft.Container(
-                                        padding=ft.Padding.symmetric(horizontal=10, vertical=4),
-                                        border_radius=20,
-                                        bgcolor=cat_color,
-                                        content=ft.Text(f"Категория {res.get('category', 'IV')}", color=ft.Colors.WHITE, size=12, weight=ft.FontWeight.BOLD)
-                                    )
+                                    ft.Text(cand.get("name_lat", ""), italic=True, size=11, color=AppColors.TEXT_MUTED_LIGHT),
+                                    ft.Row(
+                                        spacing=8,
+                                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                                        controls=[
+                                            ft.ProgressBar(
+                                                value=c_conf if c_conf <= 1.0 else c_conf/100,
+                                                color=AppColors.PRIMARY if not is_uncertain else ft.Colors.AMBER_700,
+                                                bgcolor=ft.Colors.SURFACE_CONTAINER_HIGH,
+                                                width=110,
+                                                height=6
+                                            ),
+                                            ft.Text(
+                                                f"Сходство {c_pct}%" if lang == "ru" else f"Супадзенне {c_pct}%",
+                                                size=11,
+                                                weight=ft.FontWeight.BOLD,
+                                                color=AppColors.PRIMARY if not is_uncertain else ft.Colors.AMBER_800
+                                            )
+                                        ]
+                                    ),
+                                    ft.Text(
+                                        f"Биотоп: {cand.get('habitat', '')}" if lang == "ru" else f"Біятоп: {cand.get('habitat', '')}",
+                                        size=11,
+                                        color=ft.Colors.ON_SURFACE_VARIANT,
+                                        max_lines=1,
+                                        overflow=ft.TextOverflow.ELLIPSIS
+                                    ) if cand.get("habitat") else ft.Container()
                                 ]
                             ),
-                            ft.Row(
-                                spacing=16,
-                                vertical_alignment=ft.CrossAxisAlignment.START,
-                                controls=[
-                                    ctrl for ctrl in [
-                                        img_preview,
-                                        ft.Column(
-                                            expand=True,
-                                            spacing=6,
-                                            controls=[
-                                                ft.Text(f"{res.get('name_ru', '')} ({res.get('name_lat', '')})", size=17, weight=ft.FontWeight.BOLD),
-                                                ft.ProgressBar(value=conf if conf <= 1.0 else conf/100, color=ft.Colors.GREEN_600),
-                                                ft.Row(
-                                                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                                                    controls=[
-                                                        ft.Text(f"Уверенность сходства: {conf_percent}%", size=12, color=AppColors.TEXT_MUTED_LIGHT),
-                                                        ft.Text("ONNX CPU • 100% Офлайн", size=11, color=ft.Colors.GREEN_700, weight=ft.FontWeight.BOLD)
-                                                    ]
-                                                ),
-                                                ft.Container(
-                                                    padding=10,
-                                                    border_radius=8,
-                                                    bgcolor=ft.Colors.RED_50,
-                                                    border=ft.Border.all(1, ft.Colors.RED_200),
-                                                    content=ft.Text(res.get("warning", ""), size=11, weight=ft.FontWeight.BOLD, color=ft.Colors.RED_900)
-                                                )
-                                            ]
-                                        )
-                                    ] if ctrl is not None
-                                ]
-                            ),
-                            ft.Text(f"• {res.get('distinguishing_features', '')}", size=12),
-                            ft.Text(f"• Характерный биотоп: {res.get('habitat', '')}", size=12),
-                            *candidates_controls,
-                            ft.Row(
-                                alignment=ft.MainAxisAlignment.END,
-                                controls=[
-                                    ft.FilledButton(
-                                        content=ft.Text("Открыть паспорт вида в каталоге →" if lang == "ru" else "Адкрыць пашпарт віду ў каталогу →"),
-                                        icon=ft.Icons.ARROW_FORWARD,
-                                        on_click=lambda e: self.on_select_species(res.get("species_id", ""))
-                                    )
-                                ]
+                            ft.FilledButton(
+                                content=ft.Text("Паспорт →" if lang == "ru" else "Пашпарт →"),
+                                icon=ft.Icons.ARROW_FORWARD,
+                                style=ft.ButtonStyle(
+                                    bgcolor=AppColors.PRIMARY if is_primary_choice else ft.Colors.SURFACE_CONTAINER_HIGHEST,
+                                    color=ft.Colors.WHITE if is_primary_choice else ft.Colors.ON_SURFACE
+                                ),
+                                on_click=lambda e, sid=cand["id"]: self.on_select_species(sid)
                             )
                         ]
                     )
                 )
-            )
+
+            if is_uncertain:
+                # ВАРИАНТ А: НЕЙРОСЕТЬ НЕ УВЕРЕНА — ПОКАЗЫВАЕМ НЕСКОЛЬКО ВАРИАНТОВ
+                cand_cards = [
+                    _create_candidate_card(c, is_primary_choice=(idx == 0))
+                    for idx, c in enumerate(top_candidates[:4])
+                ]
+
+                result_container = ft.Card(
+                    elevation=3,
+                    content=ft.Container(
+                        padding=16,
+                        content=ft.Column(
+                            spacing=14,
+                            controls=[
+                                ft.Row(
+                                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                    controls=[
+                                        ft.Row(
+                                            spacing=8,
+                                            controls=[
+                                                ft.Icon(ft.Icons.HELP_OUTLINE, color=ft.Colors.AMBER_800, size=24),
+                                                ft.Text(
+                                                    "Нейросеть не уверена: найдено несколько вариантов" if lang == "ru" else "Нейрасетка не ўпэўненая: знойдзена некалькі варыянтаў",
+                                                    weight=ft.FontWeight.BOLD,
+                                                    size=15,
+                                                    color=ft.Colors.AMBER_900
+                                                )
+                                            ]
+                                        ),
+                                        ft.Container(
+                                            padding=ft.Padding.symmetric(horizontal=10, vertical=4),
+                                            border_radius=12,
+                                            bgcolor=ft.Colors.AMBER_100,
+                                            border=ft.Border.all(1, ft.Colors.AMBER_400),
+                                            content=ft.Text(
+                                                "Требуется уточнение" if lang == "ru" else "Патрабуецца ўдакладненне",
+                                                color=ft.Colors.AMBER_900,
+                                                size=11,
+                                                weight=ft.FontWeight.BOLD
+                                            )
+                                        )
+                                    ]
+                                ),
+                                ft.Text(
+                                    "Признаки снимка или описания частично совпадают сразу с несколькими видами Красной книги Беларуси. Ознакомьтесь с кандидатами и выберите подходящий вид для просмотра паспорта:" if lang == "ru" else "Прыкметы здымка ці апісання падыходзяць да некалькіх відаў Чырвонай кнігі. Азнаёмцеся з кандыдатамі і абярыце адпаведны пашпарт:",
+                                    size=12,
+                                    color=ft.Colors.ON_SURFACE_VARIANT
+                                ),
+                                *([img_preview] if img_preview else []),
+                                ft.Column(spacing=8, controls=cand_cards)
+                            ]
+                        )
+                    )
+                )
+            else:
+                # ВАРИАНТ Б: ВЫСОКАЯ УВЕРЕННОСТЬ — ОТОБРАЖАЕМ ГЛАВНЫЙ ВИД + ДРУГИЕ ВАРИАНТЫ ДЛЯ СРАВНЕНИЯ
+                other_candidates = [
+                    _create_candidate_card(c, is_primary_choice=False)
+                    for c in top_candidates[1:4]
+                ]
+
+                result_container = ft.Card(
+                    elevation=3,
+                    content=ft.Container(
+                        padding=16,
+                        content=ft.Column(
+                            spacing=12,
+                            controls=[
+                                ft.Row(
+                                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                    controls=[
+                                        ft.Row(
+                                            spacing=8,
+                                            controls=[
+                                                ft.Icon(ft.Icons.CHECK_CIRCLE, color=ft.Colors.GREEN_600, size=24),
+                                                ft.Text("Вид определен с высокой уверенностью" if lang == "ru" else "Від вызначаны з высокай дакладнасцю", weight=ft.FontWeight.BOLD, size=16)
+                                            ]
+                                        ),
+                                        ft.Container(
+                                            padding=ft.Padding.symmetric(horizontal=10, vertical=4),
+                                            border_radius=20,
+                                            bgcolor=cat_color,
+                                            content=ft.Text(f"Категория {res.get('category', 'IV')}", color=ft.Colors.WHITE, size=12, weight=ft.FontWeight.BOLD)
+                                        )
+                                    ]
+                                ),
+                                ft.Row(
+                                    spacing=16,
+                                    vertical_alignment=ft.CrossAxisAlignment.START,
+                                    controls=[
+                                        ctrl for ctrl in [
+                                            img_preview,
+                                            ft.Column(
+                                                expand=True,
+                                                spacing=6,
+                                                controls=[
+                                                    ft.Text(f"{res.get('name_ru', '')} ({res.get('name_lat', '')})", size=17, weight=ft.FontWeight.BOLD),
+                                                    ft.ProgressBar(value=conf if conf <= 1.0 else conf/100, color=ft.Colors.GREEN_600),
+                                                    ft.Row(
+                                                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                                        controls=[
+                                                            ft.Text(f"Уверенность сходства: {conf_percent}%", size=12, color=AppColors.TEXT_MUTED_LIGHT),
+                                                            ft.Text("ONNX CPU • 100% Офлайн", size=11, color=ft.Colors.GREEN_700, weight=ft.FontWeight.BOLD)
+                                                        ]
+                                                    ),
+                                                    ft.Container(
+                                                        padding=10,
+                                                        border_radius=8,
+                                                        bgcolor=ft.Colors.RED_50,
+                                                        border=ft.Border.all(1, ft.Colors.RED_200),
+                                                        content=ft.Text(res.get("warning", ""), size=11, weight=ft.FontWeight.BOLD, color=ft.Colors.RED_900)
+                                                    )
+                                                ]
+                                            )
+                                        ] if ctrl is not None
+                                    ]
+                                ),
+                                ft.Text(f"• {res.get('distinguishing_features', '')}", size=12),
+                                ft.Text(f"• Характерный биотоп: {res.get('habitat', '')}", size=12),
+                                ft.Row(
+                                    alignment=ft.MainAxisAlignment.END,
+                                    controls=[
+                                        ft.FilledButton(
+                                            content=ft.Text("Открыть паспорт вида в каталоге →" if lang == "ru" else "Адкрыць пашпарт віду ў каталогу →"),
+                                            icon=ft.Icons.ARROW_FORWARD,
+                                            on_click=lambda e: self.on_select_species(res.get("species_id", ""))
+                                        )
+                                    ]
+                                ),
+                                *([
+                                    ft.Divider(height=1),
+                                    ft.Text("Другие возможные варианты для сравнения:" if lang == "ru" else "Іншыя магчымыя варыянты для параўнання:", size=13, weight=ft.FontWeight.BOLD),
+                                    ft.Column(spacing=6, controls=other_candidates)
+                                ] if other_candidates else [])
+                            ]
+                        )
+                    )
+                )
 
         return ft.ListView(
             expand=True,

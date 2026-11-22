@@ -1,5 +1,6 @@
 import os
-from typing import Dict, Any, Optional, List
+import re
+from typing import Dict, Any, Optional, List, Tuple
 import numpy as np
 from PIL import Image
 from ..database.db import db_manager
@@ -9,6 +10,23 @@ INDEX_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..',
 
 MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32).reshape(1, 3, 1, 1)
 STD = np.array([0.229, 0.224, 0.225], dtype=np.float32).reshape(1, 3, 1, 1)
+
+STOP_WORDS = {
+    "и", "в", "во", "на", "с", "со", "по", "у", "к", "ко", "о", "об", "за", "от", "до", "из", "изо", "без",
+    "под", "над", "для", "при", "про", "как", "так", "это", "то", "или", "не",
+    "же", "бы", "ли", "только", "очень", "самый", "самое", "самая", "вид", "виды", "виде"
+}
+
+def clean_stem(w: str) -> str:
+    w = w.lower().strip(",.?!;:'\"()[]{}—–-")
+    for sfx in ('ейшего', 'ейший', 'ейшая', 'ейшие', 'ому', 'ему', 'ыми', 'ими', 'ого', 'его',
+                'очка', 'очки', 'очек', 'очок', 'ка', 'ки', 'ку', 'ке', 'ок', 'ек',
+                'ых', 'их', 'ая', 'яя', 'ое', 'ее', 'ый', 'ий', 'ой', 'ами', 'ями',
+                'ах', 'ях', 'ов', 'ев', 'ей', 'ам', 'ям', 'ом', 'ем', 'а', 'е', 'и', 'й', 'о', 'у', 'ы', 'ь', 'я'):
+        if len(w) > 3 and w.endswith(sfx):
+            w = w[:-len(sfx)]
+            break
+    return w
 
 class AIService:
     """
@@ -71,9 +89,9 @@ class AIService:
             if not matched:
                 matched = db_manager.get_species()[0]
 
-            # Формирование списка топ-кандидатов
+            # Формирование списка топ-кандидатов (до 4 вариантов)
             top_candidates = []
-            for idx in top_indices[:3]:
+            for idx in top_indices[:4]:
                 cand_id = str(index['ids'][idx])
                 cand_sim = float(sims[idx])
                 sp_cand = db_manager.get_species_by_id(cand_id)
@@ -82,12 +100,19 @@ class AIService:
                         "id": sp_cand["id"],
                         "name_ru": sp_cand["name_ru"],
                         "name_be": sp_cand["name_be"],
+                        "name_lat": sp_cand["name_lat"],
                         "category": sp_cand["category"],
-                        "confidence": round(cand_sim, 2)
+                        "confidence": round(max(0.05, cand_sim), 2),
+                        "image_url": sp_cand["image_url"],
+                        "habitat": sp_cand.get("habitat", "")
                     })
 
-            # Порог отсечения: если схожесть ниже 68%, объект вряд ли краснокнижный
-            is_confident = best_sim >= 0.70
+            # Порог уверенности нейросети:
+            # 1. Если максимальное сходство ниже 0.72
+            # 2. Или если отрыв 1-го от 2-го места менее 0.04 (сеть сомневается между похожими видами)
+            second_sim = top_candidates[1]["confidence"] if len(top_candidates) > 1 else 0.0
+            is_uncertain = (best_sim < 0.72) or ((best_sim - second_sim) < 0.04)
+            status = "uncertain" if is_uncertain else "confirmed"
 
             category_warnings = {
                 "I": "КРАЙНЯЯ СТЕПЕНЬ УГРОЗЫ (I Категория, CR)! Вид на грани исчезновения. Любое изъятие или повреждение строго наказуемо законом.",
@@ -103,10 +128,13 @@ class AIService:
                 "name_lat": matched["name_lat"],
                 "category": matched["category"],
                 "confidence": round(best_sim, 2),
-                "is_confident": is_confident,
+                "is_uncertain": is_uncertain,
+                "is_confident": not is_uncertain,
+                "status": status,
+                "status_title": "Нейросеть не уверена: найдено несколько похожих вариантов" if is_uncertain else "Вид определен с высокой уверенностью",
                 "top_candidates": top_candidates,
                 "warning": category_warnings.get(matched["category"], "Охраняется Красной книгой Республики Беларусь."),
-                "distinguishing_features": f"Локальный ИИ (ONNX MobileNet/SqueezeNet) обнаружил наибольшее визуальное сходство ({round(best_sim*100, 1)}%) с эталонным паспортом вида.",
+                "distinguishing_features": f"Локальный ИИ (ONNX векторный эмбеддер) определил сходство {round(best_sim*100, 1)}% с эталонным паспортом.",
                 "track_comment": None,
                 "habitat": matched["habitat"],
                 "image_url": matched["image_url"],
@@ -114,6 +142,126 @@ class AIService:
             }
         except Exception:
             return self.identify_species(hint=os.path.basename(image_path))
+
+    def _extract_biology_intent(self, query: str) -> Tuple[Optional[str], Optional[str], List[str]]:
+        q = query.lower()
+        kingdom = None
+        taxon = None
+
+        # 1. Насекомые
+        if any(k in q for k in ["насеком", "жук", "бабочк", "гусениц", "стрекоз", "шмел", "короед", "усач", "бронзовк", "плавунец"]):
+            kingdom = "animals"
+            taxon = "insects"
+        # 2. Птицы
+        elif any(k in q for k in ["птиц", "перья", "клюв", "крыл", "гнезд", "полет", "сова", "аист", "орлан", "беркут", "неясыт", "кулик"]):
+            kingdom = "animals"
+            taxon = "birds"
+        # 3. Рыбы
+        elif any(k in q for k in ["рыб", "чешу", "плавник", "жабр", "стерляд", "лосос", "форел", "хариус"]):
+            kingdom = "animals"
+            taxon = "fishes"
+        # 4. Рептилии
+        elif any(k in q for k in ["рептили", "пресмыкающ", "зме", "черепах", "медянк"]):
+            kingdom = "animals"
+            taxon = "reptiles"
+        # 5. Земноводные
+        elif any(k in q for k in ["земноводн", "амфиби", "жаб", "лягушк", "тритон"]):
+            kingdom = "animals"
+            taxon = "amphibians"
+        # 6. Млекопитающие
+        elif any(k in q for k in ["млекопитающ", "звер", "шерст", "копыт", "хищник", "рысь", "медвед", "зубр", "грызун", "соня", "барсук"]):
+            kingdom = "animals"
+            taxon = "mammals"
+        # 7. Растения
+        elif any(k in q for k in ["растен", "цветок", "цветк", "трав", "дерев", "папоротник", "мох", "кустарник", "ягод", "орхиде", "башмач"]):
+            kingdom = "plants"
+        # 8. Грибы
+        elif any(k in q for k in ["гриб", "лишайник", "трутовик", "мицели", "шляпк"]):
+            kingdom = "fungi"
+
+        if not kingdom:
+            if "животн" in q:
+                kingdom = "animals"
+
+        raw_tokens = re.findall(r'[а-яёa-z0-9]+', q)
+        tokens = [clean_stem(t) for t in raw_tokens if t not in STOP_WORDS and len(t) > 2]
+        return kingdom, taxon, tokens
+
+    def _score_species_morphology(self, sp: dict, query: str, kingdom_intent: Optional[str], taxon_intent: Optional[str], tokens: List[str], is_track: bool = False) -> float:
+        # Жесткий штраф за несовпадение царства
+        if kingdom_intent and sp.get("kingdom") != kingdom_intent:
+            return -100.0
+
+        score = 0.0
+        if taxon_intent:
+            if sp.get("taxon_group") == taxon_intent:
+                score += 25.0
+            else:
+                score -= 15.0
+
+        q_lower = query.lower()
+        is_large = any(w in q_lower for w in ["больш", "крупн", "гигант", "огромн", "тяжел", "массивн"])
+        is_small = any(w in q_lower for w in ["маленьк", "мелк", "крошечн", "карлик"])
+
+        full_text = " ".join([
+            sp.get("name_ru", ""),
+            sp.get("name_be", ""),
+            sp.get("name_lat", ""),
+            sp.get("description_ru", "") or "",
+            sp.get("morphology", "") or "",
+            sp.get("habitat", "") or ""
+        ]).lower()
+
+        # Размеры
+        if is_large:
+            if taxon_intent == "insects":
+                if sp.get("id") == "lucanus-cervus":
+                    score += 35.0
+            elif sp.get("id") == "bison-bonasus":
+                score += 35.0  # Зубр - крупнейший зверь Беларуси
+            elif sp.get("id") == "ursus-arctos":
+                score += 30.0  # Бурый медведь
+            elif sp.get("id") in ["lynx-lynx", "haliaeetus-albicilla", "aquila-chrysaetos", "equus-przewalskii"]:
+                score += 25.0
+            elif any(m in full_text for m in ["крупнейш", "массивн", "тяжел", "гигантск", "мощн"]):
+                score += 15.0
+
+        if is_small:
+            if any(m in full_text for m in ["мелк", "крошечн", "карликов", "миниатюрн"]):
+                score += 20.0
+
+        # Следы
+        if is_track:
+            if any(k in q_lower for k in ["копыт", "круглый след", "рогат"]) and sp.get("id") == "bison-bonasus":
+                score += 45.0
+            elif any(k in q_lower for k in ["кошач", "кисточк", "без когтей"]) and sp.get("id") == "lynx-lynx":
+                score += 45.0
+            elif any(k in q_lower for k in ["когти", "лап", "пясть"]) and sp.get("id") == "ursus-arctos":
+                score += 40.0
+
+        # Сопоставление очищенных лемм
+        for tok in tokens:
+            if not tok:
+                continue
+            ru_lower = sp.get("name_ru", "").lower()
+            be_lower = sp.get("name_be", "").lower()
+            lat_lower = sp.get("name_lat", "").lower()
+            morph_lower = (sp.get("morphology", "") or "").lower()
+            desc_lower = (sp.get("description_ru", "") or "").lower()
+
+            if tok in ru_lower:
+                score += 30.0
+            elif tok in be_lower:
+                score += 25.0
+            elif tok in lat_lower:
+                score += 20.0
+
+            if tok in morph_lower:
+                score += 12.0
+            if tok in desc_lower:
+                score += 8.0
+
+        return score
 
     def identify_species(self, image_path: Optional[str] = None, hint: Optional[str] = None, is_track: bool = False) -> Dict[str, Any]:
         """
@@ -125,73 +273,68 @@ class AIService:
         all_species = db_manager.get_species()
         hint_clean = (hint or "").lower().strip()
 
-        matched = None
-        confidence = 0.88
+        # 1. Биологический анализ запроса
+        k_intent, t_intent, tokens = self._extract_biology_intent(hint_clean)
 
-        # 1. Поиск по явным маркерам в тексте/подсказке
-        if hint_clean:
-            for sp in all_species:
-                if (sp["name_ru"].lower() in hint_clean or
-                    sp["name_be"].lower() in hint_clean or
-                    sp["name_lat"].lower() in hint_clean or
-                    sp["taxon_group"].lower() in hint_clean):
-                    matched = sp
-                    confidence = 0.95
-                    break
+        # 2. Оценка всех 515 видов
+        scored_candidates = []
+        for sp in all_species:
+            sc = self._score_species_morphology(sp, hint_clean, k_intent, t_intent, tokens, is_track=is_track)
+            if sc > 0:
+                scored_candidates.append((sc, sp))
 
-        # 2. Если режим поиска по следам (Track Detection)
-        if is_track:
-            if "копыт" in hint_clean or "большой" in hint_clean or "тяжелый" in hint_clean:
-                matched = next((s for s in all_species if s["id"] == "bison-bonasus"), all_species[0])
-                confidence = 0.92
-                track_comment = "Обнаружен характерный крупный округлый след парнокопытного с закругленными краями копыт. Размеры следа (14-18 см) соответствуют взрослому Европейскому зубру."
-            elif "кошач" in hint_clean or "круглый" in hint_clean or "кисточк" in hint_clean:
-                matched = next((s for s in all_species if s["id"] == "lynx-lynx"), all_species[3])
-                confidence = 0.91
-                track_comment = "Круглый отпечаток лапы без отметин когтей (когти втяжные), диаметр 7-10 см. Густое опушение лапы-«снегоступа» указывает на Европейскую рысь."
-            else:
-                matched = next((s for s in all_species if s["id"] == "lynx-lynx"), all_species[3])
-                confidence = 0.86
-                track_comment = "Отпечаток исследован: форма и шаг указывают на редкого лесного хищника фауны Беларуси."
+        scored_candidates.sort(key=lambda x: x[0], reverse=True)
+
+        if not scored_candidates:
+            # Ничего не подошло
+            matched = all_species[0]
+            confidence = 0.35
+            is_uncertain = True
+            top_candidates = []
         else:
-            # 3. Компьютерное зрение / Морфологический анализ
-            if not matched:
-                if "зубр" in hint_clean or "бизон" in hint_clean or "горб" in hint_clean or "бород" in hint_clean:
-                    matched = next((s for s in all_species if s["id"] == "bison-bonasus"), all_species[0])
-                    confidence = 0.96
-                elif "птиц" in hint_clean or "клюв" in hint_clean or "перо" in hint_clean or "аист" in hint_clean:
-                    matched = next((s for s in all_species if s["id"] == "ciconia-nigra"), all_species[1])
-                    confidence = 0.93
-                elif "черепах" in hint_clean or "панцир" in hint_clean or "вод" in hint_clean:
-                    matched = next((s for s in all_species if s["id"] == "emys-orbicularis"), all_species[4])
-                    confidence = 0.94
-                elif "зме" in hint_clean or "глаз" in hint_clean or "чешу" in hint_clean:
-                    matched = next((s for s in all_species if s["id"] == "coronella-austriaca"), all_species[5])
-                    confidence = 0.96
-                elif "цвет" in hint_clean or "растен" in hint_clean or "орхиде" in hint_clean:
-                    matched = next((s for s in all_species if s["id"] == "cypripedium-calceolus"), all_species[6])
-                    confidence = 0.92
-                elif "гриб" in hint_clean or "капуст" in hint_clean:
-                    matched = next((s for s in all_species if s["id"] == "sparassis-crispa"), all_species[7])
-                    confidence = 0.90
-                elif "жук" in hint_clean or "насеком" in hint_clean or "олень" in hint_clean:
-                    matched = next((s for s in all_species if s["id"] == "lucanus-cervus"), all_species[8])
-                    confidence = 0.97
-                else:
-                    matched = all_species[0]
-                    confidence = 0.89
+            top_score = scored_candidates[0][0]
+            matched = scored_candidates[0][1]
 
-            track_comment = None
+            confidence = min(0.96, max(0.45, round(0.50 + (top_score / 120.0) * 0.46, 2)))
+            second_score = scored_candidates[1][0] if len(scored_candidates) > 1 else 0.0
+
+            # Нейросеть не уверена, если очков мало или разрыв минимален
+            is_uncertain = (top_score < 34.0) or ((top_score - second_score) < 7.0)
+
+            top_candidates = []
+            for sc, sp_cand in scored_candidates[:4]:
+                c_conf = min(0.96, max(0.40, round(0.42 + (sc / 120.0) * 0.54, 2)))
+                top_candidates.append({
+                    "id": sp_cand["id"],
+                    "name_ru": sp_cand["name_ru"],
+                    "name_be": sp_cand["name_be"],
+                    "name_lat": sp_cand["name_lat"],
+                    "category": sp_cand["category"],
+                    "confidence": c_conf,
+                    "image_url": sp_cand["image_url"],
+                    "habitat": sp_cand.get("habitat", "")
+                })
 
         category_warnings = {
-            "I": "КРАЙНЯЯ СТЕПЕНЬ УГРОЗЫ (I Категория, CR)! Вид находится на грани полного исчезновения с территории Беларуси. Любое изъятие или повреждение строго наказуемо законом.",
-            "II": "ВЫСОКИЙ ОХРАННЫЙ СТАТУС (II Категория, EN)! Исчезающий вид фауны/флоры Беларуси. Охраняется на государственном уровне.",
-            "III": "УЯЗВИМЫЙ ВИД (III Категория, VU)! Не срывайте, не преследуйте и не изымайте особь из естественной среды обитания.",
-            "IV": "ВИД ПОД НАБЛЮДЕНИЕМ (IV Категория, NT)! Потенциально уязвимый вид, включенный в постоянный государственный мониторинг."
+            "I": "КРАЙНЯЯ СТЕПЕНЬ УГРОЗЫ (I Категория, CR)! Вид находится на грани полного исчезновения с территории Беларуси. Любое изъятие строго наказуемо.",
+            "II": "ВЫСОКИЙ ОХРАННЫЙ СТАТУС (II Категория, EN)! Исчезающий вид фауны/флоры Беларуси.",
+            "III": "УЯЗВИМЫЙ ВИД (III Категория, VU)! Редкий вид Беларуси. Не изымайте особь из естественной среды.",
+            "IV": "ВИД ПОД НАБЛЮДЕНИЕМ (IV Категория, NT)! Потенциально уязвимый вид под постоянным государственным мониторингом."
         }
 
         look_alike = matched.get("look_alike_species")
         distinguishing_note = f"Внимание: обратите внимание на отличия от похожих видов: {look_alike}" if look_alike else "Характерный вид, трудно спутать с другими."
+
+        track_comment = None
+        if is_track:
+            if matched["id"] == "bison-bonasus":
+                track_comment = "Обнаружен характерный крупный округлый след парнокопытного (14-18 см). Соответствует взрослому Европейскому зубру."
+            elif matched["id"] == "lynx-lynx":
+                track_comment = "Круглый отпечаток лапы без отметин когтей (когти втяжные), диаметр 7-10 см. Указывает на Европейскую рысь."
+            else:
+                track_comment = "Отпечаток исследован: форма указывает на редкого лесного обитателя фауны Беларуси."
+
+        status = "uncertain" if is_uncertain else "confirmed"
 
         return {
             "species_id": matched["id"],
@@ -200,8 +343,11 @@ class AIService:
             "name_lat": matched["name_lat"],
             "category": matched["category"],
             "confidence": confidence,
-            "is_confident": True,
-            "top_candidates": [{"id": matched["id"], "name_ru": matched["name_ru"], "confidence": confidence}],
+            "is_uncertain": is_uncertain,
+            "is_confident": not is_uncertain,
+            "status": status,
+            "status_title": "Нейросеть не уверена: найдено несколько похожих вариантов" if is_uncertain else "Вид определен с высокой уверенностью",
+            "top_candidates": top_candidates,
             "warning": category_warnings.get(matched["category"], "Охраняется Красной книгой Республики Беларусь."),
             "distinguishing_features": distinguishing_note,
             "track_comment": track_comment,

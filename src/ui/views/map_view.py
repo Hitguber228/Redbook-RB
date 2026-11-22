@@ -106,7 +106,7 @@ class MapView(ft.Container):
                         ),
                         ft.FilledButton(
                             icon=ft.Icons.OPEN_IN_NEW,
-                            content=ft.Text("Открыть веб-карту Leaflet" if lang == "ru" else "Адкрыць вэб-карту Leaflet", weight=ft.FontWeight.BOLD),
+                            content=ft.Text("Открыть интерактивную ГИС-карту" if lang == "ru" else "Адкрыць інтэрактыўную ГІС-карту", weight=ft.FontWeight.BOLD),
                             style=ft.ButtonStyle(bgcolor=ft.Colors.WHITE, color=AppColors.PRIMARY),
                             on_click=lambda e: open_target("/map/index.html", self.page)
                         )
@@ -412,8 +412,8 @@ class MapView(ft.Container):
                                 ft.Row(
                                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                     controls=[
-                                        ft.Text("Картографическая подложка OpenStreetMap (Беларусь):" if lang == "ru" else "Картаграфічная падложка OpenStreetMap (Беларусь):", weight=ft.FontWeight.BOLD, size=14),
-                                        ft.Text("Координаты WGS-84", size=11, color=AppColors.TEXT_MUTED_LIGHT)
+                                        ft.Text("Геоинформационная основа Республики Беларусь:" if lang == "ru" else "Геаінфармацыйная аснова Рэспублікі Беларусь:", weight=ft.FontWeight.BOLD, size=14),
+                                        ft.Text("Спутник • Схема • WGS-84", size=11, color=AppColors.TEXT_MUTED_LIGHT)
                                     ]
                                 ),
                                 ft.Container(
@@ -432,7 +432,7 @@ class MapView(ft.Container):
                                     controls=[
                                         ft.FilledButton(
                                             icon=ft.Icons.MAP,
-                                            content=ft.Text("Открыть динамический Leaflet-слой с зумом и перемещением" if lang == "ru" else "Адкрыць дынамічны Leaflet-слой з зумам", weight=ft.FontWeight.BOLD),
+                                            content=ft.Text("Открыть динамический ГИС-слой (Спутник / Схема Яндекса)" if lang == "ru" else "Адкрыць дынамічны ГІС-слой (Спадарожнік / Схема)", weight=ft.FontWeight.BOLD),
                                             on_click=lambda e: open_target("/map/index.html", self.page)
                                         )
                                     ]

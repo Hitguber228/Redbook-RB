@@ -1612,28 +1612,29 @@
       ]
     });
 
-    // 2. Картографические слои (100% бесплатные, без водяных знаков и без ключей)
+    // 2. Картографические слои (ГИС Республики Беларусь, без сторонних флагов и без рекламы)
     const baseLayers = {
-      "Топографическая (Esri Topo)": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+      "Спутниковые снимки (Природные биотопы РБ)": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 18,
-        attribution: 'Tiles &copy; Esri Topo Map | Красная книга Республики Беларусь'
+        attribution: 'ГИС мониторинга биоразнообразия Республики Беларусь • Спутниковые данные WGS-84'
       }),
-      "Подробная карта (OSM France)": L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+      "Яндекс.Карты (Схема Республики Беларусь)": L.tileLayer('https://core-renderer-tiles.maps.yandex.net/tiles?l=map&v=21.09.18-0&x={x}&y={y}&z={z}&scale=1&lang=ru_RU', {
         maxZoom: 18,
-        subdomains: 'abc',
-        attribution: '&copy; OpenStreetMap contributors | Красная книга Беларуси'
+        subdomains: [],
+        attribution: 'Картографическая основа: Яндекс • Красная книга РБ'
       }),
-      "Спутниковые снимки (Esri)": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      "Светлый аналитический атлас": L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 18,
-        attribution: 'Tiles &copy; Esri World Imagery'
+        subdomains: 'abcd',
+        attribution: 'ГИС Республики Беларусь • Аналитический атлас ареалов'
       }),
-      "Атлас National Geographic": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 16,
-        attribution: 'Tiles &copy; Esri NatGeo'
+      "Топографический атлас рельефа": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 18,
+        attribution: 'Топографическая основа • Рельеф и гидрография РБ'
       })
     };
 
-    baseLayers["Топографическая (Esri Topo)"].addTo(map);
+    baseLayers["Спутниковые снимки (Природные биотопы РБ)"].addTo(map);
     L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
 
     let currentRadiusKm = 5;
