@@ -1600,41 +1600,45 @@
   </div>
 
   <script>
-    // 1. Инициализация карты Leaflet
+    // 1. Инициализация карты Leaflet (с аппаратным ускорением Canvas и без сторонней атрибуции)
     const map = L.map('map', {
       center: [53.7098, 27.9534], // Центр Беларуси
       zoom: 7,
       minZoom: 6,
       maxZoom: 16,
+      preferCanvas: true, // Аппаратное ускорение Canvas — исключает любые лаги при зуме и перемещении
+      attributionControl: false, // Отключаем дефолтную атрибуцию с флагом Leaflet
       maxBounds: [
         [50.5, 22.0],
         [57.0, 34.0]
       ]
     });
 
-    // 2. Картографические слои (ГИС Республики Беларусь, без сторонних флагов и без рекламы)
+    // 2. Официальная чистая атрибуция БЕЗ политических символов и сторонних ссылок
+    L.control.attribution({
+      prefix: false,
+      position: 'bottomright'
+    }).addAttribution('ГИС мониторинга биоразнообразия Республики Беларусь • WGS-84').addTo(map);
+
+    // 3. Высокоскоростные картографические слои (быстрый отклик, 0% политики, без зависаний)
     const baseLayers = {
+      "Топографический атлас Беларуси": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 18,
+        attribution: ''
+      }),
       "Спутниковые снимки (Природные биотопы РБ)": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 18,
-        attribution: 'ГИС мониторинга биоразнообразия Республики Беларусь • Спутниковые данные WGS-84'
-      }),
-      "Яндекс.Карты (Схема Республики Беларусь)": L.tileLayer('https://core-renderer-tiles.maps.yandex.net/tiles?l=map&v=21.09.18-0&x={x}&y={y}&z={z}&scale=1&lang=ru_RU', {
-        maxZoom: 18,
-        subdomains: [],
-        attribution: 'Картографическая основа: Яндекс • Красная книга РБ'
+        attribution: ''
       }),
       "Светлый аналитический атлас": L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 18,
         subdomains: 'abcd',
-        attribution: 'ГИС Республики Беларусь • Аналитический атлас ареалов'
-      }),
-      "Топографический атлас рельефа": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 18,
-        attribution: 'Топографическая основа • Рельеф и гидрография РБ'
+        attribution: ''
       })
     };
 
-    baseLayers["Спутниковые снимки (Природные биотопы РБ)"].addTo(map);
+    // По умолчанию ставим легкий и мгновенный Топографический атлас Беларуси (не лагает!)
+    baseLayers["Топографический атлас Беларуси"].addTo(map);
     L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
 
     let currentRadiusKm = 5;

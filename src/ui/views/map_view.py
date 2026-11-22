@@ -432,7 +432,7 @@ class MapView(ft.Container):
                                     controls=[
                                         ft.FilledButton(
                                             icon=ft.Icons.MAP,
-                                            content=ft.Text("Открыть динамический ГИС-слой (Спутник / Схема Яндекса)" if lang == "ru" else "Адкрыць дынамічны ГІС-слой (Спадарожнік / Схема)", weight=ft.FontWeight.BOLD),
+                                            content=ft.Text("Открыть динамический ГИС-слой (Топография / Спутник)" if lang == "ru" else "Адкрыць дынамічны ГІС-слой (Тапаграфія / Спадарожнік)", weight=ft.FontWeight.BOLD),
                                             on_click=lambda e: open_target("/map/index.html", self.page)
                                         )
                                     ]
