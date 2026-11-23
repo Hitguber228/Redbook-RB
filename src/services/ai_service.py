@@ -5,7 +5,9 @@ import numpy as np
 from PIL import Image
 from ..database.db import db_manager
 
-MODEL_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'ai', 'vision_model.onnx'))
+NEW_MODEL_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'ai', 'mobilenetv3_large.onnx'))
+OLD_MODEL_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'ai', 'vision_model.onnx'))
+MODEL_PATH = NEW_MODEL_PATH if os.path.exists(NEW_MODEL_PATH) else OLD_MODEL_PATH
 INDEX_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'ai', 'species_index.npz'))
 
 MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32).reshape(1, 3, 1, 1)
@@ -79,21 +81,46 @@ class AIService:
                 norm = np.linalg.norm(raw_out)
                 query_vec = raw_out / norm if norm > 1e-6 else raw_out
 
-            embeddings = index['embeddings'] # [N, 1000]
-            sims = np.dot(embeddings, query_vec) # Косинусное сходство [-1, 1]
             ids = list(index['ids'])
+
+            # Проверяем, содержит ли индекс мультипрототипный пул (5 прототипов на вид)
+            if 'proto_embeddings' in index and 'proto_ids' in index:
+                proto_embs = index['proto_embeddings']
+                proto_ids = list(index['proto_ids'])
+                proto_sims = np.dot(proto_embs, query_vec) # [num_protos]
+
+                # Находим максимальное сходство по всем ракурсам/прототипам каждого вида
+                species_proto_sim = {}
+                for p_idx, p_id in enumerate(proto_ids):
+                    s = float(proto_sims[p_idx])
+                    if p_id not in species_proto_sim or s > species_proto_sim[p_id]:
+                        species_proto_sim[p_id] = s
+
+                centroids = index['embeddings']
+                centroid_sims = np.dot(centroids, query_vec)
+
+                sims_dict = {}
+                for idx_sp, sp_id in enumerate(ids):
+                    p_sim = species_proto_sim.get(sp_id, float(centroid_sims[idx_sp]))
+                    c_sim = float(centroid_sims[idx_sp])
+                    # Взвешенное сочетание лучшего ракурса (75%) и центроида (25%)
+                    sims_dict[sp_id] = 0.75 * p_sim + 0.25 * c_sim
+            else:
+                embeddings = index['embeddings']
+                sims_raw = np.dot(embeddings, query_vec)
+                sims_dict = {sp_id: float(sims_raw[i]) for i, sp_id in enumerate(ids)}
 
             hint_clean = (hint or "").strip()
             k_intent, t_intent, tokens = self._extract_biology_intent(hint_clean) if hint_clean else (None, None, [])
 
             # Мультимодальная гибридная оценка всех видов
             scored_candidates = []
-            for idx_sp, sp_id in enumerate(ids):
+            for sp_id in ids:
                 sp = db_manager.get_species_by_id(sp_id)
                 if not sp:
                     continue
 
-                vis_sim = float(sims[idx_sp])
+                vis_sim = float(sims_dict.get(sp_id, 0.0))
                 final_score = vis_sim
 
                 # Жесткая или мягкая таксономическая фильтрация
@@ -134,8 +161,12 @@ class AIService:
                 if hint_clean:
                     c_conf = min(0.98, max(0.40, round(0.50 + (cand["score"] / 1.5) * 0.48, 2)))
                 else:
-                    # Разворачиваем узкий диапазон косинусного сходства ImageNet (0.88 - 0.97)
-                    c_conf = min(0.96, max(0.45, round(0.50 + max(0.0, (raw_s - 0.88)) / 0.09 * 0.46, 2)))
+                    if raw_s > 0.60:
+                        # Диапазон SqueezeNet (0.88 - 0.97)
+                        c_conf = min(0.96, max(0.45, round(0.50 + max(0.0, (raw_s - 0.88)) / 0.09 * 0.46, 2)))
+                    else:
+                        # Новый диапазон MobileNetV3 (0.20 - 0.36)
+                        c_conf = min(0.96, max(0.45, round(0.50 + max(0.0, (raw_s - 0.20)) / 0.16 * 0.46, 2)))
 
                 top_candidates.append({
                     "id": sp_cand["id"],
