@@ -6,15 +6,19 @@ def test_quiz_service_initialization():
     assert len(quizzes) >= 6, "Должно быть загружено минимум 6 образовательных викторин"
 
 def test_quiz_check_answer_correct():
-    # Проверка правильного ответа на 1-й вопрос
     quiz_service.reset_score()
-    res = quiz_service.check_answer(quiz_id=1, selected_index=0, language="ru")
+    all_q = quiz_service.get_all_quizzes()
+    target = all_q[0]
+    res = quiz_service.check_answer(quiz_id=target["id"], selected_index=target["correct_index"], language="ru")
     assert res["is_correct"] is True
     assert quiz_service.current_score == 1
 
 def test_quiz_check_answer_incorrect():
     quiz_service.reset_score()
-    res = quiz_service.check_answer(quiz_id=1, selected_index=3, language="ru")
+    all_q = quiz_service.get_all_quizzes()
+    target = all_q[0]
+    wrong_index = (target["correct_index"] + 1) % len(target["options_ru"])
+    res = quiz_service.check_answer(quiz_id=target["id"], selected_index=wrong_index, language="ru")
     assert res["is_correct"] is False
     assert quiz_service.current_score == 0
 
@@ -86,4 +90,9 @@ def test_full_quiz_session():
         view._handle_action_btn(None) # next question or finish
     assert view.view_state == "certificate"
     assert view.content is not None
+
+def test_quiz_session_options_shuffled():
+    session_q = quiz_service.start_session("tournament", limit=10)
+    indices = [q["correct_index"] for q in session_q]
+    assert len(set(indices)) > 1, f"Indices should be distributed, got {indices}"
 

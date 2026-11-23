@@ -79,7 +79,29 @@ class QuizService:
         # Перемешивание вопросов для разнообразия каждого прохождения
         shuffled = list(all_q)
         random.shuffle(shuffled)
-        self.session_quizzes = shuffled[:limit]
+        selected = shuffled[:limit]
+
+        # Динамическое перемешивание вариантов ответов (A, B, C, D) для каждого запуска
+        session_list = []
+        for q in selected:
+            q_copy = dict(q)
+            opts_ru = list(q["options_ru"])
+            opts_be = list(q["options_be"])
+            corr_idx = q["correct_index"]
+
+            paired = []
+            for i in range(len(opts_ru)):
+                ru_val = opts_ru[i]
+                be_val = opts_be[i] if i < len(opts_be) else ru_val
+                paired.append((ru_val, be_val, (i == corr_idx)))
+
+            random.shuffle(paired)
+            q_copy["options_ru"] = [p[0] for p in paired]
+            q_copy["options_be"] = [p[1] for p in paired]
+            q_copy["correct_index"] = next(i for i, p in enumerate(paired) if p[2])
+            session_list.append(q_copy)
+
+        self.session_quizzes = session_list
         return self.session_quizzes
 
     def get_all_quizzes(self, quiz_type: Optional[str] = None) -> List[Dict[str, Any]]:
