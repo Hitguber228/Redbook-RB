@@ -40,3 +40,23 @@ def test_clipboard_image_format_support():
     finally:
         if os.path.exists(test_img_path):
             os.remove(test_img_path)
+
+def test_identify_by_image_with_hybrid_hint():
+    import os
+    img_path = os.path.abspath("assets/images/species/bison-bonasus.jpg")
+    res = ai_service.identify_species(image_path=img_path, hint="зубр")
+    assert res is not None
+    assert res["species_id"] == "bison-bonasus"
+    assert res["confidence"] >= 0.85
+
+def test_identify_by_image_with_taxon_filter():
+    import os
+    img_path = os.path.abspath("assets/images/species/bison-bonasus.jpg")
+    res = ai_service.identify_species(image_path=img_path, taxon_filter="mammals")
+    assert res is not None
+    assert res["species_id"] == "bison-bonasus"
+    # Verify candidates are mammals
+    from src.database.db import db_manager
+    for cand in res["top_candidates"]:
+        sp = db_manager.get_species_by_id(cand["id"])
+        assert sp["taxon_group"] == "mammals"

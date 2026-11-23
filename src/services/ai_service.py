@@ -58,16 +58,17 @@ class AIService:
                 self._index = None
         return self._index
 
-    def identify_by_image(self, image_path: str) -> Dict[str, Any]:
+    def identify_by_image(self, image_path: str, hint: Optional[str] = None, taxon_filter: Optional[str] = None) -> Dict[str, Any]:
         """
         Локальное распознавание фотографии через векторный эмбеддер ONNX.
-        Работает офлайн за 5 миллисекунд.
+        Поддерживает мультимодальное уточнение (фото + морфологические признаки или таксон).
+        Работает офлайн за доли секунды.
         """
         session = self._get_vision_session()
         index = self._get_vector_index()
 
         if not session or not index or not os.path.exists(image_path):
-            return self.identify_species(hint=os.path.basename(image_path))
+            return self.identify_species(hint=hint or os.path.basename(image_path), taxon_filter=taxon_filter)
 
         try:
             with Image.open(image_path) as img:
@@ -80,38 +81,80 @@ class AIService:
 
             embeddings = index['embeddings'] # [N, 1000]
             sims = np.dot(embeddings, query_vec) # Косинусное сходство [-1, 1]
-            top_indices = np.argsort(sims)[::-1][:5]
-            best_idx = top_indices[0]
-            best_sim = float(sims[best_idx])
-            best_id = str(index['ids'][best_idx])
+            ids = list(index['ids'])
 
-            matched = db_manager.get_species_by_id(best_id)
-            if not matched:
-                matched = db_manager.get_species()[0]
+            hint_clean = (hint or "").strip()
+            k_intent, t_intent, tokens = self._extract_biology_intent(hint_clean) if hint_clean else (None, None, [])
 
-            # Формирование списка топ-кандидатов (до 4 вариантов)
+            # Мультимодальная гибридная оценка всех видов
+            scored_candidates = []
+            for idx_sp, sp_id in enumerate(ids):
+                sp = db_manager.get_species_by_id(sp_id)
+                if not sp:
+                    continue
+
+                vis_sim = float(sims[idx_sp])
+                final_score = vis_sim
+
+                # Жесткая или мягкая таксономическая фильтрация
+                if taxon_filter and taxon_filter != "all":
+                    sp_taxon = sp.get("taxon_group")
+                    sp_kingdom = sp.get("kingdom")
+                    if taxon_filter in ["mammals", "birds", "insects", "reptiles", "amphibians", "fishes"]:
+                        if sp_taxon != taxon_filter:
+                            final_score -= 1.0 # Отсекаем нерелевантные таксоны
+                    elif taxon_filter in ["plants", "fungi"]:
+                        if sp_kingdom != taxon_filter:
+                            final_score -= 1.0
+
+                # Учет текстовой подсказки пользователя
+                if hint_clean:
+                    morph_sc = self._score_species_morphology(sp, hint_clean, k_intent, t_intent, tokens)
+                    final_score += (morph_sc / 50.0) * 0.40
+
+                scored_candidates.append({
+                    "score": final_score,
+                    "vis_sim": vis_sim,
+                    "species": sp
+                })
+
+            scored_candidates.sort(key=lambda x: x["score"], reverse=True)
+
+            best_item = scored_candidates[0]
+            matched = best_item["species"]
+            best_sim = best_item["vis_sim"]
+            best_score = best_item["score"]
+
+            # Формирование списка топ-кандидатов (до 4 вариантов) с дифференцированной уверенностью
             top_candidates = []
-            for idx in top_indices[:4]:
-                cand_id = str(index['ids'][idx])
-                cand_sim = float(sims[idx])
-                sp_cand = db_manager.get_species_by_id(cand_id)
-                if sp_cand:
-                    top_candidates.append({
-                        "id": sp_cand["id"],
-                        "name_ru": sp_cand["name_ru"],
-                        "name_be": sp_cand["name_be"],
-                        "name_lat": sp_cand["name_lat"],
-                        "category": sp_cand["category"],
-                        "confidence": round(max(0.05, cand_sim), 2),
-                        "image_url": sp_cand["image_url"],
-                        "habitat": sp_cand.get("habitat", "")
-                    })
+            for cand in scored_candidates[:4]:
+                sp_cand = cand["species"]
+                raw_s = cand["vis_sim"]
+                # Масштабирование уверенности для наглядного UI
+                if hint_clean:
+                    c_conf = min(0.98, max(0.40, round(0.50 + (cand["score"] / 1.5) * 0.48, 2)))
+                else:
+                    # Разворачиваем узкий диапазон косинусного сходства ImageNet (0.88 - 0.97)
+                    c_conf = min(0.96, max(0.45, round(0.50 + max(0.0, (raw_s - 0.88)) / 0.09 * 0.46, 2)))
+
+                top_candidates.append({
+                    "id": sp_cand["id"],
+                    "name_ru": sp_cand["name_ru"],
+                    "name_be": sp_cand["name_be"],
+                    "name_lat": sp_cand["name_lat"],
+                    "category": sp_cand["category"],
+                    "confidence": c_conf,
+                    "image_url": sp_cand["image_url"],
+                    "habitat": sp_cand.get("habitat", "")
+                })
+
+            primary_conf = top_candidates[0]["confidence"] if top_candidates else 0.50
+            second_conf = top_candidates[1]["confidence"] if len(top_candidates) > 1 else 0.0
 
             # Порог уверенности нейросети:
-            # 1. Если максимальное сходство ниже 0.72
+            # 1. Если максимальное сходство ниже 0.70
             # 2. Или если отрыв 1-го от 2-го места менее 0.04 (сеть сомневается между похожими видами)
-            second_sim = top_candidates[1]["confidence"] if len(top_candidates) > 1 else 0.0
-            is_uncertain = (best_sim < 0.72) or ((best_sim - second_sim) < 0.04)
+            is_uncertain = (primary_conf < 0.70) or ((primary_conf - second_conf) < 0.04)
             status = "uncertain" if is_uncertain else "confirmed"
 
             category_warnings = {
@@ -121,27 +164,31 @@ class AIService:
                 "IV": "ВИД ПОД НАБЛЮДЕНИЕМ (IV Категория, NT)! Потенциально уязвимый вид, включенный в постоянный мониторинг."
             }
 
+            features_desc = f"Локальный ИИ определил сходство {int(primary_conf * 100)}% по ключевым визуальным признакам."
+            if hint_clean:
+                features_desc += f" Учтены морфологические признаки: '{hint_clean}'."
+
             return {
                 "species_id": matched["id"],
                 "name_ru": matched["name_ru"],
                 "name_be": matched["name_be"],
                 "name_lat": matched["name_lat"],
                 "category": matched["category"],
-                "confidence": round(best_sim, 2),
+                "confidence": primary_conf,
                 "is_uncertain": is_uncertain,
                 "is_confident": not is_uncertain,
                 "status": status,
                 "status_title": "Нейросеть не уверена: найдено несколько похожих вариантов" if is_uncertain else "Вид определен с высокой уверенностью",
                 "top_candidates": top_candidates,
                 "warning": category_warnings.get(matched["category"], "Охраняется Красной книгой Республики Беларусь."),
-                "distinguishing_features": f"Локальный ИИ (ONNX векторный эмбеддер) определил сходство {round(best_sim*100, 1)}% с эталонным паспортом.",
+                "distinguishing_features": features_desc,
                 "track_comment": None,
                 "habitat": matched["habitat"],
                 "image_url": matched["image_url"],
                 "analyzed_image_path": image_path
             }
         except Exception:
-            return self.identify_species(hint=os.path.basename(image_path))
+            return self.identify_species(hint=hint or os.path.basename(image_path), taxon_filter=taxon_filter)
 
     def _extract_biology_intent(self, query: str) -> Tuple[Optional[str], Optional[str], List[str]]:
         q = query.lower()
@@ -263,12 +310,12 @@ class AIService:
 
         return score
 
-    def identify_species(self, image_path: Optional[str] = None, hint: Optional[str] = None, is_track: bool = False) -> Dict[str, Any]:
+    def identify_species(self, image_path: Optional[str] = None, hint: Optional[str] = None, taxon_filter: Optional[str] = None, is_track: bool = False) -> Dict[str, Any]:
         """
         Идентификация вида по фото через локальный ИИ, либо по текстовым признакам / следам.
         """
         if image_path and os.path.exists(image_path):
-            return self.identify_by_image(image_path)
+            return self.identify_by_image(image_path, hint=hint, taxon_filter=taxon_filter)
 
         all_species = db_manager.get_species()
         hint_clean = (hint or "").lower().strip()

@@ -16,6 +16,10 @@ class AIScannerView(ft.Container):
         self.chat_messages = []
         self.is_track_mode = False
         self.analyzed_image: Optional[str] = None
+        self.analyzed_image_data_uri: Optional[str] = None
+        self.selected_taxon: str = "all"
+        self.current_hint: str = ""
+        self.refine_field: Optional[ft.TextField] = None
         self.status_banner: Optional[tuple[str, str]] = None # (type: 'success' | 'warning' | 'error', text)
 
         self.file_picker = file_picker if file_picker is not None else ft.FilePicker()
@@ -148,10 +152,31 @@ class AIScannerView(ft.Container):
 
     def _clear_analysis(self, e=None):
         self.analyzed_image = None
+        self.analyzed_image_data_uri = None
         self.scanner_result = None
         self.status_banner = None
+        self.selected_taxon = "all"
+        self.current_hint = ""
+        if hasattr(self, "input_field") and self.input_field:
+            self.input_field.value = ""
+        if hasattr(self, "refine_field") and self.refine_field:
+            self.refine_field.value = ""
         self._build_ui()
         self.update()
+
+    def _on_taxon_chip_click(self, taxon_key: str):
+        self.selected_taxon = taxon_key
+        if self.analyzed_image:
+            self._run_image_analysis(self.analyzed_image, hint=self.current_hint or None, taxon_filter=self.selected_taxon)
+        else:
+            self._build_ui()
+            self.update()
+
+    def _on_refine_submit(self):
+        val = self.refine_field.value.strip() if self.refine_field and self.refine_field.value else ""
+        self.current_hint = val
+        if self.analyzed_image:
+            self._run_image_analysis(self.analyzed_image, hint=self.current_hint or None, taxon_filter=self.selected_taxon)
 
     def _build_ui(self):
         lang = self.get_language()
@@ -245,64 +270,216 @@ class AIScannerView(ft.Container):
             )
 
         # Чистый и современный Hero-блок загрузки фотографий
-        upload_card = ft.Card(
-            elevation=1,
-            content=ft.Container(
-                padding=20,
-                border_radius=16,
-                border=ft.Border.all(1.5, AppColors.PRIMARY),
-                bgcolor=ft.Colors.SURFACE_CONTAINER_LOW,
-                content=ft.Column(
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    spacing=14,
-                    controls=[
-                        ft.Icon(ft.Icons.ADD_A_PHOTO_ROUNDED, size=46, color=AppColors.PRIMARY),
-                        ft.Column(
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                            spacing=3,
-                            controls=[
-                                ft.Text(
-                                    "Загрузить фото для ИИ-распознавания" if lang == "ru" else "Загрузіць фота для ІІ-распазнавання",
-                                    size=16,
-                                    weight=ft.FontWeight.BOLD,
-                                    text_align=ft.TextAlign.CENTER
-                                ),
-                                ft.Text(
-                                    "Выберите снимок из галереи, сделайте фото камерой или нажмите Ctrl+V" if lang == "ru" else "Абярыце здымак з галерэі, зрабіце фота ці націсніце Ctrl+V",
-                                    size=12,
-                                    color=ft.Colors.ON_SURFACE_VARIANT,
-                                    text_align=ft.TextAlign.CENTER
-                                )
-                            ]
+        if self.analyzed_image_data_uri:
+            # СОСТОЯНИЕ А: ФОТОГРАФИЯ ЗАГРУЖЕНА - отображаем превью прямо в этом блоке с кнопками управления
+            taxon_options = [
+                ("all", "Все виды" if lang == "ru" else "Усе віды"),
+                ("mammals", "Звери" if lang == "ru" else "Звяры"),
+                ("birds", "Птицы" if lang == "ru" else "Птушкі"),
+                ("insects", "Насекомые" if lang == "ru" else "Насякомыя"),
+                ("plants", "Растения" if lang == "ru" else "Расліны"),
+                ("fungi", "Грибы" if lang == "ru" else "Грыбы"),
+            ]
+
+            taxon_chips = []
+            for t_key, t_label in taxon_options:
+                is_selected = (self.selected_taxon == t_key)
+                taxon_chips.append(
+                    ft.Container(
+                        padding=ft.Padding.symmetric(horizontal=12, vertical=6),
+                        border_radius=20,
+                        bgcolor=AppColors.PRIMARY if is_selected else ft.Colors.SURFACE_CONTAINER_HIGHEST,
+                        border=ft.Border.all(1, AppColors.PRIMARY if is_selected else ft.Colors.OUTLINE_VARIANT),
+                        content=ft.Text(
+                            t_label,
+                            size=12,
+                            weight=ft.FontWeight.BOLD if is_selected else ft.FontWeight.NORMAL,
+                            color=ft.Colors.WHITE if is_selected else ft.Colors.ON_SURFACE
                         ),
-                        ft.Row(
-                            wrap=True,
-                            alignment=ft.MainAxisAlignment.CENTER,
-                            spacing=10,
-                            run_spacing=10,
-                            controls=[
-                                ft.FilledButton(
-                                    content=ft.Text("Выбрать файл / Галерея" if lang == "ru" else "Выбраць файл / Галерэя"),
-                                    icon=ft.Icons.PHOTO_LIBRARY,
-                                    style=ft.ButtonStyle(bgcolor=AppColors.PRIMARY, color=ft.Colors.WHITE),
-                                    on_click=self._open_file_dialog
-                                ),
-                                ft.OutlinedButton(
-                                    content=ft.Text("Сделать снимок (Камера)" if lang == "ru" else "Зрабіць здымак (Камера)"),
-                                    icon=ft.Icons.PHOTO_CAMERA,
-                                    on_click=self._open_camera_capture
-                                ),
-                                ft.FilledTonalButton(
-                                    content=ft.Text("Вставить из буфера (Ctrl+V)" if lang == "ru" else "Уставіць з буфера (Ctrl+V)"),
-                                    icon=ft.Icons.CONTENT_PASTE,
-                                    on_click=self._paste_from_clipboard
+                        on_click=lambda e, k=t_key: self._on_taxon_chip_click(k),
+                        ink=True
+                    )
+                )
+
+            self.refine_field = ft.TextField(
+                hint_text="Уточнить признаки (напр. 'соня', 'черная маска', 'в дупле')..." if lang == "ru" else "Удакладніць прыкметы (напр. 'соня', 'чорная маска')...",
+                value=self.current_hint or "",
+                prefix_icon=ft.Icons.AUTO_AWESOME,
+                dense=True,
+                border_radius=10,
+                expand=True,
+                on_submit=lambda e: self._on_refine_submit()
+            )
+
+            upload_card = ft.Card(
+                elevation=2,
+                content=ft.Container(
+                    padding=18,
+                    border_radius=16,
+                    border=ft.Border.all(1.5, AppColors.PRIMARY),
+                    bgcolor=ft.Colors.SURFACE_CONTAINER_LOW,
+                    content=ft.Column(
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        spacing=14,
+                        controls=[
+                            ft.Row(
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                controls=[
+                                    ft.Row(
+                                        spacing=8,
+                                        controls=[
+                                            ft.Icon(ft.Icons.CHECK_CIRCLE, color=ft.Colors.GREEN_600, size=20),
+                                            ft.Text(
+                                                "Фотография загружена для анализа" if lang == "ru" else "Фотаздымак загружаны для аналізу",
+                                                weight=ft.FontWeight.BOLD,
+                                                size=14,
+                                                color=ft.Colors.GREEN_800
+                                            )
+                                        ]
+                                    ),
+                                    ft.Container(
+                                        padding=ft.Padding.symmetric(horizontal=8, vertical=3),
+                                        border_radius=12,
+                                        bgcolor=ft.Colors.GREEN_100,
+                                        content=ft.Text("Готово к поиску" if lang == "ru" else "Гатова да пошуку", size=11, color=ft.Colors.GREEN_900, weight=ft.FontWeight.BOLD)
+                                    )
+                                ]
+                            ),
+                            # Само изображение внутри красивой адаптивной рамки
+                            ft.Container(
+                                border_radius=12,
+                                clip_behavior=ft.ClipBehavior.HARD_EDGE,
+                                border=ft.Border.all(1, ft.Colors.OUTLINE_VARIANT),
+                                bgcolor=ft.Colors.SURFACE_CONTAINER_HIGH,
+                                alignment=ft.Alignment.CENTER,
+                                content=ft.Image(
+                                    src=self.analyzed_image_data_uri,
+                                    height=220,
+                                    fit="contain"
                                 )
-                            ]
-                        )
-                    ]
+                            ),
+                            # Кнопки действий прямо под фото
+                            ft.Row(
+                                wrap=True,
+                                alignment=ft.MainAxisAlignment.CENTER,
+                                spacing=10,
+                                run_spacing=8,
+                                controls=[
+                                    ft.FilledButton(
+                                        content=ft.Text("Заменить фото" if lang == "ru" else "Замяніць фота"),
+                                        icon=ft.Icons.PHOTO_LIBRARY,
+                                        style=ft.ButtonStyle(bgcolor=AppColors.PRIMARY, color=ft.Colors.WHITE),
+                                        on_click=self._open_file_dialog
+                                    ),
+                                    ft.FilledTonalButton(
+                                        content=ft.Text("Вставить другое (Ctrl+V)" if lang == "ru" else "Уставіць іншае (Ctrl+V)"),
+                                        icon=ft.Icons.CONTENT_PASTE,
+                                        on_click=self._paste_from_clipboard
+                                    ),
+                                    ft.OutlinedButton(
+                                        content=ft.Text("Камера" if lang == "ru" else "Камера"),
+                                        icon=ft.Icons.PHOTO_CAMERA,
+                                        on_click=self._open_camera_capture
+                                    ),
+                                    ft.TextButton(
+                                        content=ft.Text("Очистить" if lang == "ru" else "Ачысціць"),
+                                        icon=ft.Icons.DELETE_OUTLINE,
+                                        style=ft.ButtonStyle(color=ft.Colors.RED_700),
+                                        on_click=self._clear_analysis
+                                    )
+                                ]
+                            ),
+                            # Разделитель и блок уточнения признаков для максимальной точности
+                            ft.Divider(height=1),
+                            ft.Column(
+                                spacing=8,
+                                horizontal_alignment=ft.CrossAxisAlignment.START,
+                                controls=[
+                                    ft.Text(
+                                        "Уточнить категорию или признаки для максимальной точности:" if lang == "ru" else "Удакладніць катэгорыю ці прыкметы:",
+                                        size=12,
+                                        weight=ft.FontWeight.BOLD,
+                                        color=ft.Colors.ON_SURFACE_VARIANT
+                                    ),
+                                    ft.Row(wrap=True, spacing=6, run_spacing=6, controls=taxon_chips),
+                                    ft.Row(
+                                        spacing=8,
+                                        controls=[
+                                            self.refine_field,
+                                            ft.FilledButton(
+                                                content=ft.Text("Уточнить" if lang == "ru" else "Удакладніць"),
+                                                icon=ft.Icons.SEARCH,
+                                                style=ft.ButtonStyle(bgcolor=AppColors.PRIMARY, color=ft.Colors.WHITE),
+                                                on_click=lambda e: self._on_refine_submit()
+                                            )
+                                        ]
+                                    )
+                                ]
+                            )
+                        ]
+                    )
                 )
             )
-        )
+        else:
+            # СОСТОЯНИЕ Б: ПЕРВИЧНАЯ ЗАГРУЗКА
+            upload_card = ft.Card(
+                elevation=1,
+                content=ft.Container(
+                    padding=20,
+                    border_radius=16,
+                    border=ft.Border.all(1.5, AppColors.PRIMARY),
+                    bgcolor=ft.Colors.SURFACE_CONTAINER_LOW,
+                    content=ft.Column(
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        spacing=14,
+                        controls=[
+                            ft.Icon(ft.Icons.ADD_A_PHOTO_ROUNDED, size=46, color=AppColors.PRIMARY),
+                            ft.Column(
+                                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                spacing=3,
+                                controls=[
+                                    ft.Text(
+                                        "Загрузить фото для ИИ-распознавания" if lang == "ru" else "Загрузіць фота для ІІ-распазнавання",
+                                        size=16,
+                                        weight=ft.FontWeight.BOLD,
+                                        text_align=ft.TextAlign.CENTER
+                                    ),
+                                    ft.Text(
+                                        "Выберите снимок из галереи, сделайте фото камерой или нажмите Ctrl+V" if lang == "ru" else "Абярыце здымак з галерэі, зрабіце фота ці націсніце Ctrl+V",
+                                        size=12,
+                                        color=ft.Colors.ON_SURFACE_VARIANT,
+                                        text_align=ft.TextAlign.CENTER
+                                    )
+                                ]
+                            ),
+                            ft.Row(
+                                wrap=True,
+                                alignment=ft.MainAxisAlignment.CENTER,
+                                spacing=10,
+                                run_spacing=10,
+                                controls=[
+                                    ft.FilledButton(
+                                        content=ft.Text("Выбрать файл / Галерея" if lang == "ru" else "Выбраць файл / Галерэя"),
+                                        icon=ft.Icons.PHOTO_LIBRARY,
+                                        style=ft.ButtonStyle(bgcolor=AppColors.PRIMARY, color=ft.Colors.WHITE),
+                                        on_click=self._open_file_dialog
+                                    ),
+                                    ft.OutlinedButton(
+                                        content=ft.Text("Сделать снимок (Камера)" if lang == "ru" else "Зрабіць здымак (Камера)"),
+                                        icon=ft.Icons.PHOTO_CAMERA,
+                                        on_click=self._open_camera_capture
+                                    ),
+                                    ft.FilledTonalButton(
+                                        content=ft.Text("Вставить из буфера (Ctrl+V)" if lang == "ru" else "Уставіць з буфера (Ctrl+V)"),
+                                        icon=ft.Icons.CONTENT_PASTE,
+                                        on_click=self._paste_from_clipboard
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                )
+            )
 
         result_container = ft.Container()
         if self.scanner_result:
@@ -312,36 +489,6 @@ class AIScannerView(ft.Container):
             conf_percent = int(conf * 100) if conf <= 1.0 else int(conf)
             is_uncertain = res.get("is_uncertain", False)
             top_candidates = res.get("top_candidates", [])
-
-            # Блок предпросмотра загруженного пользователем изображения
-            img_preview = None
-            if self.analyzed_image and os.path.exists(self.analyzed_image):
-                img_preview = ft.Container(
-                    border_radius=12,
-                    clip_behavior=ft.ClipBehavior.HARD_EDGE,
-                    content=ft.Stack(
-                        controls=[
-                            ft.Image(
-                                src=self.analyzed_image,
-                                height=160,
-                                width=240,
-                                fit="cover"
-                            ),
-                            ft.Container(
-                                top=6,
-                                right=6,
-                                content=ft.IconButton(
-                                    icon=ft.Icons.CLOSE,
-                                    bgcolor=ft.Colors.BLACK_54,
-                                    icon_color=ft.Colors.WHITE,
-                                    icon_size=16,
-                                    tooltip="Очистить снимок",
-                                    on_click=self._clear_analysis
-                                )
-                            )
-                        ]
-                    )
-                )
 
             # Функция создания интерактивной карточки вида-кандидата
             def _create_candidate_card(cand: dict, is_primary_choice: bool = False):
@@ -482,7 +629,6 @@ class AIScannerView(ft.Container):
                                     size=12,
                                     color=ft.Colors.ON_SURFACE_VARIANT
                                 ),
-                                *([img_preview] if img_preview else []),
                                 ft.Column(spacing=8, controls=cand_cards)
                             ]
                         )
@@ -520,35 +666,25 @@ class AIScannerView(ft.Container):
                                         )
                                     ]
                                 ),
-                                ft.Row(
-                                    spacing=16,
-                                    vertical_alignment=ft.CrossAxisAlignment.START,
+                                ft.Column(
+                                    spacing=6,
                                     controls=[
-                                        ctrl for ctrl in [
-                                            img_preview,
-                                            ft.Column(
-                                                expand=True,
-                                                spacing=6,
-                                                controls=[
-                                                    ft.Text(f"{res.get('name_ru', '')} ({res.get('name_lat', '')})", size=17, weight=ft.FontWeight.BOLD),
-                                                    ft.ProgressBar(value=conf if conf <= 1.0 else conf/100, color=ft.Colors.GREEN_600),
-                                                    ft.Row(
-                                                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                                                        controls=[
-                                                            ft.Text(f"Уверенность сходства: {conf_percent}%", size=12, color=AppColors.TEXT_MUTED_LIGHT),
-                                                            ft.Text("ONNX CPU • 100% Офлайн", size=11, color=ft.Colors.GREEN_700, weight=ft.FontWeight.BOLD)
-                                                        ]
-                                                    ),
-                                                    ft.Container(
-                                                        padding=10,
-                                                        border_radius=8,
-                                                        bgcolor=ft.Colors.RED_50,
-                                                        border=ft.Border.all(1, ft.Colors.RED_200),
-                                                        content=ft.Text(res.get("warning", ""), size=11, weight=ft.FontWeight.BOLD, color=ft.Colors.RED_900)
-                                                    )
-                                                ]
-                                            )
-                                        ] if ctrl is not None
+                                        ft.Text(f"{res.get('name_ru', '')} ({res.get('name_lat', '')})", size=17, weight=ft.FontWeight.BOLD),
+                                        ft.ProgressBar(value=conf if conf <= 1.0 else conf/100, color=ft.Colors.GREEN_600),
+                                        ft.Row(
+                                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                            controls=[
+                                                ft.Text(f"Уверенность сходства: {conf_percent}%", size=12, color=AppColors.TEXT_MUTED_LIGHT),
+                                                ft.Text("ONNX CPU • 100% Офлайн", size=11, color=ft.Colors.GREEN_700, weight=ft.FontWeight.BOLD)
+                                            ]
+                                        ),
+                                        ft.Container(
+                                            padding=10,
+                                            border_radius=8,
+                                            bgcolor=ft.Colors.RED_50,
+                                            border=ft.Border.all(1, ft.Colors.RED_200),
+                                            content=ft.Text(res.get("warning", ""), size=11, weight=ft.FontWeight.BOLD, color=ft.Colors.RED_900)
+                                        )
                                     ]
                                 ),
                                 ft.Text(f"• {res.get('distinguishing_features', '')}", size=12),
@@ -572,6 +708,33 @@ class AIScannerView(ft.Container):
                         )
                     )
                 )
+
+        # Карточка поиска по тексту / словесному описанию
+        text_search_card = ft.Card(
+            elevation=1,
+            content=ft.Container(
+                padding=14,
+                border_radius=12,
+                content=ft.Column(
+                    spacing=8,
+                    controls=[
+                        ft.Text("Поиск по словесному описанию или следам:" if lang == "ru" else "Пошук па апісанні ці слядах:", size=12, weight=ft.FontWeight.BOLD),
+                        ft.Row(
+                            spacing=10,
+                            controls=[
+                                self.input_field,
+                                ft.FilledButton(
+                                    content=ft.Text("Определить" if lang == "ru" else "Вызначыць"),
+                                    icon=ft.Icons.AUTO_AWESOME,
+                                    style=ft.ButtonStyle(bgcolor=AppColors.PRIMARY, color=ft.Colors.WHITE),
+                                    on_click=lambda e: self._run_text_analysis(self.input_field.value, False)
+                                )
+                            ]
+                        )
+                    ]
+                )
+            )
+        )
 
         return ft.ListView(
             expand=True,
@@ -598,32 +761,7 @@ class AIScannerView(ft.Container):
                 ),
                 *([banner_control] if banner_control else []),
                 upload_card,
-                # Лаконичный текстовый поиск по признакам
-                ft.Card(
-                    elevation=1,
-                    content=ft.Container(
-                        padding=14,
-                        border_radius=12,
-                        content=ft.Column(
-                            spacing=8,
-                            controls=[
-                                ft.Text("Поиск по словесному описанию или следам:" if lang == "ru" else "Пошук па апісанні ці слядах:", size=12, weight=ft.FontWeight.BOLD),
-                                ft.Row(
-                                    spacing=10,
-                                    controls=[
-                                        self.input_field,
-                                        ft.FilledButton(
-                                            content=ft.Text("Определить" if lang == "ru" else "Вызначыць"),
-                                            icon=ft.Icons.AUTO_AWESOME,
-                                            style=ft.ButtonStyle(bgcolor=AppColors.PRIMARY, color=ft.Colors.WHITE),
-                                            on_click=lambda e: self._run_text_analysis(self.input_field.value, False)
-                                        )
-                                    ]
-                                )
-                            ]
-                        )
-                    )
-                ),
+                *([text_search_card] if not self.analyzed_image_data_uri else []),
                 result_container,
                 ft.Container(height=24)
             ]
@@ -634,11 +772,32 @@ class AIScannerView(ft.Container):
         self._build_ui()
         self.update()
 
-    def _run_image_analysis(self, image_path: str):
+    def _run_image_analysis(self, image_path: str, hint: Optional[str] = None, taxon_filter: Optional[str] = None):
         if not image_path or not os.path.exists(image_path):
             return
         self.analyzed_image = image_path
-        res = ai_service.identify_species(image_path=image_path)
+        import base64
+        try:
+            with open(image_path, "rb") as f:
+                raw_bytes = f.read()
+            ext = os.path.splitext(image_path)[1].lower()
+            mime = "image/png" if ext == ".png" else "image/jpeg"
+            self.analyzed_image_data_uri = f"data:{mime};base64,{base64.b64encode(raw_bytes).decode('utf-8')}"
+        except Exception as ex:
+            print("[AIScannerView] Error encoding base64:", ex)
+            self.analyzed_image_data_uri = None
+
+        if hint is not None:
+            self.current_hint = hint
+        if taxon_filter is not None:
+            self.selected_taxon = taxon_filter
+
+        t_filter = self.selected_taxon if self.selected_taxon != "all" else None
+        res = ai_service.identify_species(
+            image_path=image_path,
+            hint=self.current_hint or None,
+            taxon_filter=t_filter
+        )
         self.scanner_result = res
         self._build_ui()
         self.update()
@@ -647,6 +806,8 @@ class AIScannerView(ft.Container):
         if not hint:
             return
         self.analyzed_image = None
+        self.analyzed_image_data_uri = None
+        self.current_hint = hint
         res = ai_service.identify_species(hint=hint, is_track=is_track)
         self.scanner_result = res
         self._build_ui()
