@@ -231,7 +231,8 @@ class RedBookApp:
             )
         elif self.current_nav_index == 3:
             return QuizView(
-                get_language=self.get_language
+                get_language=self.get_language,
+                on_select_species=self._select_species
             )
         elif self.current_nav_index == 4:
             return DiaryView(

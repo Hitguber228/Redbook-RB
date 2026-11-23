@@ -12,7 +12,12 @@ if os.path.exists(_species_json_path):
 else:
     INITIAL_SPECIES_DATA = []
 
-INITIAL_QUIZZES_DATA = [
+_quizzes_json_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "quizzes_seed.json"))
+if os.path.exists(_quizzes_json_path):
+    with open(_quizzes_json_path, encoding="utf-8") as _f:
+        INITIAL_QUIZZES_DATA = json.load(_f)
+else:
+    INITIAL_QUIZZES_DATA = [
     {
         "id": 1,
         "quiz_type": "voice",
