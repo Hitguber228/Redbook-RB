@@ -452,7 +452,7 @@ class CatalogView(ft.Container):
                             *([
                                 ft.TextButton(
                                     icon=ft.Icons.CLEAR_ALL,
-                                    text="Сбросить все" if lang == "ru" else "Скінуць усё",
+                                    content=ft.Text("Сбросить все" if lang == "ru" else "Скінуць усё"),
                                     style=ft.ButtonStyle(color=ft.Colors.RED_600),
                                     on_click=self._reset_all_filters
                                 )
@@ -511,7 +511,7 @@ class CatalogView(ft.Container):
                 ft.Text("Активные:" if lang == "ru" else "Актыўныя:", size=11, weight=ft.FontWeight.BOLD, color=AppColors.PRIMARY),
                 *active_tags,
                 ft.TextButton(
-                    text="Сбросить все" if lang == "ru" else "Скінуць усё",
+                    content=ft.Text("Сбросить все" if lang == "ru" else "Скінуць усё"),
                     style=ft.ButtonStyle(color=ft.Colors.RED_600),
                     on_click=self._reset_all_filters
                 )
