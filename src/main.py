@@ -15,6 +15,14 @@ class RedBookApp:
         self.current_nav_index = 0
         self.active_species_id: Optional[str] = None
 
+        # Инициализация сервиса выбора файлов для ИИ-сканера
+        self.file_picker = ft.FilePicker()
+        if hasattr(self.page, "services") and hasattr(self.page.services, "register_service"):
+            try:
+                self.page.services.register_service(self.file_picker)
+            except Exception:
+                pass
+
         self._configure_page()
         self._build_layout()
 
@@ -214,7 +222,8 @@ class RedBookApp:
         elif self.current_nav_index == 2:
             return AIScannerView(
                 on_select_species=self._select_species,
-                get_language=self.get_language
+                get_language=self.get_language,
+                file_picker=self.file_picker
             )
         elif self.current_nav_index == 3:
             return QuizView(

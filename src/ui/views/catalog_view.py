@@ -163,7 +163,7 @@ class CatalogView(ft.Container):
             content_padding=ft.Padding.symmetric(horizontal=12, vertical=6),
             dense=True,
             on_select=self._on_taxon_change,
-            width=210,
+            expand=True,
             tooltip="Фильтр по таксономической группе" if lang == "ru" else "Фільтр па таксанамічнай групе"
         )
 
@@ -193,7 +193,7 @@ class CatalogView(ft.Container):
             content_padding=ft.Padding.symmetric(horizontal=12, vertical=6),
             dense=True,
             on_select=self._on_biotope_change,
-            width=210,
+            expand=True,
             tooltip="Фильтр по экосистеме обитания" if lang == "ru" else "Фільтр па экасістэме пражывання"
         )
 
@@ -237,7 +237,7 @@ class CatalogView(ft.Container):
             content_padding=ft.Padding.symmetric(horizontal=12, vertical=6),
             dense=True,
             on_select=self._on_park_change,
-            width=230,
+            expand=True,
             tooltip="Фильтр по заповедникам и национальным паркам" if lang == "ru" else "Фільтр па запаведніках і нацпарках"
         )
 
@@ -271,7 +271,7 @@ class CatalogView(ft.Container):
             content_padding=ft.Padding.symmetric(horizontal=12, vertical=6),
             dense=True,
             on_select=self._on_region_change,
-            width=210,
+            expand=True,
             tooltip="Фильтр по административным областям" if lang == "ru" else "Фільтр па адміністрацыйных абласцях"
         )
 
@@ -300,7 +300,7 @@ class CatalogView(ft.Container):
             content_padding=ft.Padding.symmetric(horizontal=12, vertical=6),
             dense=True,
             on_select=self._on_sort_change,
-            width=220,
+            expand=True,
             tooltip="Порядок сортировки реестра" if lang == "ru" else "Парадак сартавання рэестра"
         )
 
@@ -314,7 +314,7 @@ class CatalogView(ft.Container):
 
         reset_btn = ft.OutlinedButton(
             icon=ft.Icons.RESTART_ALT,
-            content=ft.Text("Сбросить все" if lang == "ru" else "Скінуць усё"),
+            content=ft.Text("Сбросить фильтры" if lang == "ru" else "Скінуць фільтры"),
             style=ft.ButtonStyle(
                 color=ft.Colors.RED_600,
                 side=ft.BorderSide(1, ft.Colors.RED_200)
@@ -323,20 +323,70 @@ class CatalogView(ft.Container):
             on_click=self._reset_all_filters
         )
 
-        self.dropdown_row = ft.Row(
-            wrap=True,
-            spacing=10,
-            run_spacing=10,
-            vertical_alignment=ft.CrossAxisAlignment.CENTER,
-            controls=[
-                self.taxon_dropdown,
-                self.biotope_dropdown,
-                self.park_dropdown,
-                self.region_dropdown,
-                self.sort_dropdown,
-                self.sound_chip,
-                reset_btn
-            ]
+        # 4.7 Панель фильтров в ровной адаптивной сетке (без кривых столбцов)
+        filter_panel = ft.Card(
+            elevation=1,
+            content=ft.Container(
+                padding=14,
+                border_radius=14,
+                bgcolor=ft.Colors.SURFACE_CONTAINER_LOW,
+                content=ft.Column(
+                    spacing=12,
+                    controls=[
+                        ft.Row(
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            controls=[
+                                ft.Row(
+                                    tight=True,
+                                    spacing=8,
+                                    controls=[
+                                        ft.Icon(ft.Icons.TUNE, size=18, color=AppColors.PRIMARY),
+                                        ft.Text("Параметры выборки и сортировки:" if lang == "ru" else "Параметры выбаркі і сартавання:", weight=ft.FontWeight.BOLD, size=13),
+                                        *([
+                                            ft.Container(
+                                                padding=ft.Padding.symmetric(horizontal=8, vertical=2),
+                                                border_radius=10,
+                                                bgcolor=AppColors.PRIMARY_CONTAINER,
+                                                content=ft.Text("Активны" if lang == "ru" else "Актыўныя", size=10, color=AppColors.PRIMARY, weight=ft.FontWeight.BOLD)
+                                            )
+                                        ] if is_filtered else [])
+                                    ]
+                                ),
+                                *([reset_btn] if is_filtered else [])
+                            ]
+                        ),
+                        # Ряд 1: Таксон, Область, Биотоп, Нацпарк (ровная сетка 4 на ПК, 2 на планшете, 1 на Android)
+                        ft.ResponsiveRow(
+                            spacing=10,
+                            run_spacing=10,
+                            controls=[
+                                ft.Container(col={"sm": 12, "md": 6, "lg": 3}, content=self.taxon_dropdown),
+                                ft.Container(col={"sm": 12, "md": 6, "lg": 3}, content=self.region_dropdown),
+                                ft.Container(col={"sm": 12, "md": 6, "lg": 3}, content=self.biotope_dropdown),
+                                ft.Container(col={"sm": 12, "md": 6, "lg": 3}, content=self.park_dropdown),
+                            ]
+                        ),
+                        # Ряд 2: Сортировка и опции
+                        ft.ResponsiveRow(
+                            spacing=10,
+                            run_spacing=10,
+                            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                            controls=[
+                                ft.Container(col={"sm": 12, "md": 6, "lg": 6}, content=self.sort_dropdown),
+                                ft.Container(
+                                    col={"sm": 12, "md": 6, "lg": 6},
+                                    content=ft.Row(
+                                        spacing=10,
+                                        controls=[
+                                            self.sound_chip
+                                        ]
+                                    )
+                                )
+                            ]
+                        )
+                    ]
+                )
+            )
         )
 
         # 5. Сетка карточек видов
@@ -357,7 +407,7 @@ class CatalogView(ft.Container):
                 self.search_field,
                 self.kingdom_row,
                 self.category_row,
-                self.dropdown_row,
+                filter_panel,
                 ft.Row(
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     controls=[

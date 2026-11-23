@@ -6,7 +6,7 @@ from ...services.ai_service import ai_service
 from ..theme import AppColors, get_category_color
 
 class AIScannerView(ft.Container):
-    def __init__(self, on_select_species: Callable[[str], None], get_language: Callable[[], str]):
+    def __init__(self, on_select_species: Callable[[str], None], get_language: Callable[[], str], file_picker: Optional[ft.FilePicker] = None):
         super().__init__()
         self.expand = True
         self.on_select_species = on_select_species
@@ -16,42 +16,44 @@ class AIScannerView(ft.Container):
         self.chat_messages = []
         self.is_track_mode = False
         self.analyzed_image: Optional[str] = None
-        self.file_picker = ft.FilePicker(on_result=self._on_file_picked)
+        self.status_banner: Optional[tuple[str, str]] = None # (type: 'success' | 'warning' | 'error', text)
+
+        self.file_picker = file_picker if file_picker is not None else ft.FilePicker()
+        self.file_picker.on_result = self._on_file_picked
 
         self._build_ui()
 
-    def did_mount(self):
-        if self.page:
-            # В Flet 1.1+ FilePicker регистрируется в page.services (не в overlay, чтобы избежать ошибки Unknown control)
-            if hasattr(self.page, "services") and self.file_picker not in self.page.services:
-                self.page.services.append(self.file_picker)
-            if hasattr(self.page, "overlay") and self.file_picker in self.page.overlay:
-                self.page.overlay.remove(self.file_picker)
-            self.page.update()
-
     def _open_camera_capture(self, e=None):
-        # На смартфонах через Web/PWA активирует камеру
-        if self.page:
-            try:
-                self.page.run_task(
-                    self.file_picker.pick_files,
-                    dialog_title="Сфотографируйте вид камерой смартфона" if self.get_language() == "ru" else "Сфатаграфуйце від камерай смартфона",
-                    file_type=ft.FilePickerFileType.IMAGE,
-                    allow_multiple=False,
-                    with_data=True
-                )
-            except Exception:
-                self._open_file_dialog()
+        """Активация камеры смартфона (Android / iOS / Web)"""
+        if self.file_picker and self.page:
+            async def _capture():
+                try:
+                    files = await self.file_picker.pick_files(
+                        dialog_title="Сфотографируйте вид камерой смартфона" if self.get_language() == "ru" else "Сфатаграфуйце від камерай смартфона",
+                        file_type=ft.FilePickerFileType.IMAGE,
+                        allow_multiple=False,
+                        with_data=True
+                    )
+                    if files and len(files) > 0:
+                        self._handle_file_item(files[0])
+                except Exception as err:
+                    print("[Camera] error:", err)
+                    self._open_file_dialog()
+
+            self.page.run_task(_capture)
+        else:
+            self._open_file_dialog()
 
     def _open_file_dialog(self, e=None):
-        # 1. Если запущено на десктопе Windows — открываем нативный проводник Windows через tkinter
+        """Выбор файла: на десктопе через нативный проводник Windows, на Android/Web через FilePicker"""
+        chosen_path = None
         try:
             import tkinter as tk
             from tkinter import filedialog
             root = tk.Tk()
             root.withdraw()
             root.attributes("-topmost", True)
-            selected = filedialog.askopenfilename(
+            chosen_path = filedialog.askopenfilename(
                 title="Выберите фото животного или растения",
                 filetypes=[
                     ("Изображения", "*.jpg;*.jpeg;*.png;*.webp;*.bmp;*.gif"),
@@ -59,28 +61,60 @@ class AIScannerView(ft.Container):
                 ]
             )
             root.destroy()
-            if selected and os.path.exists(selected):
-                self._run_image_analysis(selected)
-                return
         except Exception:
-            pass
+            chosen_path = None
 
-        # 2. Если режим Web / PWA (или мобильный) — вызываем через асинхронный task Flet
-        if self.page:
-            self.page.run_task(
-                self.file_picker.pick_files,
-                dialog_title="Выберите фото из медиатеки или папки" if self.get_language() == "ru" else "Выберыце фота з медыятэкі ці тэчкі",
-                file_type=ft.FilePickerFileType.IMAGE,
-                allow_multiple=False,
-                with_data=True
-            )
+        if chosen_path and os.path.exists(chosen_path):
+            self.status_banner = None
+            self._run_image_analysis(chosen_path)
+            return
+
+        # На мобильных устройствах или если tkinter не вернул путь
+        if self.file_picker and self.page:
+            async def _pick():
+                try:
+                    files = await self.file_picker.pick_files(
+                        dialog_title="Выберите фото из медиатеки" if self.get_language() == "ru" else "Выберыце фота з медыятэкі",
+                        file_type=ft.FilePickerFileType.IMAGE,
+                        allow_multiple=False,
+                        with_data=True
+                    )
+                    if files and len(files) > 0:
+                        self._handle_file_item(files[0])
+                except Exception as err:
+                    print("[FilePicker] error:", err)
+
+            self.page.run_task(_pick)
+
+    def _handle_file_item(self, file_item):
+        if not file_item:
+            return
+        if getattr(file_item, "path", None) and os.path.exists(file_item.path):
+            self.status_banner = None
+            self._run_image_analysis(file_item.path)
+            return
+
+        raw_bytes = getattr(file_item, "bytes", None)
+        if raw_bytes:
+            upload_dir = os.path.abspath(os.path.join("assets", "uploads"))
+            os.makedirs(upload_dir, exist_ok=True)
+            save_path = os.path.join(upload_dir, f"capture_{int(time.time() * 1000)}.jpg")
+            with open(save_path, "wb") as f:
+                f.write(raw_bytes)
+            self.status_banner = None
+            self._run_image_analysis(save_path)
+
+    def _on_file_picked(self, e: ft.FilePickerResultEvent):
+        if e.files and len(e.files) > 0:
+            self._handle_file_item(e.files[0])
 
     def _paste_from_clipboard(self, e=None):
+        """Вставка фото из буфера обмена (скриншоты, скопированные изображения или файлы)"""
         try:
             from PIL import ImageGrab, Image
             content = ImageGrab.grabclipboard()
 
-            # 1. Если в буфере обмена находится изображение (скриншот, скопированное фото)
+            # 1. Если в буфере растровое изображение
             if isinstance(content, Image.Image):
                 upload_dir = os.path.abspath(os.path.join("assets", "uploads"))
                 os.makedirs(upload_dir, exist_ok=True)
@@ -88,78 +122,36 @@ class AIScannerView(ft.Container):
                 save_path = os.path.join(upload_dir, temp_filename)
 
                 img_rgb = content.convert("RGB") if content.mode in ("RGBA", "P", "LA") else content
-                img_rgb.save(save_path, "JPEG", quality=85)
+                img_rgb.save(save_path, "JPEG", quality=90)
 
-                if self.page:
-                    self.page.open(
-                        ft.SnackBar(
-                            content=ft.Row([
-                                ft.Icon(ft.Icons.CHECK_CIRCLE, color=ft.Colors.WHITE, size=18),
-                                ft.Text("Изображение успешно вставлено из буфера обмена!")
-                            ]),
-                            bgcolor=ft.Colors.GREEN_700
-                        )
-                    )
+                self.status_banner = ("success", "Изображение успешно вставлено из буфера обмена!")
                 self._run_image_analysis(save_path)
                 return
 
-            # 2. Если в буфере обмена скопирован файл (например, через Ctrl+C в проводнике Windows)
+            # 2. Если в буфере файл (Ctrl+C в проводнике)
             elif isinstance(content, list) and len(content) > 0:
                 candidate = content[0]
                 if isinstance(candidate, str) and os.path.exists(candidate):
                     ext = os.path.splitext(candidate)[1].lower()
                     if ext in [".jpg", ".jpeg", ".png", ".webp", ".bmp"]:
-                        if self.page:
-                            self.page.open(
-                                ft.SnackBar(
-                                    content=ft.Row([
-                                        ft.Icon(ft.Icons.CHECK_CIRCLE, color=ft.Colors.WHITE, size=18),
-                                        ft.Text(f"Файл вставлен из буфера: {os.path.basename(candidate)}")
-                                    ]),
-                                    bgcolor=ft.Colors.GREEN_700
-                                )
-                            )
+                        self.status_banner = ("success", f"Файл вставлен из буфера: {os.path.basename(candidate)}")
                         self._run_image_analysis(candidate)
                         return
 
-            # 3. Буфер пуст или не содержит картинки
-            if self.page:
-                self.page.open(
-                    ft.SnackBar(
-                        content=ft.Row([
-                            ft.Icon(ft.Icons.INFO_OUTLINE, color=ft.Colors.WHITE, size=18),
-                            ft.Text("В буфере обмена нет картинки. Скопируйте фото (или Win+Shift+S) и нажмите кнопку снова.")
-                        ]),
-                        bgcolor=ft.Colors.AMBER_800
-                    )
-                )
+            self.status_banner = ("warning", "В буфере обмена нет картинки. Скопируйте фото (или Win+Shift+S) и нажмите снова.")
+            self._build_ui()
+            self.update()
         except Exception as ex:
-            if self.page:
-                self.page.open(
-                    ft.SnackBar(
-                        content=ft.Text(f"Ошибка чтения буфера обмена: {ex}"),
-                        bgcolor=ft.Colors.RED_700
-                    )
-                )
+            self.status_banner = ("error", f"Ошибка буфера обмена: {ex}")
+            self._build_ui()
+            self.update()
 
-    def _on_file_picked(self, e: ft.FilePickerResultEvent):
-        if e.files and len(e.files) > 0:
-            file_item = e.files[0]
-            # 1. Если передан прямой путь файловой системы (Windows Desktop)
-            if file_item.path and os.path.exists(file_item.path):
-                self._run_image_analysis(file_item.path)
-                return
-
-            # 2. Если фото снято на камеру смартфона или выбрано в браузере (iPhone / Android)
-            raw_bytes = getattr(file_item, "bytes", None)
-            if raw_bytes:
-                upload_dir = os.path.abspath(os.path.join("assets", "uploads"))
-                os.makedirs(upload_dir, exist_ok=True)
-                temp_filename = f"capture_{int(time.time() * 1000)}.jpg"
-                save_path = os.path.join(upload_dir, temp_filename)
-                with open(save_path, "wb") as f:
-                    f.write(raw_bytes)
-                self._run_image_analysis(save_path)
+    def _clear_analysis(self, e=None):
+        self.analyzed_image = None
+        self.scanner_result = None
+        self.status_banner = None
+        self._build_ui()
+        self.update()
 
     def _build_ui(self):
         lang = self.get_language()
@@ -210,51 +202,107 @@ class AIScannerView(ft.Container):
 
     def _build_scanner_tab(self, lang: str) -> ft.Control:
         self.input_field = ft.TextField(
-            hint_text="Опишите вид или ключевые признаки (напр. 'черная птица с красным клювом', 'след копыт')..." if lang == "ru" else "Апішыце від ці прыкметы (напр. 'чорная птушка з чырвонай дзюбай', 'след капыт')...",
+            hint_text="Введите ключевые признаки (напр. 'черная птица с красным клювом', 'след копыт')..." if lang == "ru" else "Апішыце від ці прыкметы (напр. 'чорная птушка з чырвонай дзюбай', 'след капыт')...",
             prefix_icon=ft.Icons.SEARCH,
             filled=True,
             border_radius=12,
             expand=True
         )
 
-        # Образцы фотографий для моментального тестирования ИИ-модели
-        sample_photos = [
-            ("Зубр", "assets/images/species/bison-bonasus.jpg"),
-            ("Рысь", "assets/images/species/lynx-lynx.jpg"),
-            ("Неясыть", "assets/images/species/strix-nebulosa.jpg"),
-            ("Баранец", "assets/images/species/huperzia-selago.jpg"),
-            ("Черепаха", "assets/images/species/emys-orbicularis.jpg"),
-            ("Жук-олень", "assets/images/species/lucanus-cervus.jpg")
-        ]
+        # Статусный баннер (уведомление об успешной вставке или ошибке)
+        banner_control = None
+        if self.status_banner:
+            b_type, b_text = self.status_banner
+            b_bg = ft.Colors.GREEN_50 if b_type == "success" else (ft.Colors.AMBER_50 if b_type == "warning" else ft.Colors.RED_50)
+            b_border = ft.Colors.GREEN_300 if b_type == "success" else (ft.Colors.AMBER_300 if b_type == "warning" else ft.Colors.RED_300)
+            b_color = ft.Colors.GREEN_900 if b_type == "success" else (ft.Colors.AMBER_900 if b_type == "warning" else ft.Colors.RED_900)
+            b_icon = ft.Icons.CHECK_CIRCLE if b_type == "success" else (ft.Icons.INFO_OUTLINE if b_type == "warning" else ft.Icons.ERROR_OUTLINE)
 
-        sample_chips = []
-        for name, path in sample_photos:
-            abs_p = os.path.abspath(path)
-            if os.path.exists(abs_p):
-                sample_chips.append(
-                    ft.Chip(
-                        leading=ft.Icon(ft.Icons.IMAGE, size=14, color=AppColors.PRIMARY),
-                        label=ft.Text(f"{name}", size=11, weight=ft.FontWeight.W_500),
-                        on_click=lambda e, p=abs_p: self._run_image_analysis(p)
-                    )
+            banner_control = ft.Container(
+                padding=12,
+                border_radius=10,
+                bgcolor=b_bg,
+                border=ft.Border.all(1, b_border),
+                content=ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    controls=[
+                        ft.Row(
+                            spacing=8,
+                            expand=True,
+                            controls=[
+                                ft.Icon(b_icon, color=b_color, size=18),
+                                ft.Text(b_text, color=b_color, size=12, weight=ft.FontWeight.W_500)
+                            ]
+                        ),
+                        ft.IconButton(
+                            icon=ft.Icons.CLOSE,
+                            icon_size=16,
+                            icon_color=b_color,
+                            on_click=lambda e: self._dismiss_banner()
+                        )
+                    ]
                 )
-
-        quick_tests = [
-            ("След зубра", "крупное рогатое животное с бородой и следы копыт", True),
-            ("Черный аист", "черная лесная птица с красным клювом и ногами", False),
-            ("След рыси", "круглый след кошачьих на снегу без когтей", True),
-            ("Венерин башмачок", "желтый цветок в форме башмачка с бурыми лепестками", False),
-            ("Грибная капуста", "шаровидный кудрявый гриб у корней сосны", False)
-        ]
-
-        text_chips = [
-            ft.Chip(
-                leading=ft.Icon(ft.Icons.DESCRIPTION_OUTLINED, size=14),
-                label=ft.Text(label, size=11),
-                on_click=lambda e, txt=hint, tr=track: self._run_text_analysis(txt, tr)
             )
-            for label, hint, track in quick_tests
-        ]
+
+        # Чистый и современный Hero-блок загрузки фотографий
+        upload_card = ft.Card(
+            elevation=1,
+            content=ft.Container(
+                padding=20,
+                border_radius=16,
+                border=ft.Border.all(1.5, AppColors.PRIMARY),
+                bgcolor=ft.Colors.SURFACE_CONTAINER_LOW,
+                content=ft.Column(
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=14,
+                    controls=[
+                        ft.Icon(ft.Icons.ADD_A_PHOTO_ROUNDED, size=46, color=AppColors.PRIMARY),
+                        ft.Column(
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                            spacing=3,
+                            controls=[
+                                ft.Text(
+                                    "Загрузить фото для ИИ-распознавания" if lang == "ru" else "Загрузіць фота для ІІ-распазнавання",
+                                    size=16,
+                                    weight=ft.FontWeight.BOLD,
+                                    text_align=ft.TextAlign.CENTER
+                                ),
+                                ft.Text(
+                                    "Выберите снимок из галереи, сделайте фото камерой или нажмите Ctrl+V" if lang == "ru" else "Абярыце здымак з галерэі, зрабіце фота ці націсніце Ctrl+V",
+                                    size=12,
+                                    color=ft.Colors.ON_SURFACE_VARIANT,
+                                    text_align=ft.TextAlign.CENTER
+                                )
+                            ]
+                        ),
+                        ft.Row(
+                            wrap=True,
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            spacing=10,
+                            run_spacing=10,
+                            controls=[
+                                ft.FilledButton(
+                                    content=ft.Text("Выбрать файл / Галерея" if lang == "ru" else "Выбраць файл / Галерэя"),
+                                    icon=ft.Icons.PHOTO_LIBRARY,
+                                    style=ft.ButtonStyle(bgcolor=AppColors.PRIMARY, color=ft.Colors.WHITE),
+                                    on_click=self._open_file_dialog
+                                ),
+                                ft.OutlinedButton(
+                                    content=ft.Text("Сделать снимок (Камера)" if lang == "ru" else "Зрабіць здымак (Камера)"),
+                                    icon=ft.Icons.PHOTO_CAMERA,
+                                    on_click=self._open_camera_capture
+                                ),
+                                ft.FilledTonalButton(
+                                    content=ft.Text("Вставить из буфера (Ctrl+V)" if lang == "ru" else "Уставіць з буфера (Ctrl+V)"),
+                                    icon=ft.Icons.CONTENT_PASTE,
+                                    on_click=self._paste_from_clipboard
+                                )
+                            ]
+                        )
+                    ]
+                )
+            )
+        )
 
         result_container = ft.Container()
         if self.scanner_result:
@@ -265,21 +313,37 @@ class AIScannerView(ft.Container):
             is_uncertain = res.get("is_uncertain", False)
             top_candidates = res.get("top_candidates", [])
 
-            # Блок миниатюры фото, если было проанализировано изображение
+            # Блок предпросмотра загруженного пользователем изображения
             img_preview = None
             if self.analyzed_image and os.path.exists(self.analyzed_image):
                 img_preview = ft.Container(
                     border_radius=12,
                     clip_behavior=ft.ClipBehavior.HARD_EDGE,
-                    content=ft.Image(
-                        src=self.analyzed_image,
-                        height=160,
-                        width=240,
-                        fit="cover"
+                    content=ft.Stack(
+                        controls=[
+                            ft.Image(
+                                src=self.analyzed_image,
+                                height=160,
+                                width=240,
+                                fit="cover"
+                            ),
+                            ft.Container(
+                                top=6,
+                                right=6,
+                                content=ft.IconButton(
+                                    icon=ft.Icons.CLOSE,
+                                    bgcolor=ft.Colors.BLACK54,
+                                    icon_color=ft.Colors.WHITE,
+                                    icon_size=16,
+                                    tooltip="Очистить снимок",
+                                    on_click=self._clear_analysis
+                                )
+                            )
+                        ]
                     )
                 )
 
-            # Функция создания красивой карточки кандидата
+            # Функция создания интерактивной карточки вида-кандидата
             def _create_candidate_card(cand: dict, is_primary_choice: bool = False):
                 c_conf = cand.get("confidence", 0.0)
                 c_pct = int(c_conf * 100) if c_conf <= 1.0 else int(c_conf)
@@ -511,7 +575,7 @@ class AIScannerView(ft.Container):
 
         return ft.ListView(
             expand=True,
-            spacing=14,
+            spacing=16,
             controls=[
                 ft.Row(
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -526,100 +590,49 @@ class AIScannerView(ft.Container):
                                 spacing=4,
                                 controls=[
                                     ft.Icon(ft.Icons.OFFLINE_BOLT, size=14, color=ft.Colors.GREEN_800),
-                                    ft.Text("Офлайн ONNX (4.7 МБ)", size=11, weight=ft.FontWeight.BOLD, color=ft.Colors.GREEN_800)
+                                    ft.Text("Офлайн ONNX (4.9 МБ)", size=11, weight=ft.FontWeight.BOLD, color=ft.Colors.GREEN_800)
                                 ]
                             )
                         )
                     ]
                 ),
-                # Блок загрузки и моментальной фотосъемки с мобильного / ПК
-                ft.Container(
-                    padding=16,
-                    border_radius=14,
-                    border=ft.Border.all(1.5, AppColors.PRIMARY),
-                    bgcolor=ft.Colors.SURFACE_CONTAINER_LOW,
-                    content=ft.Column(
-                        spacing=12,
-                        controls=[
-                            ft.Row(
-                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                                controls=[
-                                    ft.Row(
-                                        spacing=12,
-                                        controls=[
-                                            ft.Icon(ft.Icons.ADD_A_PHOTO, size=28, color=AppColors.PRIMARY),
-                                            ft.Column(
-                                                spacing=2,
-                                                controls=[
-                                                    ft.Text("Сфотографировать или загрузить снимок" if lang == "ru" else "Сфатаграфаваць ці загрузіць здымак", size=14, weight=ft.FontWeight.BOLD),
-                                                    ft.Text("На iPhone и Android сразу активируется камера" if lang == "ru" else "На iPhone і Android адразу актывуецца камера", size=12, color=ft.Colors.ON_SURFACE_VARIANT)
-                                                ]
-                                            )
-                                        ]
-                                    ),
-                                    ft.Container(
-                                        padding=ft.Padding.symmetric(horizontal=8, vertical=3),
-                                        border_radius=10,
-                                        bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
-                                        content=ft.Row(
-                                            tight=True,
-                                            spacing=4,
-                                            controls=[
-                                                ft.Icon(ft.Icons.PHONE_IPHONE, size=13, color=ft.Colors.ON_SURFACE_VARIANT),
-                                                ft.Text("iOS • Android • ПК", size=11, color=ft.Colors.ON_SURFACE_VARIANT, weight=ft.FontWeight.BOLD)
-                                            ]
+                *([banner_control] if banner_control else []),
+                upload_card,
+                # Лаконичный текстовый поиск по признакам
+                ft.Card(
+                    elevation=1,
+                    content=ft.Container(
+                        padding=14,
+                        border_radius=12,
+                        content=ft.Column(
+                            spacing=8,
+                            controls=[
+                                ft.Text("Поиск по словесному описанию или следам:" if lang == "ru" else "Пошук па апісанні ці слядах:", size=12, weight=ft.FontWeight.BOLD),
+                                ft.Row(
+                                    spacing=10,
+                                    controls=[
+                                        self.input_field,
+                                        ft.FilledButton(
+                                            content=ft.Text("Определить" if lang == "ru" else "Вызначыць"),
+                                            icon=ft.Icons.AUTO_AWESOME,
+                                            style=ft.ButtonStyle(bgcolor=AppColors.PRIMARY, color=ft.Colors.WHITE),
+                                            on_click=lambda e: self._run_text_analysis(self.input_field.value, False)
                                         )
-                                    )
-                                ]
-                            ),
-                            ft.Row(
-                                wrap=True,
-                                spacing=10,
-                                controls=[
-                                    ft.FilledButton(
-                                        content=ft.Text("Сделать фото (Камера)" if lang == "ru" else "Зрабіць фота (Камера)"),
-                                        icon=ft.Icons.PHOTO_CAMERA,
-                                        style=ft.ButtonStyle(
-                                            bgcolor=AppColors.PRIMARY,
-                                            color=ft.Colors.WHITE
-                                        ),
-                                        on_click=self._open_camera_capture
-                                    ),
-                                    ft.OutlinedButton(
-                                        content=ft.Text("Медиатека / Файл" if lang == "ru" else "Медыятэка / Файл"),
-                                        icon=ft.Icons.PHOTO_LIBRARY,
-                                        on_click=self._open_file_dialog
-                                    ),
-                                    ft.FilledTonalButton(
-                                        content=ft.Text("Вставить из буфера (Ctrl+V)" if lang == "ru" else "Уставіць з буфера (Ctrl+V)"),
-                                        icon=ft.Icons.CONTENT_PASTE,
-                                        on_click=self._paste_from_clipboard
-                                    )
-                                ]
-                            )
-                        ]
+                                    ]
+                                )
+                            ]
+                        )
                     )
                 ),
-                ft.Text("Или протестируйте локальную нейросеть на образцах:" if lang == "ru" else "Ці пратэстуйце лакальную нейрасетку на ўзорах:", size=12, weight=ft.FontWeight.BOLD),
-                ft.Row(wrap=True, spacing=6, controls=sample_chips),
-                ft.Divider(height=1),
-                ft.Text("Морфологический поиск по описанию и следам:" if lang == "ru" else "Пошук па апісанні і слядах:", size=12, weight=ft.FontWeight.BOLD),
-                ft.Row(
-                    spacing=10,
-                    controls=[
-                        self.input_field,
-                        ft.FilledButton(
-                            content=ft.Text("Определить" if lang == "ru" else "Вызначыць"),
-                            icon=ft.Icons.AUTO_AWESOME,
-                            on_click=lambda e: self._run_text_analysis(self.input_field.value, False)
-                        )
-                    ]
-                ),
-                ft.Row(wrap=True, spacing=6, controls=text_chips),
                 result_container,
-                ft.Container(height=20)
+                ft.Container(height=24)
             ]
         )
+
+    def _dismiss_banner(self):
+        self.status_banner = None
+        self._build_ui()
+        self.update()
 
     def _run_image_analysis(self, image_path: str):
         if not image_path or not os.path.exists(image_path):
@@ -660,77 +673,55 @@ class AIScannerView(ft.Container):
                     controls=[
                         ft.Container(
                             padding=12,
-                            border_radius=12,
+                            border_radius=14,
                             bgcolor=AppColors.PRIMARY if is_user else ft.Colors.SURFACE_CONTAINER_HIGHEST,
                             max_width=480,
-                            content=ft.Text(
-                                msg["text"],
-                                size=13,
-                                color=ft.Colors.WHITE if is_user else ft.Colors.ON_SURFACE
+                            content=ft.Column(
+                                spacing=4,
+                                controls=[
+                                    ft.Text("Вы" if is_user else ("Гид-натуралист" if lang == "ru" else "Гід-натураліст"), size=11, color=ft.Colors.WHITE70 if is_user else ft.Colors.ON_SURFACE_VARIANT, weight=ft.FontWeight.BOLD),
+                                    ft.Markdown(msg["text"], selectable=True)
+                                ]
                             )
                         )
                     ]
                 )
             )
 
-        self.chat_input = ft.TextField(
-            hint_text="Задайте вопрос гиду-натуралисту...",
-            expand=True,
+        chat_input = ft.TextField(
+            hint_text="Спросите о любом виде, штрафах или заповедниках..." if lang == "ru" else "Спытайце пра любы від, штрафы ці запаведнікі...",
             border_radius=12,
-            filled=True,
-            on_submit=lambda e: self._send_chat_message()
+            expand=True,
+            on_submit=lambda e: self._send_chat_message(chat_input.value, chat_input, lang)
         )
-
-        quick_questions = [
-            "Что делать, если нашел птенца совы?",
-            "Какой штраф за сбор сон-травы?",
-            "Расскажи про европейского зубра"
-        ]
-
-        q_chips = [
-            ft.Chip(
-                label=ft.Text(q, size=11),
-                on_click=lambda e, question=q: self._send_quick_question(question)
-            )
-            for q in quick_questions
-        ]
 
         return ft.Column(
             expand=True,
-            spacing=10,
+            spacing=12,
             controls=[
-                ft.Row(wrap=True, spacing=6, controls=q_chips),
                 ft.Container(expand=True, content=chat_list),
                 ft.Row(
                     spacing=8,
                     controls=[
-                        self.chat_input,
+                        chat_input,
                         ft.IconButton(
                             icon=ft.Icons.SEND,
-                            icon_color=AppColors.PRIMARY,
-                            on_click=lambda e: self._send_chat_message()
+                            bgcolor=AppColors.PRIMARY,
+                            icon_color=ft.Colors.WHITE,
+                            on_click=lambda e: self._send_chat_message(chat_input.value, chat_input, lang)
                         )
                     ]
                 )
             ]
         )
 
-    def _send_chat_message(self):
-        text = self.chat_input.value
-        if not text:
+    def _send_chat_message(self, text: str, text_field: ft.TextField, lang: str):
+        if not text or not text.strip():
             return
-        lang = self.get_language()
-        self.chat_messages.append({"role": "user", "text": text})
-        ans = ai_service.ask_naturalist(text, lang)
-        self.chat_messages.append({"role": "assistant", "text": ans})
-        self.chat_input.value = ""
-        self._build_ui()
-        self.update()
-
-    def _send_quick_question(self, question: str):
-        lang = self.get_language()
-        self.chat_messages.append({"role": "user", "text": question})
-        ans = ai_service.ask_naturalist(question, lang)
+        q = text.strip()
+        text_field.value = ""
+        self.chat_messages.append({"role": "user", "text": q})
+        ans = ai_service.ask_naturalist(q, lang)
         self.chat_messages.append({"role": "assistant", "text": ans})
         self._build_ui()
         self.update()

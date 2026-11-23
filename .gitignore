@@ -35,7 +35,10 @@ flet_build/
 *.sqlite3
 # Keep our seed database or auto-generated db template, ignore local cache
 
-# OS & IDE
+# Temporary uploads
+assets/uploads/
+*.tmp
+
 .vscode/
 .idea/
 *.swp
