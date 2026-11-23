@@ -20,36 +20,38 @@ class CatalogView(ft.Container):
         self.sort_by: str = "name_asc"
         self.has_sound_only: bool = False
         self.visible_count: int = 36
+        self.filters_expanded: bool = False
 
         self._build_ui()
 
     def _build_ui(self):
         lang = self.get_language()
-        is_filtered = bool(
-            self.search_query or
-            self.selected_category or
-            self.selected_kingdom or
-            self.selected_taxon or
-            self.selected_biotope or
-            self.selected_region or
-            self.selected_national_park or
-            self.has_sound_only or
-            self.sort_by != "name_asc"
-        )
 
-        # 1. Поисковая строка с подсказкой и кнопкой быстрой очистки
+        # Подсчет активных детальных фильтров
+        adv_active_count = sum([
+            1 if self.selected_taxon else 0,
+            1 if self.selected_region else 0,
+            1 if self.selected_biotope else 0,
+            1 if self.selected_national_park else 0,
+            1 if self.has_sound_only else 0
+        ])
+        total_active_count = adv_active_count + (1 if self.selected_kingdom else 0) + (1 if self.selected_category else 0) + (1 if self.search_query else 0)
+
+        # 1. Поисковая строка в современном дизайне с кнопкой фильтров
         self.search_field = ft.TextField(
-            hint_text="Поиск по названию или латыни... (напр. Зубр, Ciconia, Рысь)" if lang == "ru" else "Пошук па назве ці латыні... (напр. Зубр, Ciconia, Рысь)",
+            hint_text="Поиск по названию или латыни... (Зубр, Рысь, Ciconia)" if lang == "ru" else "Пошук па назве ці латыні... (Зубр, Рысь, Ciconia)",
             prefix_icon=ft.Icons.SEARCH,
-            border_radius=12,
+            border_radius=14,
             filled=True,
-            bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
-            border_color=ft.Colors.TRANSPARENT,
+            bgcolor=ft.Colors.SURFACE_CONTAINER_LOW,
+            border_color=ft.Colors.OUTLINE_VARIANT,
+            focused_border_color=AppColors.PRIMARY,
+            content_padding=ft.Padding.symmetric(horizontal=14, vertical=10),
             value=self.search_query,
             on_change=self._on_search_change,
             suffix=ft.IconButton(
                 icon=ft.Icons.CLEAR,
-                icon_size=18,
+                icon_size=16,
                 tooltip="Очистить поиск" if lang == "ru" else "Ачысціць пошук",
                 on_click=self._clear_search,
                 visible=bool(self.search_query)
@@ -57,70 +59,158 @@ class CatalogView(ft.Container):
             expand=True
         )
 
-        # 2. Фильтр царств (строго без эмодзи, векторные значки + точные счётчики)
+        # Кнопка открытия/закрытия панели расширенных фильтров
+        filter_btn_active = self.filters_expanded or (adv_active_count > 0)
+        filter_toggle_btn = ft.Container(
+            padding=ft.Padding.symmetric(horizontal=14, vertical=10),
+            border_radius=14,
+            bgcolor=AppColors.PRIMARY_CONTAINER if filter_btn_active else ft.Colors.SURFACE_CONTAINER_LOW,
+            border=ft.Border.all(
+                1.5 if filter_btn_active else 1,
+                AppColors.PRIMARY if filter_btn_active else ft.Colors.OUTLINE_VARIANT
+            ),
+            ink=True,
+            on_click=self._toggle_filters_panel,
+            tooltip="Параметры фильтрации" if lang == "ru" else "Параметры фільтрацыі",
+            content=ft.Row(
+                tight=True,
+                spacing=8,
+                controls=[
+                    ft.Icon(
+                        ft.Icons.TUNE,
+                        size=18,
+                        color=AppColors.PRIMARY if filter_btn_active else ft.Colors.ON_SURFACE
+                    ),
+                    ft.Text(
+                        "Фильтры" if lang == "ru" else "Фільтры",
+                        size=13,
+                        weight=ft.FontWeight.BOLD if filter_btn_active else ft.FontWeight.W_500,
+                        color=AppColors.PRIMARY if filter_btn_active else ft.Colors.ON_SURFACE
+                    ),
+                    *([
+                        ft.Container(
+                            padding=ft.Padding.symmetric(horizontal=6, vertical=2),
+                            border_radius=10,
+                            bgcolor=AppColors.PRIMARY,
+                            content=ft.Text(
+                                str(adv_active_count),
+                                size=11,
+                                weight=ft.FontWeight.BOLD,
+                                color=ft.Colors.WHITE
+                            )
+                        )
+                    ] if adv_active_count > 0 else [
+                        ft.Icon(
+                            ft.Icons.KEYBOARD_ARROW_UP if self.filters_expanded else ft.Icons.KEYBOARD_ARROW_DOWN,
+                            size=16,
+                            color=ft.Colors.ON_SURFACE_VARIANT
+                        )
+                    ])
+                ]
+            )
+        )
+
+        top_search_row = ft.Row(
+            spacing=10,
+            controls=[
+                self.search_field,
+                filter_toggle_btn
+            ]
+        )
+
+        # 2. Сегментированный фильтр царств (современные скругленные капсулы)
         kingdom_items = [
-            (None, "Все (515)" if lang == "ru" else "Усе (515)", ft.Icons.ALL_INCLUSIVE),
+            (None, "Все виды (515)" if lang == "ru" else "Усе віды (515)", ft.Icons.ALL_INCLUSIVE),
             ("animals", "Животные (213)" if lang == "ru" else "Жывёлы (213)", ft.Icons.PETS),
             ("plants", "Растения (245)" if lang == "ru" else "Расліны (245)", ft.Icons.ECO),
-            ("fungi", "Грибы и лишайники (57)" if lang == "ru" else "Грыбы і лішайнікі (57)", ft.Icons.FOREST),
+            ("fungi", "Грибы (57)" if lang == "ru" else "Грыбы (57)", ft.Icons.FOREST),
         ]
-        kingdom_chips = []
+        kingdom_pills = []
         for k_id, k_label, k_icon in kingdom_items:
             is_sel = (self.selected_kingdom == k_id)
-            kingdom_chips.append(
-                ft.Chip(
-                    leading=ft.Icon(k_icon, size=15, color=AppColors.PRIMARY if is_sel else ft.Colors.ON_SURFACE_VARIANT),
-                    label=ft.Text(k_label, weight=ft.FontWeight.BOLD if is_sel else ft.FontWeight.W_500),
-                    selected=is_sel,
-                    on_select=lambda e, k=k_id: self._select_kingdom(k)
+            kingdom_pills.append(
+                ft.Container(
+                    padding=ft.Padding.symmetric(horizontal=12, vertical=7),
+                    border_radius=16,
+                    bgcolor=AppColors.PRIMARY if is_sel else ft.Colors.SURFACE_CONTAINER_LOW,
+                    border=ft.Border.all(
+                        1.5 if is_sel else 1,
+                        AppColors.PRIMARY if is_sel else ft.Colors.OUTLINE_VARIANT
+                    ),
+                    ink=True,
+                    on_click=lambda e, k=k_id: self._select_kingdom(k),
+                    content=ft.Row(
+                        tight=True,
+                        spacing=6,
+                        controls=[
+                            ft.Icon(
+                                k_icon,
+                                size=15,
+                                color=ft.Colors.WHITE if is_sel else AppColors.PRIMARY
+                            ),
+                            ft.Text(
+                                k_label,
+                                size=12,
+                                weight=ft.FontWeight.BOLD if is_sel else ft.FontWeight.W_500,
+                                color=ft.Colors.WHITE if is_sel else ft.Colors.ON_SURFACE
+                            )
+                        ]
+                    )
                 )
             )
 
-        self.kingdom_row = ft.Row(
+        kingdom_row = ft.Row(
             scroll=ft.ScrollMode.ADAPTIVE,
             spacing=8,
-            controls=kingdom_chips
+            controls=kingdom_pills
         )
 
-        # 3. Фильтр категорий охраны (официальные цвета Красной книги: I CR, II EN, III VU, IV NT)
+        # 3. Фильтр категорий охраны (официальные цвета Красной книги Беларуси)
         cat_items = [
             (None, "Все категории" if lang == "ru" else "Усе катэгорыі", None, None),
-            ("I", "I CR (119)", AppColors.CAT_I, "На грани исчезновения" if lang == "ru" else "На мяжы знікнення"),
-            ("II", "II EN (151)", AppColors.CAT_II, "Исчезающие виды" if lang == "ru" else "Знікаючыя віды"),
-            ("III", "III VU (152)", AppColors.CAT_III, "Уязвимые виды" if lang == "ru" else "Уразлівыя віды"),
-            ("IV", "IV NT (93)", AppColors.CAT_IV, "Требующие контроля" if lang == "ru" else "Патрабуюць кантролю"),
+            ("I", "I • CR (119)", AppColors.CAT_I, "I (CR) — На грани исчезновения" if lang == "ru" else "I (CR) — На мяжы знікнення"),
+            ("II", "II • EN (151)", AppColors.CAT_II, "II (EN) — Исчезающие виды" if lang == "ru" else "II (EN) — Знікаючыя віды"),
+            ("III", "III • VU (152)", AppColors.CAT_III, "III (VU) — Уязвимые виды" if lang == "ru" else "III (VU) — Уразлівыя віды"),
+            ("IV", "IV • NT (93)", AppColors.CAT_IV, "IV (NT) — Требующие контроля" if lang == "ru" else "IV (NT) — Патрабуюць кантролю"),
         ]
-        cat_chips = []
+        cat_pills = []
         for c_id, c_label, c_color, c_tooltip in cat_items:
             is_sel = (self.selected_category == c_id)
-            if c_color:
-                label_ctrl = ft.Row(
-                    tight=True,
-                    spacing=5,
-                    controls=[
-                        ft.Icon(ft.Icons.SHIELD, size=13, color=c_color),
-                        ft.Text(c_label, color=c_color if not is_sel else None, weight=ft.FontWeight.BOLD)
-                    ]
-                )
-            else:
-                label_ctrl = ft.Text(c_label, weight=ft.FontWeight.BOLD if is_sel else ft.FontWeight.W_500)
-
-            cat_chips.append(
-                ft.Chip(
-                    label=label_ctrl,
+            cat_pills.append(
+                ft.Container(
+                    padding=ft.Padding.symmetric(horizontal=10, vertical=6),
+                    border_radius=14,
                     tooltip=c_tooltip,
-                    selected=is_sel,
-                    on_select=lambda e, c=c_id: self._select_category(c)
+                    bgcolor=c_color if (is_sel and c_color) else (AppColors.PRIMARY if (is_sel and not c_color) else ft.Colors.SURFACE_CONTAINER_LOW),
+                    border=ft.Border.all(
+                        1.5 if is_sel else 1,
+                        (c_color or AppColors.PRIMARY) if is_sel else ft.Colors.OUTLINE_VARIANT
+                    ),
+                    ink=True,
+                    on_click=lambda e, c=c_id: self._select_category(c),
+                    content=ft.Row(
+                        tight=True,
+                        spacing=6,
+                        controls=[
+                            *( [ft.Container(width=7, height=7, border_radius=4, bgcolor=ft.Colors.WHITE if is_sel else c_color)] if c_color else [] ),
+                            ft.Text(
+                                c_label,
+                                size=11,
+                                weight=ft.FontWeight.BOLD if is_sel else ft.FontWeight.W_500,
+                                color=ft.Colors.WHITE if is_sel else (c_color if c_color else ft.Colors.ON_SURFACE)
+                            )
+                        ]
+                    )
                 )
             )
 
-        self.category_row = ft.Row(
+        category_row = ft.Row(
             scroll=ft.ScrollMode.ADAPTIVE,
             spacing=8,
-            controls=cat_chips
+            controls=cat_pills
         )
 
-        # 4. Выпадающие списки расширенной фильтрации (Таксон, Биотоп, ООПТ, Область, Сортировка)
+        # 4. Выпадающие списки расширенной фильтрации
         # 4.1 Таксоны
         taxon_options_ru = [
             ("all", "Все таксоны"),
@@ -156,18 +246,52 @@ class CatalogView(ft.Container):
         current_taxon_val = self.selected_taxon if self.selected_taxon else "all"
 
         self.taxon_dropdown = ft.Dropdown(
+            label="Таксономическая группа" if lang == "ru" else "Таксанамічная група",
             value=current_taxon_val,
             options=[ft.dropdown.Option(val, text) for val, text in t_opts],
             leading_icon=ft.Icons.CATEGORY_OUTLINED,
-            border_radius=10,
-            content_padding=ft.Padding.symmetric(horizontal=12, vertical=6),
+            border_radius=12,
+            content_padding=ft.Padding.symmetric(horizontal=12, vertical=8),
             dense=True,
             on_select=self._on_taxon_change,
-            expand=True,
-            tooltip="Фильтр по таксономической группе" if lang == "ru" else "Фільтр па таксанамічнай групе"
+            expand=True
         )
 
-        # 4.2 Биотопы
+        # 4.2 Область Беларуси
+        region_options_ru = [
+            ("all", "Все области Беларуси"),
+            ("Брестская", "Брестская область"),
+            ("Витебская", "Витебская область"),
+            ("Гомельская", "Гомельская область"),
+            ("Гродненская", "Гродненская область"),
+            ("Минская", "Минская область"),
+            ("Могилевская", "Могилевская область"),
+        ]
+        region_options_be = [
+            ("all", "Усе вобласці Беларусі"),
+            ("Брэсцкая", "Брэсцкая вобласць"),
+            ("Віцебская", "Віцебская вобласць"),
+            ("Гомельская", "Гомельская вобласць"),
+            ("Гродзенская", "Гродзенская вобласць"),
+            ("Мінская", "Мінская вобласць"),
+            ("Магілёўская", "Магілёўская вобласць"),
+        ]
+        reg_opts = region_options_ru if lang == "ru" else region_options_be
+        current_reg_val = self.selected_region if self.selected_region else "all"
+
+        self.region_dropdown = ft.Dropdown(
+            label="Область Беларуси" if lang == "ru" else "Вобласць Беларусі",
+            value=current_reg_val,
+            options=[ft.dropdown.Option(val, text) for val, text in reg_opts],
+            leading_icon=ft.Icons.MAP_OUTLINED,
+            border_radius=12,
+            content_padding=ft.Padding.symmetric(horizontal=12, vertical=8),
+            dense=True,
+            on_select=self._on_region_change,
+            expand=True
+        )
+
+        # 4.3 Биотопы
         biotope_options_ru = [
             ("all", "Все биотопы"),
             ("forest", "Леса и дубравы (393)"),
@@ -186,18 +310,18 @@ class CatalogView(ft.Container):
         current_biotope_val = self.selected_biotope if self.selected_biotope else "all"
 
         self.biotope_dropdown = ft.Dropdown(
+            label="Биотоп обитания" if lang == "ru" else "Біятоп пражывання",
             value=current_biotope_val,
             options=[ft.dropdown.Option(val, text) for val, text in b_opts],
             leading_icon=ft.Icons.FOREST_OUTLINED,
-            border_radius=10,
-            content_padding=ft.Padding.symmetric(horizontal=12, vertical=6),
+            border_radius=12,
+            content_padding=ft.Padding.symmetric(horizontal=12, vertical=8),
             dense=True,
             on_select=self._on_biotope_change,
-            expand=True,
-            tooltip="Фильтр по экосистеме обитания" if lang == "ru" else "Фільтр па экасістэме пражывання"
+            expand=True
         )
 
-        # 4.3 ООПТ / Национальные парки и заповедники
+        # 4.4 ООПТ / Национальные парки
         park_options_ru = [
             ("all", "Все ООПТ и нацпарки"),
             ("Беловежская пуща", "НП «Беловежская пуща»"),
@@ -230,49 +354,15 @@ class CatalogView(ft.Container):
         current_park_val = self.selected_national_park if self.selected_national_park else "all"
 
         self.park_dropdown = ft.Dropdown(
+            label="Заповедник / Нацпарк" if lang == "ru" else "Запаведнік / Нацпарк",
             value=current_park_val,
             options=[ft.dropdown.Option(val, text) for val, text in p_opts],
             leading_icon=ft.Icons.PARK_OUTLINED,
-            border_radius=10,
-            content_padding=ft.Padding.symmetric(horizontal=12, vertical=6),
+            border_radius=12,
+            content_padding=ft.Padding.symmetric(horizontal=12, vertical=8),
             dense=True,
             on_select=self._on_park_change,
-            expand=True,
-            tooltip="Фильтр по заповедникам и национальным паркам" if lang == "ru" else "Фільтр па запаведніках і нацпарках"
-        )
-
-        # 4.4 Область Беларуси
-        region_options_ru = [
-            ("all", "Все области Беларуси"),
-            ("Брестская", "Брестская область"),
-            ("Витебская", "Витебская область"),
-            ("Гомельская", "Гомельская область"),
-            ("Гродненская", "Гродненская область"),
-            ("Минская", "Минская область"),
-            ("Могилевская", "Могилевская область"),
-        ]
-        region_options_be = [
-            ("all", "Усе вобласці Беларусі"),
-            ("Брэсцкая", "Брэсцкая вобласць"),
-            ("Віцебская", "Віцебская вобласць"),
-            ("Гомельская", "Гомельская вобласць"),
-            ("Гродзенская", "Гродзенская вобласць"),
-            ("Мінская", "Мінская вобласць"),
-            ("Магілёўская", "Магілёўская вобласць"),
-        ]
-        reg_opts = region_options_ru if lang == "ru" else region_options_be
-        current_reg_val = self.selected_region if self.selected_region else "all"
-
-        self.region_dropdown = ft.Dropdown(
-            value=current_reg_val,
-            options=[ft.dropdown.Option(val, text) for val, text in reg_opts],
-            leading_icon=ft.Icons.MAP_OUTLINED,
-            border_radius=10,
-            content_padding=ft.Padding.symmetric(horizontal=12, vertical=6),
-            dense=True,
-            on_select=self._on_region_change,
-            expand=True,
-            tooltip="Фильтр по административным областям" if lang == "ru" else "Фільтр па адміністрацыйных абласцях"
+            expand=True
         )
 
         # 4.5 Сортировка
@@ -293,103 +383,142 @@ class CatalogView(ft.Container):
         s_opts = sort_options_ru if lang == "ru" else sort_options_be
 
         self.sort_dropdown = ft.Dropdown(
+            label="Сортировка" if lang == "ru" else "Сартаванне",
             value=self.sort_by,
             options=[ft.dropdown.Option(val, text) for val, text in s_opts],
-            leading_icon=ft.Icons.SORT_BY_ALPHA,
-            border_radius=10,
-            content_padding=ft.Padding.symmetric(horizontal=12, vertical=6),
+            leading_icon=ft.Icons.SORT,
+            border_radius=12,
+            content_padding=ft.Padding.symmetric(horizontal=12, vertical=8),
             dense=True,
             on_select=self._on_sort_change,
-            expand=True,
-            tooltip="Порядок сортировки реестра" if lang == "ru" else "Парадак сартавання рэестра"
+            expand=True
         )
 
-        # 4.6 Чекбокс аудио и кнопка сброса
-        self.sound_chip = ft.Chip(
-            leading=ft.Icon(ft.Icons.VOLUME_UP, size=15, color=AppColors.PRIMARY if self.has_sound_only else ft.Colors.ON_SURFACE_VARIANT),
-            label=ft.Text("С аудиозаписью" if lang == "ru" else "З аўдыязапісам", weight=ft.FontWeight.BOLD if self.has_sound_only else ft.FontWeight.W_500),
-            selected=self.has_sound_only,
-            on_select=self._toggle_sound_filter
-        )
-
-        reset_btn = ft.OutlinedButton(
-            icon=ft.Icons.RESTART_ALT,
-            content=ft.Text("Сбросить фильтры" if lang == "ru" else "Скінуць фільтры"),
-            style=ft.ButtonStyle(
-                color=ft.Colors.RED_600,
-                side=ft.BorderSide(1, ft.Colors.RED_200)
+        # Аудио переключатель
+        audio_chip = ft.Container(
+            padding=ft.Padding.symmetric(horizontal=12, vertical=8),
+            border_radius=12,
+            bgcolor=AppColors.PRIMARY if self.has_sound_only else ft.Colors.SURFACE_CONTAINER_LOW,
+            border=ft.Border.all(
+                1.5 if self.has_sound_only else 1,
+                AppColors.PRIMARY if self.has_sound_only else ft.Colors.OUTLINE_VARIANT
             ),
-            visible=is_filtered,
-            on_click=self._reset_all_filters
-        )
-
-        # 4.7 Панель фильтров в ровной адаптивной сетке (без кривых столбцов)
-        filter_panel = ft.Card(
-            elevation=1,
-            content=ft.Container(
-                padding=14,
-                border_radius=14,
-                bgcolor=ft.Colors.SURFACE_CONTAINER_LOW,
-                content=ft.Column(
-                    spacing=12,
-                    controls=[
-                        ft.Row(
-                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                            controls=[
-                                ft.Row(
-                                    tight=True,
-                                    spacing=8,
-                                    controls=[
-                                        ft.Icon(ft.Icons.TUNE, size=18, color=AppColors.PRIMARY),
-                                        ft.Text("Параметры выборки и сортировки:" if lang == "ru" else "Параметры выбаркі і сартавання:", weight=ft.FontWeight.BOLD, size=13),
-                                        *([
-                                            ft.Container(
-                                                padding=ft.Padding.symmetric(horizontal=8, vertical=2),
-                                                border_radius=10,
-                                                bgcolor=AppColors.PRIMARY_CONTAINER,
-                                                content=ft.Text("Активны" if lang == "ru" else "Актыўныя", size=10, color=AppColors.PRIMARY, weight=ft.FontWeight.BOLD)
-                                            )
-                                        ] if is_filtered else [])
-                                    ]
-                                ),
-                                *([reset_btn] if is_filtered else [])
-                            ]
-                        ),
-                        # Ряд 1: Таксон, Область, Биотоп, Нацпарк (ровная сетка 4 на ПК, 2 на планшете, 1 на Android)
-                        ft.ResponsiveRow(
-                            spacing=10,
-                            run_spacing=10,
-                            controls=[
-                                ft.Container(col={"sm": 12, "md": 6, "lg": 3}, content=self.taxon_dropdown),
-                                ft.Container(col={"sm": 12, "md": 6, "lg": 3}, content=self.region_dropdown),
-                                ft.Container(col={"sm": 12, "md": 6, "lg": 3}, content=self.biotope_dropdown),
-                                ft.Container(col={"sm": 12, "md": 6, "lg": 3}, content=self.park_dropdown),
-                            ]
-                        ),
-                        # Ряд 2: Сортировка и опции
-                        ft.ResponsiveRow(
-                            spacing=10,
-                            run_spacing=10,
-                            vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                            controls=[
-                                ft.Container(col={"sm": 12, "md": 6, "lg": 6}, content=self.sort_dropdown),
-                                ft.Container(
-                                    col={"sm": 12, "md": 6, "lg": 6},
-                                    content=ft.Row(
-                                        spacing=10,
-                                        controls=[
-                                            self.sound_chip
-                                        ]
-                                    )
-                                )
-                            ]
-                        )
-                    ]
-                )
+            ink=True,
+            on_click=self._toggle_sound_filter,
+            content=ft.Row(
+                tight=True,
+                spacing=8,
+                controls=[
+                    ft.Icon(
+                        ft.Icons.VOLUME_UP,
+                        size=18,
+                        color=ft.Colors.WHITE if self.has_sound_only else AppColors.PRIMARY
+                    ),
+                    ft.Text(
+                        "Только с аудиозаписью" if lang == "ru" else "Толькі з аўдыязапісам",
+                        size=12,
+                        weight=ft.FontWeight.BOLD if self.has_sound_only else ft.FontWeight.W_500,
+                        color=ft.Colors.WHITE if self.has_sound_only else ft.Colors.ON_SURFACE
+                    )
+                ]
             )
         )
 
-        # 5. Сетка карточек видов
+        # Раскрывающаяся панель детальных фильтров
+        filter_panel = ft.Container(
+            visible=self.filters_expanded,
+            padding=16,
+            border_radius=16,
+            bgcolor=ft.Colors.SURFACE_CONTAINER_LOW,
+            border=ft.Border.all(1, ft.Colors.OUTLINE_VARIANT),
+            content=ft.Column(
+                spacing=12,
+                controls=[
+                    ft.Row(
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                        controls=[
+                            ft.Row(
+                                tight=True,
+                                spacing=6,
+                                controls=[
+                                    ft.Icon(ft.Icons.TUNE, size=16, color=AppColors.PRIMARY),
+                                    ft.Text(
+                                        "Детальные параметры отбора:" if lang == "ru" else "Дэталёвыя параметры адбору:",
+                                        weight=ft.FontWeight.BOLD,
+                                        size=13
+                                    )
+                                ]
+                            ),
+                            *([
+                                ft.TextButton(
+                                    icon=ft.Icons.CLEAR_ALL,
+                                    text="Сбросить все" if lang == "ru" else "Скінуць усё",
+                                    style=ft.ButtonStyle(color=ft.Colors.RED_600),
+                                    on_click=self._reset_all_filters
+                                )
+                            ] if total_active_count > 0 else [])
+                        ]
+                    ),
+                    # Сетка выпадающих списков (4 в ряд на ПК, 2 на планшете, 1 на Android)
+                    ft.ResponsiveRow(
+                        spacing=10,
+                        run_spacing=10,
+                        controls=[
+                            ft.Container(col={"sm": 12, "md": 6, "lg": 3}, content=self.taxon_dropdown),
+                            ft.Container(col={"sm": 12, "md": 6, "lg": 3}, content=self.region_dropdown),
+                            ft.Container(col={"sm": 12, "md": 6, "lg": 3}, content=self.biotope_dropdown),
+                            ft.Container(col={"sm": 12, "md": 6, "lg": 3}, content=self.park_dropdown),
+                        ]
+                    ),
+                    # Сортировка и аудио
+                    ft.ResponsiveRow(
+                        spacing=10,
+                        run_spacing=10,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                        controls=[
+                            ft.Container(col={"sm": 12, "md": 6, "lg": 6}, content=self.sort_dropdown),
+                            ft.Container(col={"sm": 12, "md": 6, "lg": 6}, content=audio_chip),
+                        ]
+                    )
+                ]
+            )
+        )
+
+        # 5. Интерактивные чипсы активных фильтров с кнопкой удаления (✕)
+        active_tags = []
+        if self.selected_kingdom:
+            k_dict = {"animals": "Животные", "plants": "Растения", "fungi": "Грибы"} if lang == "ru" else {"animals": "Жывёлы", "plants": "Расліны", "fungi": "Грыбы"}
+            active_tags.append(self._create_active_tag(k_dict.get(self.selected_kingdom, self.selected_kingdom), lambda e: self._select_kingdom(None)))
+        if self.selected_category:
+            active_tags.append(self._create_active_tag(f"Кат. {self.selected_category}", lambda e: self._select_category(None)))
+        if self.selected_taxon:
+            active_tags.append(self._create_active_tag(self.selected_taxon, lambda e: self._clear_taxon()))
+        if self.selected_region:
+            active_tags.append(self._create_active_tag(f"{self.selected_region} обл.", lambda e: self._clear_region()))
+        if self.selected_biotope:
+            b_dict = {"forest": "Леса", "aquatic": "Водные", "wetland": "Болота", "meadow": "Луга"} if lang == "ru" else {"forest": "Лясы", "aquatic": "Водныя", "wetland": "Балоты", "meadow": "Лугі"}
+            active_tags.append(self._create_active_tag(b_dict.get(self.selected_biotope, self.selected_biotope), lambda e: self._clear_biotope()))
+        if self.selected_national_park:
+            active_tags.append(self._create_active_tag(self.selected_national_park, lambda e: self._clear_park()))
+        if self.has_sound_only:
+            active_tags.append(self._create_active_tag("С аудиозаписью" if lang == "ru" else "З аўдыя", self._toggle_sound_filter))
+
+        active_tags_row = ft.Row(
+            scroll=ft.ScrollMode.ADAPTIVE,
+            spacing=6,
+            visible=bool(active_tags),
+            controls=[
+                ft.Text("Активные:" if lang == "ru" else "Актыўныя:", size=11, weight=ft.FontWeight.BOLD, color=AppColors.PRIMARY),
+                *active_tags,
+                ft.TextButton(
+                    text="Сбросить все" if lang == "ru" else "Скінуць усё",
+                    style=ft.ButtonStyle(color=ft.Colors.RED_600),
+                    on_click=self._reset_all_filters
+                )
+            ]
+        )
+
+        # 6. Сетка карточек видов
         self.grid_container = ft.ResponsiveRow(
             spacing=16,
             run_spacing=16
@@ -404,10 +533,11 @@ class CatalogView(ft.Container):
             padding=ft.Padding.symmetric(horizontal=16, vertical=16),
             spacing=12,
             controls=[
-                self.search_field,
-                self.kingdom_row,
-                self.category_row,
+                top_search_row,
+                kingdom_row,
+                category_row,
                 filter_panel,
+                active_tags_row,
                 ft.Row(
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     controls=[
@@ -421,9 +551,35 @@ class CatalogView(ft.Container):
                 ),
                 ft.Divider(height=1, color=ft.Colors.OUTLINE_VARIANT),
                 self.grid_container,
-                ft.Container(height=32) # Bottom padding
+                ft.Container(height=32)
             ]
         )
+
+    def _create_active_tag(self, label: str, on_remove: Callable):
+        return ft.Container(
+            padding=ft.Padding.only(left=10, right=6, top=3, bottom=3),
+            border_radius=12,
+            bgcolor=AppColors.PRIMARY_CONTAINER,
+            content=ft.Row(
+                tight=True,
+                spacing=4,
+                controls=[
+                    ft.Text(label, size=11, weight=ft.FontWeight.BOLD, color=AppColors.PRIMARY),
+                    ft.IconButton(
+                        icon=ft.Icons.CLOSE,
+                        icon_size=12,
+                        icon_color=AppColors.PRIMARY,
+                        tooltip="Удалить фильтр",
+                        on_click=on_remove
+                    )
+                ]
+            )
+        )
+
+    def _toggle_filters_panel(self, e):
+        self.filters_expanded = not self.filters_expanded
+        self._build_ui()
+        self.update()
 
     def _select_category(self, cat: Optional[str]):
         self.selected_category = cat
@@ -444,9 +600,21 @@ class CatalogView(ft.Container):
         self._build_ui()
         self.update()
 
+    def _clear_taxon(self):
+        self.selected_taxon = None
+        self.visible_count = 36
+        self._build_ui()
+        self.update()
+
     def _on_biotope_change(self, e):
         val = e.control.value
         self.selected_biotope = None if val == "all" else val
+        self.visible_count = 36
+        self._build_ui()
+        self.update()
+
+    def _clear_biotope(self):
+        self.selected_biotope = None
         self.visible_count = 36
         self._build_ui()
         self.update()
@@ -458,9 +626,21 @@ class CatalogView(ft.Container):
         self._build_ui()
         self.update()
 
+    def _clear_park(self):
+        self.selected_national_park = None
+        self.visible_count = 36
+        self._build_ui()
+        self.update()
+
     def _on_region_change(self, e):
         val = e.control.value
         self.selected_region = None if val == "all" else val
+        self.visible_count = 36
+        self._build_ui()
+        self.update()
+
+    def _clear_region(self):
+        self.selected_region = None
         self.visible_count = 36
         self._build_ui()
         self.update()
@@ -558,7 +738,6 @@ class CatalogView(ft.Container):
             )
             return
 
-        # Плавная пагинация для мгновенной отрисовки без задержек интерфейса
         displayed = species_list[:self.visible_count]
         for sp in displayed:
             card = self._create_species_card(sp, lang)
@@ -588,7 +767,6 @@ class CatalogView(ft.Container):
         cat_color = get_category_color(sp["category"])
         title = sp["name_be"] if lang == "be" else sp["name_ru"]
 
-        # Значок царства — чистый векторный значок Material Icons (без эмодзи!)
         if sp["kingdom"] == "animals":
             k_icon_ctrl = ft.Icon(ft.Icons.PETS, size=14, color=ft.Colors.WHITE)
         elif sp["kingdom"] == "plants":

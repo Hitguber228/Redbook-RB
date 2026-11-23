@@ -332,7 +332,7 @@ class AIScannerView(ft.Container):
                                 right=6,
                                 content=ft.IconButton(
                                     icon=ft.Icons.CLOSE,
-                                    bgcolor=ft.Colors.BLACK54,
+                                    bgcolor=ft.Colors.BLACK_54,
                                     icon_color=ft.Colors.WHITE,
                                     icon_size=16,
                                     tooltip="Очистить снимок",
@@ -679,7 +679,7 @@ class AIScannerView(ft.Container):
                             content=ft.Column(
                                 spacing=4,
                                 controls=[
-                                    ft.Text("Вы" if is_user else ("Гид-натуралист" if lang == "ru" else "Гід-натураліст"), size=11, color=ft.Colors.WHITE70 if is_user else ft.Colors.ON_SURFACE_VARIANT, weight=ft.FontWeight.BOLD),
+                                    ft.Text("Вы" if is_user else ("Гид-натуралист" if lang == "ru" else "Гід-натураліст"), size=11, color=ft.Colors.WHITE_70 if is_user else ft.Colors.ON_SURFACE_VARIANT, weight=ft.FontWeight.BOLD),
                                     ft.Markdown(msg["text"], selectable=True)
                                 ]
                             )

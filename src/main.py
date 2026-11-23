@@ -93,12 +93,14 @@ class RedBookApp:
                                 on_click=lambda e: self._set_language("ru"),
                                 content=ft.Row(
                                     tight=True,
-                                    spacing=4,
+                                    spacing=5,
                                     controls=[
-                                        ft.Icon(
-                                            ft.Icons.LANGUAGE,
-                                            size=14,
-                                            color=AppColors.PRIMARY if lang == "ru" else ft.Colors.WHITE_70
+                                        ft.Container(
+                                            width=16,
+                                            height=11,
+                                            border_radius=2,
+                                            clip_behavior=ft.ClipBehavior.HARD_EDGE,
+                                            content=ft.Image(src="/flags/flag_ru.png", fit="cover")
                                         ),
                                         ft.Text(
                                             "РУС",
@@ -118,12 +120,14 @@ class RedBookApp:
                                 on_click=lambda e: self._set_language("be"),
                                 content=ft.Row(
                                     tight=True,
-                                    spacing=4,
+                                    spacing=5,
                                     controls=[
-                                        ft.Icon(
-                                            ft.Icons.TRANSLATE,
-                                            size=14,
-                                            color=AppColors.PRIMARY if lang == "be" else ft.Colors.WHITE_70
+                                        ft.Container(
+                                            width=16,
+                                            height=11,
+                                            border_radius=2,
+                                            clip_behavior=ft.ClipBehavior.HARD_EDGE,
+                                            content=ft.Image(src="/flags/flag_by.png", fit="cover")
                                         ),
                                         ft.Text(
                                             "БЕЛ",
