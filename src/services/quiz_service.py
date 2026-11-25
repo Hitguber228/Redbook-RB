@@ -1,6 +1,13 @@
+import os
 import random
 from typing import List, Dict, Any, Optional
 from ..database.db import db_manager
+
+RECOGNIZABLE_PHOTO_GROUPS = {
+    "mammals", "birds", "reptiles", "amphibians",
+    "fish", "vascular_plants", "mushrooms", "insects"
+}
+
 
 class QuizService:
     def __init__(self):
@@ -17,10 +24,26 @@ class QuizService:
             {
                 "id": "tournament",
                 "title": "Большой эко-турнир" if is_ru else "Вялікі эка-турнір",
-                "subtitle": "Все разделы" if is_ru else "Усе раздзелы",
-                "description": "Случайный олимпиадный тест по всем разделам Красной книги Беларуси." if is_ru else "Выпадковы тэст па ўсіх раздзелах Чырвонай кнігі Беларусі.",
+                "subtitle": "Смешанный олимпиадный режим" if is_ru else "Змешаны алімпіядны рэжым",
+                "description": (
+                    "Случайный микс из всех разделов Красной книги: фото-загадки, редкие звери и растения, следы, голоса и законы."
+                    if is_ru else
+                    "Выпадковы мікс з усіх раздзелаў Чырвонай кнігі: фота-загадкі, рэдкія звяры і расліны, сляды, галасы і законы."
+                ),
                 "icon": "MILITARY_TECH",
-                "badge": "10 вопросов" if is_ru else "10 пытанняў"
+                "badge": "10 вопросов • Все форматы" if is_ru else "10 пытанняў • Усе фарматы"
+            },
+            {
+                "id": "photo",
+                "title": "Фото-определитель" if is_ru else "Фота-азначнік",
+                "subtitle": "Узнай вид по фото" if is_ru else "Пазнай від па фота",
+                "description": (
+                    "Определяйте редких зверей, птиц, насекомых, грибы и растения Беларуси по реальным фотографиям."
+                    if is_ru else
+                    "Вызначайце рэдкіх звяроў, птушак, насякомых, грыбы і расліны Беларусі па рэальных фатаграфіях."
+                ),
+                "icon": "PHOTO_CAMERA",
+                "badge": "Визуальный тест" if is_ru else "Візуальны тэст"
             },
             {
                 "id": "animals",
@@ -64,6 +87,143 @@ class QuizService:
             }
         ]
 
+    @staticmethod
+    def _first_sentence(text: str, max_len: int = 180) -> str:
+        if not text:
+            return ""
+        clean = " ".join(text.strip().split())
+        if len(clean) <= max_len:
+            return clean
+        dot_idx = clean.find(".", 40, max_len)
+        if dot_idx != -1:
+            return clean[:dot_idx + 1]
+        return clean[:max_len].rstrip(" ,;:") + "..."
+
+    @staticmethod
+    def _photo_prompt_for_species(sp: Dict[str, Any]) -> tuple[str, str]:
+        group = sp.get("taxon_group", "")
+        kingdom = sp.get("kingdom", "animals")
+        if group == "birds":
+            return (
+                "Какая редкая птица из Красной книги Беларуси изображена на фотографии?",
+                "Якая рэдкая птушка з Чырвонай кнігі Беларусі выяўлена на фатаграфіі?"
+            )
+        if group == "insects":
+            return (
+                "Какое редкое насекомое из Красной книги Беларуси изображено на фотографии?",
+                "Якое рэдкае насякомае з Чырвонай кнігі Беларусі выяўлена на фатаграфіі?"
+            )
+        if group == "fish":
+            return (
+                "Какая редкая рыба из Красной книги Беларуси изображена на фотографии?",
+                "Якая рэдкая рыба з Чырвонай кнігі Беларусі выяўлена на фатаграфіі?"
+            )
+        if group == "mushrooms":
+            return (
+                "Какой редкий гриб из Красной книги Беларуси изображен на фотографии?",
+                "Які рэдкі грыб з Чырвонай кнігі Беларусі выяўлены на фатаграфіі?"
+            )
+        if kingdom == "plants":
+            return (
+                "Какое редкое растение из Красной книги Беларуси изображено на фотографии?",
+                "Якая рэдкая расліна з Чырвонай кнігі Беларусі выяўлена на фатаграфіі?"
+            )
+        return (
+            "Какое редкое животное из Красной книги Беларуси изображено на фотографии?",
+            "Якая рэдкая жывёла з Чырвонай кнігі Беларусі выяўлена на фатаграфіі?"
+        )
+
+    def _generate_photo_quizzes(self, count: int = 10) -> List[Dict[str, Any]]:
+        all_species = db_manager.get_species()
+        assets_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "assets"))
+
+        valid_species = [
+            s for s in all_species
+            if s.get("image_url")
+            and os.path.exists(os.path.join(assets_root, s["image_url"].lstrip("/")))
+        ]
+        if len(valid_species) < 4:
+            return []
+
+        pool = [s for s in valid_species if s.get("taxon_group") in RECOGNIZABLE_PHOTO_GROUPS]
+        if len(pool) < count:
+            pool = valid_species
+
+        by_group: Dict[str, List[Dict[str, Any]]] = {}
+        by_kingdom: Dict[str, List[Dict[str, Any]]] = {}
+        for s in valid_species:
+            by_group.setdefault(s.get("taxon_group", "other"), []).append(s)
+            by_kingdom.setdefault(s.get("kingdom", "animals"), []).append(s)
+
+        featured = [s for s in pool if s.get("is_featured")]
+        regular = [s for s in pool if not s.get("is_featured")]
+        random.shuffle(featured)
+        random.shuffle(regular)
+
+        # Баланс: до половины вопросов — знаковые виды, остальные — случайные из базы
+        featured_quota = min(len(featured), max(1, count // 2))
+        targets = featured[:featured_quota] + regular[:max(0, count - featured_quota)]
+        if len(targets) < count:
+            used_ids = {s["id"] for s in targets}
+            rest = [s for s in pool if s["id"] not in used_ids]
+            random.shuffle(rest)
+            targets.extend(rest[:count - len(targets)])
+        random.shuffle(targets)
+
+        generated: List[Dict[str, Any]] = []
+        for idx, sp in enumerate(targets[:count], start=1):
+            group_candidates = [
+                c for c in by_group.get(sp.get("taxon_group", "other"), [])
+                if c["id"] != sp["id"] and c["name_ru"] != sp["name_ru"]
+            ]
+            if len(group_candidates) < 3:
+                kingdom_candidates = [
+                    c for c in by_kingdom.get(sp.get("kingdom", "animals"), [])
+                    if c["id"] != sp["id"] and c["name_ru"] != sp["name_ru"]
+                    and c["id"] not in {g["id"] for g in group_candidates}
+                ]
+                random.shuffle(kingdom_candidates)
+                group_candidates.extend(kingdom_candidates)
+
+            if len(group_candidates) < 3:
+                fallback = [
+                    c for c in valid_species
+                    if c["id"] != sp["id"] and c["name_ru"] != sp["name_ru"]
+                    and c["id"] not in {g["id"] for g in group_candidates}
+                ]
+                random.shuffle(fallback)
+                group_candidates.extend(fallback)
+
+            distractors = random.sample(group_candidates, 3)
+            q_ru, q_be = self._photo_prompt_for_species(sp)
+
+            short_ru = self._first_sentence(sp.get("description_ru", ""))
+            short_be = self._first_sentence(sp.get("description_be", "")) or short_ru
+
+            exp_ru = f"На фотографии: {sp['name_ru']} ({sp['name_lat']}), {sp['category']} категория охраны."
+            if short_ru:
+                exp_ru += f" {short_ru}"
+
+            exp_be = f"На фатаграфіі: {sp['name_be']} ({sp['name_lat']}), {sp['category']} катэгорыя аховы."
+            if short_be:
+                exp_be += f" {short_be}"
+
+            generated.append({
+                "id": -idx,
+                "quiz_type": "photo",
+                "question_ru": q_ru,
+                "question_be": q_be,
+                "options_ru": [sp["name_ru"]] + [d["name_ru"] for d in distractors],
+                "options_be": [sp["name_be"]] + [d["name_be"] for d in distractors],
+                "correct_index": 0,
+                "explanation_ru": exp_ru,
+                "explanation_be": exp_be,
+                "media_url": sp["image_url"],
+                "related_species_id": sp["id"],
+            })
+
+        return generated
+
     def start_session(self, category_id: str = "tournament", limit: int = 10) -> List[Dict[str, Any]]:
         self.current_score = 0
         self.total_answered = 0
@@ -71,15 +231,20 @@ class QuizService:
         self.max_streak = 0
         self.active_category = category_id
 
-        if category_id == "tournament":
-            all_q = db_manager.get_quizzes()
+        if category_id == "photo":
+            selected = self._generate_photo_quizzes(limit)
+        elif category_id == "tournament":
+            photo_count = min(3, max(1, limit // 3))
+            photo_q = self._generate_photo_quizzes(photo_count)
+            text_q = list(db_manager.get_quizzes())
+            random.shuffle(text_q)
+            selected = photo_q + text_q[:max(0, limit - len(photo_q))]
+            random.shuffle(selected)
         else:
             all_q = db_manager.get_quizzes(category_id)
-
-        # Перемешивание вопросов для разнообразия каждого прохождения
-        shuffled = list(all_q)
-        random.shuffle(shuffled)
-        selected = shuffled[:limit]
+            shuffled = list(all_q)
+            random.shuffle(shuffled)
+            selected = shuffled[:limit]
 
         # Динамическое перемешивание вариантов ответов (A, B, C, D) для каждого запуска
         session_list = []

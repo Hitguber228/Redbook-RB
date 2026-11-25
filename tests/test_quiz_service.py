@@ -33,12 +33,13 @@ def test_quiz_certificate_generation():
 
 def test_quiz_categories():
     cats_ru = quiz_service.get_categories("ru")
-    assert len(cats_ru) == 6
+    assert len(cats_ru) == 7
     assert any(c["id"] == "tournament" for c in cats_ru)
+    assert any(c["id"] == "photo" for c in cats_ru)
     assert any(c["id"] == "tracks" for c in cats_ru)
 
     cats_be = quiz_service.get_categories("be")
-    assert len(cats_be) == 6
+    assert len(cats_be) == 7
 
 def test_quiz_view_states():
     from src.ui.views.quiz_view import QuizView
@@ -95,4 +96,38 @@ def test_quiz_session_options_shuffled():
     session_q = quiz_service.start_session("tournament", limit=10)
     indices = [q["correct_index"] for q in session_q]
     assert len(set(indices)) > 1, f"Indices should be distributed, got {indices}"
+    assert any(q["quiz_type"] == "photo" for q in session_q), "Tournament should mix in photo quizzes"
+
+def test_photo_quiz_generation_and_view():
+    import os
+    from src.ui.views.quiz_view import QuizView
+
+    session_q = quiz_service.start_session("photo", limit=10)
+    assert len(session_q) == 10
+    for q in session_q:
+        assert q["quiz_type"] == "photo"
+        assert q["media_url"] and q["media_url"].startswith("/images/species/")
+        assert os.path.exists(os.path.join("assets", q["media_url"].lstrip("/")))
+        assert len(q["options_ru"]) == 4
+        assert len(set(q["options_ru"])) == 4
+        assert len(q["options_be"]) == 4
+        assert 0 <= q["correct_index"] < 4
+        assert q["related_species_id"]
+
+    # Проверка ответа на сгенерированный фото-вопрос
+    first_q = session_q[0]
+    res = quiz_service.check_answer(first_q["id"], first_q["correct_index"], language="ru")
+    assert res["is_correct"] is True
+    assert res["related_species_id"] == first_q["related_species_id"]
+
+    # Проверка рендера в QuizView (RU и BE)
+    for lang in ("ru", "be"):
+        view = QuizView(get_language=lambda l=lang: l)
+        view._start_category("photo")
+        assert view.view_state == "question"
+        assert view.content is not None
+        view._select_option(view.session_quizzes[0]["correct_index"])
+        view._handle_action_btn(None)
+        assert view.answer_checked is True
+        assert view.last_result["is_correct"] is True
 

@@ -5,6 +5,7 @@ from ..theme import AppColors
 
 CATEGORY_ICONS = {
     "MILITARY_TECH": ft.Icons.MILITARY_TECH,
+    "PHOTO_CAMERA": ft.Icons.PHOTO_CAMERA,
     "PETS": ft.Icons.PETS,
     "LOCAL_FLORIST": ft.Icons.LOCAL_FLORIST,
     "EXPLORE": ft.Icons.EXPLORE,
@@ -105,11 +106,11 @@ class QuizView(ft.Container):
                             controls=[
                                 self._build_mini_info_chip(
                                     ft.Icons.HELP_OUTLINE,
-                                    "40 вопросов в базе" if is_ru else "40 пытанняў у базе"
+                                    "515 видов + 40 вопросов" if is_ru else "515 відаў + 40 пытанняў"
                                 ),
                                 self._build_mini_info_chip(
                                     ft.Icons.CATEGORY,
-                                    "6 направлений" if is_ru else "6 напрамкаў"
+                                    "7 направлений" if is_ru else "7 напрамкаў"
                                 ),
                                 self._build_mini_info_chip(
                                     ft.Icons.WORKSPACE_PREMIUM,
@@ -122,9 +123,101 @@ class QuizView(ft.Container):
             )
         )
 
-        # Сетка карточек категорий (ft.ResponsiveRow)
+        # Выделенная карточка главного смешанного турнира (во всю ширину)
+        tournament_cat = next((c for c in categories if c["id"] == "tournament"), None)
+        thematic_cats = [c for c in categories if c["id"] != "tournament"]
+
+        featured_card = ft.Container()
+        if tournament_cat:
+            featured_card = ft.Card(
+                elevation=0,
+                shape=ft.RoundedRectangleBorder(radius=16),
+                content=ft.Container(
+                    padding=ft.Padding.symmetric(horizontal=22, vertical=18),
+                    bgcolor=AppColors.PRIMARY_CONTAINER,
+                    border=ft.Border.all(1, AppColors.PRIMARY_LIGHT),
+                    border_radius=16,
+                    ink=True,
+                    on_click=lambda e, cid=tournament_cat["id"]: self._start_category(cid),
+                    content=ft.ResponsiveRow(
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                        spacing=14,
+                        controls=[
+                            ft.Container(
+                                col={"xs": 12, "md": 8},
+                                content=ft.Row(
+                                    spacing=14,
+                                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                                    controls=[
+                                        ft.Container(
+                                            width=50,
+                                            height=50,
+                                            border_radius=12,
+                                            bgcolor=AppColors.PRIMARY,
+                                            alignment=ft.Alignment.CENTER,
+                                            content=ft.Icon(ft.Icons.MILITARY_TECH, color=ft.Colors.WHITE, size=28)
+                                        ),
+                                        ft.Column(
+                                            spacing=3,
+                                            expand=True,
+                                            controls=[
+                                                ft.Row(
+                                                    spacing=8,
+                                                    wrap=True,
+                                                    controls=[
+                                                        ft.Text(
+                                                            tournament_cat["title"],
+                                                            size=17,
+                                                            weight=ft.FontWeight.BOLD,
+                                                            color=AppColors.TEXT_MAIN_LIGHT
+                                                        ),
+                                                        ft.Container(
+                                                            padding=ft.Padding.symmetric(horizontal=8, vertical=2),
+                                                            border_radius=8,
+                                                            bgcolor=ft.Colors.SURFACE,
+                                                            content=ft.Text(
+                                                                tournament_cat["badge"],
+                                                                size=11,
+                                                                weight=ft.FontWeight.W_600,
+                                                                color=AppColors.PRIMARY
+                                                            )
+                                                        )
+                                                    ]
+                                                ),
+                                                ft.Text(
+                                                    tournament_cat["description"],
+                                                    size=13,
+                                                    color=AppColors.TEXT_MAIN_LIGHT
+                                                )
+                                            ]
+                                        )
+                                    ]
+                                )
+                            ),
+                            ft.Container(
+                                col={"xs": 12, "md": 4},
+                                alignment=ft.Alignment.CENTER_RIGHT,
+                                content=ft.FilledButton(
+                                    content=ft.Text("Начать турнир" if is_ru else "Пачаць турнір"),
+                                    icon=ft.Icons.PLAY_ARROW,
+                                    style=ft.ButtonStyle(
+                                        bgcolor=AppColors.PRIMARY,
+                                        color=ft.Colors.WHITE,
+                                        padding=ft.Padding.symmetric(horizontal=20, vertical=12),
+                                        shape=ft.RoundedRectangleBorder(radius=10)
+                                    ),
+                                    on_click=lambda e, cid=tournament_cat["id"]: self._start_category(cid)
+                                )
+                            )
+                        ]
+                    )
+                )
+            )
+
+        # Сетка 6 тематических карточек (ровная сетка 3x2 на ПК, 2x3 на планшете)
         cards = []
-        for cat in categories:
+        for cat in thematic_cats:
             icon_key = cat.get("icon", "HELP_OUTLINE")
             material_icon = CATEGORY_ICONS.get(icon_key, ft.Icons.HELP_OUTLINE)
 
@@ -232,6 +325,7 @@ class QuizView(ft.Container):
                             spacing=18,
                             controls=[
                                 header_card,
+                                featured_card,
                                 grid_row
                             ]
                         )
@@ -248,6 +342,17 @@ class QuizView(ft.Container):
                 ft.Text(text, size=12, weight=ft.FontWeight.W_500, color=AppColors.TEXT_MAIN_LIGHT)
             ]
         )
+
+    @staticmethod
+    def _normalize_image_src(media_url: Optional[str]) -> Optional[str]:
+        if not media_url or not isinstance(media_url, str):
+            return None
+        lower = media_url.lower()
+        if lower.endswith((".mp3", ".wav", ".ogg")):
+            return None
+        if media_url.startswith("assets/"):
+            return "/" + media_url[len("assets/"):]
+        return media_url
 
     # =========================================================================
     # ЭКРАН 2: ПРОХОЖДЕНИЕ ТЕСТА (АКТИВНЫЙ ВОПРОС)
@@ -353,25 +458,85 @@ class QuizView(ft.Container):
             ]
         )
 
-        # Дополнительная плашка для биоакустических вопросов
-        audio_notice = ft.Container()
+        # Дополнительная плашка для биоакустических вопросов или фото-блок
+        media_src = self._normalize_image_src(current_quiz.get("media_url"))
+        question_media_controls: List[ft.Control] = []
+
         if quiz_type == "voice":
-            audio_notice = ft.Container(
-                padding=ft.Padding.symmetric(horizontal=12, vertical=8),
-                border_radius=10,
-                bgcolor=AppColors.PRIMARY_CONTAINER,
-                content=ft.Row(
-                    spacing=8,
-                    controls=[
-                        ft.Icon(ft.Icons.VOLUME_UP, size=18, color=AppColors.PRIMARY),
-                        ft.Text(
-                            "Биоакустический вопрос: проанализируйте голосовые сигналы и биотоп" if is_ru else "Біяакустычнае пытанне: прааналізуйце галасавыя сігналы і біятоп",
-                            size=12,
-                            weight=ft.FontWeight.W_500,
-                            color=AppColors.PRIMARY,
-                            expand=True
+            question_media_controls.append(
+                ft.Container(
+                    padding=ft.Padding.symmetric(horizontal=12, vertical=8),
+                    border_radius=10,
+                    bgcolor=AppColors.PRIMARY_CONTAINER,
+                    content=ft.Row(
+                        spacing=8,
+                        controls=[
+                            ft.Icon(ft.Icons.VOLUME_UP, size=18, color=AppColors.PRIMARY),
+                            ft.Text(
+                                "Биоакустический вопрос: проанализируйте голосовые сигналы и биотоп" if is_ru else "Біяакустычнае пытанне: прааналізуйце галасавыя сігналы і біятоп",
+                                size=12,
+                                weight=ft.FontWeight.W_500,
+                                color=AppColors.PRIMARY,
+                                expand=True
+                            )
+                        ]
+                    )
+                )
+            )
+        elif quiz_type == "photo" and media_src:
+            question_media_controls.append(
+                ft.Container(
+                    padding=ft.Padding.symmetric(horizontal=10, vertical=6),
+                    border_radius=8,
+                    bgcolor=AppColors.PRIMARY_CONTAINER,
+                    content=ft.Row(
+                        spacing=6,
+                        alignment=ft.MainAxisAlignment.START,
+                        tight=True,
+                        controls=[
+                            ft.Icon(ft.Icons.PHOTO_CAMERA, size=16, color=AppColors.PRIMARY),
+                            ft.Text(
+                                "Фото-определитель: узнайте вид по изображению" if is_ru else "Фота-азначнік: пазнайце від па выяве",
+                                size=12,
+                                weight=ft.FontWeight.W_600,
+                                color=AppColors.PRIMARY
+                            )
+                        ]
+                    )
+                )
+            )
+            question_media_controls.append(
+                ft.Container(
+                    height=240,
+                    width=float("inf"),
+                    border_radius=12,
+                    clip_behavior=ft.ClipBehavior.HARD_EDGE,
+                    bgcolor=ft.Colors.SURFACE_CONTAINER_LOW,
+                    border=ft.Border.all(1, ft.Colors.OUTLINE_VARIANT),
+                    alignment=ft.Alignment.CENTER,
+                    content=ft.Image(
+                        src=media_src,
+                        height=240,
+                        width=float("inf"),
+                        fit="contain",
+                        error_content=ft.Container(
+                            height=240,
+                            alignment=ft.Alignment.CENTER,
+                            content=ft.Column(
+                                alignment=ft.MainAxisAlignment.CENTER,
+                                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                spacing=6,
+                                controls=[
+                                    ft.Icon(ft.Icons.IMAGE_NOT_SUPPORTED, size=36, color=ft.Colors.ON_SURFACE_VARIANT),
+                                    ft.Text(
+                                        "Изображение временно недоступно" if is_ru else "Выява часова недаступная",
+                                        size=12,
+                                        color=ft.Colors.ON_SURFACE_VARIANT
+                                    )
+                                ]
+                            )
                         )
-                    ]
+                    )
                 )
             )
 
@@ -387,7 +552,7 @@ class QuizView(ft.Container):
                 content=ft.Column(
                     spacing=12,
                     controls=[
-                        audio_notice,
+                        *question_media_controls,
                         ft.Text(
                             q_text,
                             size=17,
@@ -494,30 +659,55 @@ class QuizView(ft.Container):
             exp_text = self.last_result.get("explanation", "")
             species_id = self.last_result.get("related_species_id")
 
-            exp_controls = [
-                ft.Row(
-                    spacing=8,
-                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            exp_text_block = ft.Column(
+                spacing=6,
+                expand=True,
+                controls=[
+                    ft.Row(
+                        spacing=8,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                        controls=[
+                            ft.Icon(
+                                ft.Icons.CHECK_CIRCLE if is_ok else ft.Icons.INFO_OUTLINE,
+                                color=ft.Colors.GREEN_700 if is_ok else ft.Colors.RED_700,
+                                size=20
+                            ),
+                            ft.Text(
+                                "Правильно!" if is_ok else ("Не совсем так..." if is_ru else "Не зусім так..."),
+                                weight=ft.FontWeight.BOLD,
+                                size=15,
+                                color=ft.Colors.GREEN_900 if is_ok else ft.Colors.RED_900
+                            )
+                        ]
+                    ),
+                    ft.Text(
+                        exp_text,
+                        size=13,
+                        color=ft.Colors.GREEN_900 if is_ok else ft.Colors.RED_900
+                    )
+                ]
+            )
+
+            if quiz_type != "photo" and media_src:
+                exp_header_row = ft.Row(
+                    spacing=12,
+                    vertical_alignment=ft.CrossAxisAlignment.START,
                     controls=[
-                        ft.Icon(
-                            ft.Icons.CHECK_CIRCLE if is_ok else ft.Icons.INFO_OUTLINE,
-                            color=ft.Colors.GREEN_700 if is_ok else ft.Colors.RED_700,
-                            size=20
+                        ft.Container(
+                            width=72,
+                            height=72,
+                            border_radius=10,
+                            clip_behavior=ft.ClipBehavior.HARD_EDGE,
+                            bgcolor=ft.Colors.SURFACE,
+                            border=ft.Border.all(1, ft.Colors.GREEN_300 if is_ok else ft.Colors.RED_300),
+                            content=ft.Image(src=media_src, width=72, height=72, fit="cover")
                         ),
-                        ft.Text(
-                            "Правильно!" if is_ok else ("Не совсем так..." if is_ru else "Не зусім так..."),
-                            weight=ft.FontWeight.BOLD,
-                            size=15,
-                            color=ft.Colors.GREEN_900 if is_ok else ft.Colors.RED_900
-                        )
+                        exp_text_block
                     ]
-                ),
-                ft.Text(
-                    exp_text,
-                    size=13,
-                    color=ft.Colors.GREEN_900 if is_ok else ft.Colors.RED_900
                 )
-            ]
+                exp_controls = [exp_header_row]
+            else:
+                exp_controls = [exp_text_block]
 
             # Кнопка перехода к паспорту вида в Красной книге
             if species_id and self.on_select_species:
