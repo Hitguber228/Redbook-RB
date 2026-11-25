@@ -150,7 +150,7 @@ class DiaryView(ft.Container):
                                     alignment=ft.MainAxisAlignment.END,
                                     controls=[
                                         ft.FilledButton(
-                                            content="Зафиксировать в дневнике" if lang == "ru" else "Зафіксаваць у дзённіку",
+                                            content=ft.Text("Зафиксировать в дневнике" if lang == "ru" else "Зафіксаваць у дзённіку"),
                                             icon=ft.Icons.SAVE,
                                             on_click=self._save_observation
                                         )
@@ -166,7 +166,7 @@ class DiaryView(ft.Container):
                     controls=[
                         ft.Text("История полевых находок:" if lang == "ru" else "Гісторыя палявых знаходак:", weight=ft.FontWeight.BOLD, size=15),
                         ft.FilledButton(
-                            content="Экспорт в CSV для отчета" if lang == "ru" else "Экспарт у CSV для справаздачы",
+                            content=ft.Text("Экспорт в CSV для отчета" if lang == "ru" else "Экспарт у CSV для справаздачы"),
                             icon=ft.Icons.DOWNLOAD,
                             style=ft.ButtonStyle(bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST, color=ft.Colors.ON_SURFACE),
                             on_click=self._export_to_csv
@@ -199,7 +199,10 @@ class DiaryView(ft.Container):
         self.species_field.value = ""
         self.notes_field.value = ""
         self._build_ui()
-        self.update()
+        try:
+            self.update()
+        except RuntimeError:
+            pass
 
     def _export_to_csv(self, e):
         observations = db_manager.get_observations()

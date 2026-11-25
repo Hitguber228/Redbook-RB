@@ -17,6 +17,7 @@ class QuizService:
         self.max_streak = 0
         self.active_category = "tournament"
         self.session_quizzes: List[Dict[str, Any]] = []
+        self._valid_photo_species_cache: Optional[List[Dict[str, Any]]] = None
 
     def get_categories(self, language: str = "ru") -> List[Dict[str, Any]]:
         is_ru = (language == "ru")
@@ -133,15 +134,19 @@ class QuizService:
             "Якая рэдкая жывёла з Чырвонай кнігі Беларусі выяўлена на фатаграфіі?"
         )
 
-    def _generate_photo_quizzes(self, count: int = 10) -> List[Dict[str, Any]]:
-        all_species = db_manager.get_species()
-        assets_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "assets"))
+    def _get_valid_photo_species(self) -> List[Dict[str, Any]]:
+        if self._valid_photo_species_cache is None:
+            all_species = db_manager.get_species()
+            assets_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "assets"))
+            self._valid_photo_species_cache = [
+                s for s in all_species
+                if s.get("image_url")
+                and os.path.exists(os.path.join(assets_root, s["image_url"].lstrip("/")))
+            ]
+        return self._valid_photo_species_cache
 
-        valid_species = [
-            s for s in all_species
-            if s.get("image_url")
-            and os.path.exists(os.path.join(assets_root, s["image_url"].lstrip("/")))
-        ]
+    def _generate_photo_quizzes(self, count: int = 10) -> List[Dict[str, Any]]:
+        valid_species = self._get_valid_photo_species()
         if len(valid_species) < 4:
             return []
 
@@ -193,6 +198,9 @@ class QuizService:
                 ]
                 random.shuffle(fallback)
                 group_candidates.extend(fallback)
+
+            if len(group_candidates) < 3:
+                continue
 
             distractors = random.sample(group_candidates, 3)
             q_ru, q_be = self._photo_prompt_for_species(sp)
@@ -263,7 +271,7 @@ class QuizService:
             random.shuffle(paired)
             q_copy["options_ru"] = [p[0] for p in paired]
             q_copy["options_be"] = [p[1] for p in paired]
-            q_copy["correct_index"] = next(i for i, p in enumerate(paired) if p[2])
+            q_copy["correct_index"] = next((i for i, p in enumerate(paired) if p[2]), 0)
             session_list.append(q_copy)
 
         self.session_quizzes = session_list
@@ -336,7 +344,7 @@ class QuizService:
 
         return {
             "user_name": name_display,
-            "score": f"{score} из {total}",
+            "score": f"{score} из {total}" if language == "ru" else f"{score} з {total}",
             "percentage": f"{percentage}%",
             "rank": rank_be if language == "be" else rank_ru,
             "badge_title": badge_title,

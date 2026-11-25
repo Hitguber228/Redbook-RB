@@ -113,10 +113,11 @@ class AIService:
             hint_clean = (hint or "").strip()
             k_intent, t_intent, tokens = self._extract_biology_intent(hint_clean) if hint_clean else (None, None, [])
 
-            # Мультимодальная гибридная оценка всех видов
+            # Мультимодальная гибридная оценка всех видов (одним запросом к БД вместо N+1)
+            species_by_id = {s["id"]: s for s in db_manager.get_species()}
             scored_candidates = []
             for sp_id in ids:
-                sp = db_manager.get_species_by_id(sp_id)
+                sp = species_by_id.get(sp_id)
                 if not sp:
                     continue
 
@@ -127,11 +128,12 @@ class AIService:
                 if taxon_filter and taxon_filter != "all":
                     sp_taxon = sp.get("taxon_group")
                     sp_kingdom = sp.get("kingdom")
-                    if taxon_filter in ["mammals", "birds", "insects", "reptiles", "amphibians", "fishes"]:
-                        if sp_taxon != taxon_filter:
+                    norm_filter = "fish" if taxon_filter == "fishes" else taxon_filter
+                    if norm_filter in ["mammals", "birds", "insects", "reptiles", "amphibians", "fish"]:
+                        if sp_taxon != norm_filter:
                             final_score -= 1.0 # Отсекаем нерелевантные таксоны
-                    elif taxon_filter in ["plants", "fungi"]:
-                        if sp_kingdom != taxon_filter:
+                    elif norm_filter in ["plants", "fungi"]:
+                        if sp_kingdom != norm_filter:
                             final_score -= 1.0
 
                 # Учет текстовой подсказки пользователя
@@ -237,7 +239,7 @@ class AIService:
         # 3. Рыбы
         elif any(k in q for k in ["рыб", "чешу", "плавник", "жабр", "стерляд", "лосос", "форел", "хариус"]):
             kingdom = "animals"
-            taxon = "fishes"
+            taxon = "fish"
         # 4. Рептилии
         elif any(k in q for k in ["рептили", "пресмыкающ", "зме", "черепах", "медянк"]):
             kingdom = "animals"

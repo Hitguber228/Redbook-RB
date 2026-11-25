@@ -94,60 +94,66 @@ class DatabaseManager:
     def _seed_initial_data(self):
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            for s in INITIAL_SPECIES_DATA:
-                cursor.execute("""
-                INSERT OR REPLACE INTO species (
-                    id, name_ru, name_be, name_lat, kingdom, taxon_group, category,
-                    description_ru, description_be, morphology, look_alike_species,
-                    habitat, distribution_rb, national_parks, limiting_factors,
-                    protection_measures, phenology_months, image_url, sound_url,
-                    sound_title, coordinates_json, is_featured, biotope
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    s["id"],
-                    s["name_ru"],
-                    s["name_be"],
-                    s["name_lat"],
-                    s["kingdom"],
-                    s["taxon_group"],
-                    s["category"],
-                    s["description_ru"],
-                    s["description_be"],
-                    s["morphology"],
-                    s.get("look_alike_species"),
-                    s["habitat"],
-                    json.dumps(s["distribution_rb"], ensure_ascii=False),
-                    json.dumps(s["national_parks"], ensure_ascii=False),
-                    s["limiting_factors"],
-                    s["protection_measures"],
-                    json.dumps(s["phenology_months"]),
-                    s["image_url"],
-                    s.get("sound_url"),
-                    s.get("sound_title"),
-                    json.dumps(s.get("coordinates", [])),
-                    1 if s.get("is_featured") else 0,
-                    s.get("biotope", "forest")
-                ))
-
-            for q in INITIAL_QUIZZES_DATA:
-                cursor.execute("""
-                INSERT OR REPLACE INTO quizzes (
-                    id, quiz_type, question_ru, question_be, options_ru, options_be,
-                    correct_index, explanation_ru, explanation_be, media_url, related_species_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            cursor.execute("SELECT COUNT(*) FROM species")
+            species_count = cursor.fetchone()[0]
+            if species_count < len(INITIAL_SPECIES_DATA):
+                for s in INITIAL_SPECIES_DATA:
+                    cursor.execute("""
+                    INSERT OR REPLACE INTO species (
+                        id, name_ru, name_be, name_lat, kingdom, taxon_group, category,
+                        description_ru, description_be, morphology, look_alike_species,
+                        habitat, distribution_rb, national_parks, limiting_factors,
+                        protection_measures, phenology_months, image_url, sound_url,
+                        sound_title, coordinates_json, is_featured, biotope
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, (
-                        q["id"],
-                        q["quiz_type"],
-                        q["question_ru"],
-                        q["question_be"],
-                        json.dumps(q["options_ru"], ensure_ascii=False),
-                        json.dumps(q["options_be"], ensure_ascii=False),
-                        q["correct_index"],
-                        q["explanation_ru"],
-                        q["explanation_be"],
-                        q.get("media_url"),
-                        q.get("related_species_id")
+                        s["id"],
+                        s["name_ru"],
+                        s["name_be"],
+                        s["name_lat"],
+                        s["kingdom"],
+                        s["taxon_group"],
+                        s["category"],
+                        s["description_ru"],
+                        s["description_be"],
+                        s["morphology"],
+                        s.get("look_alike_species"),
+                        s["habitat"],
+                        json.dumps(s["distribution_rb"], ensure_ascii=False),
+                        json.dumps(s["national_parks"], ensure_ascii=False),
+                        s["limiting_factors"],
+                        s["protection_measures"],
+                        json.dumps(s["phenology_months"]),
+                        s["image_url"],
+                        s.get("sound_url"),
+                        s.get("sound_title"),
+                        json.dumps(s.get("coordinates", [])),
+                        1 if s.get("is_featured") else 0,
+                        s.get("biotope", "forest")
                     ))
+
+            cursor.execute("SELECT COUNT(*) FROM quizzes")
+            quizzes_count = cursor.fetchone()[0]
+            if quizzes_count < len(INITIAL_QUIZZES_DATA):
+                for q in INITIAL_QUIZZES_DATA:
+                    cursor.execute("""
+                    INSERT OR REPLACE INTO quizzes (
+                        id, quiz_type, question_ru, question_be, options_ru, options_be,
+                        correct_index, explanation_ru, explanation_be, media_url, related_species_id
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (
+                            q["id"],
+                            q["quiz_type"],
+                            q["question_ru"],
+                            q["question_be"],
+                            json.dumps(q["options_ru"], ensure_ascii=False),
+                            json.dumps(q["options_be"], ensure_ascii=False),
+                            q["correct_index"],
+                            q["explanation_ru"],
+                            q["explanation_be"],
+                            q.get("media_url"),
+                            q.get("related_species_id")
+                        ))
 
             conn.commit()
 

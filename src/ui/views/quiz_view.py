@@ -21,7 +21,6 @@ class QuizView(ft.Container):
     ):
         super().__init__()
         self.expand = True
-        self.bgcolor = AppColors.BG_LIGHT
         self.get_language = get_language
         self.on_select_species = on_select_species
 
@@ -33,9 +32,30 @@ class QuizView(ft.Container):
         self.answer_checked: bool = False
         self.last_result: Optional[Dict[str, Any]] = None
         self.session_quizzes: List[Dict[str, Any]] = []
-        self.student_name: str = "Учащийся"
+        self.student_name: str = ""
 
         self._build_ui()
+
+    @staticmethod
+    def _primary_button(
+        label: str,
+        icon: str,
+        on_click,
+        disabled: bool = False,
+        padding: Optional[ft.Padding] = None
+    ) -> ft.FilledButton:
+        return ft.FilledButton(
+            content=ft.Text(label),
+            icon=icon,
+            disabled=disabled,
+            style=ft.ButtonStyle(
+                bgcolor=AppColors.PRIMARY,
+                color=ft.Colors.WHITE,
+                padding=padding,
+                shape=ft.RoundedRectangleBorder(radius=10)
+            ),
+            on_click=on_click
+        )
 
     def _build_ui(self):
         lang = self.get_language()
@@ -197,17 +217,12 @@ class QuizView(ft.Container):
                             ),
                             ft.Container(
                                 col={"xs": 12, "md": 4},
-                                alignment=ft.Alignment.CENTER_RIGHT,
-                                content=ft.FilledButton(
-                                    content=ft.Text("Начать турнир" if is_ru else "Пачаць турнір"),
-                                    icon=ft.Icons.PLAY_ARROW,
-                                    style=ft.ButtonStyle(
-                                        bgcolor=AppColors.PRIMARY,
-                                        color=ft.Colors.WHITE,
-                                        padding=ft.Padding.symmetric(horizontal=20, vertical=12),
-                                        shape=ft.RoundedRectangleBorder(radius=10)
-                                    ),
-                                    on_click=lambda e, cid=tournament_cat["id"]: self._start_category(cid)
+                                alignment=ft.Alignment.CENTER_LEFT,
+                                content=self._primary_button(
+                                    "Начать турнир" if is_ru else "Пачаць турнір",
+                                    ft.Icons.PLAY_ARROW,
+                                    on_click=lambda e, cid=tournament_cat["id"]: self._start_category(cid),
+                                    padding=ft.Padding.symmetric(horizontal=20, vertical=12)
                                 )
                             )
                         ]
@@ -289,14 +304,9 @@ class QuizView(ft.Container):
                                             overflow=ft.TextOverflow.ELLIPSIS
                                         )
                                     ),
-                                    ft.FilledButton(
-                                        content=ft.Text("Начать тест" if is_ru else "Пачаць тэст"),
-                                        icon=ft.Icons.PLAY_ARROW,
-                                        style=ft.ButtonStyle(
-                                            bgcolor=AppColors.PRIMARY,
-                                            color=ft.Colors.WHITE,
-                                            shape=ft.RoundedRectangleBorder(radius=10)
-                                        ),
+                                    self._primary_button(
+                                        "Начать тест" if is_ru else "Пачаць тэст",
+                                        ft.Icons.PLAY_ARROW,
                                         on_click=lambda e, cid=cat["id"]: self._start_category(cid)
                                     )
                                 ]
@@ -371,15 +381,37 @@ class QuizView(ft.Container):
         quiz_type = current_quiz.get("quiz_type", "general")
 
         # Верхняя панель навигации и индикаторов
+        active_cat = next((c for c in quiz_service.get_categories(lang) if c["id"] == self.active_category_id), None)
+        cat_title = active_cat["title"] if active_cat else ("Викторина" if is_ru else "Віктарына")
+
         top_bar = ft.Row(
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            wrap=True,
+            spacing=8,
             controls=[
-                ft.TextButton(
-                    content=ft.Text("К разделам" if is_ru else "Да раздзелаў"),
-                    icon=ft.Icons.ARROW_BACK,
-                    style=ft.ButtonStyle(color=AppColors.PRIMARY),
-                    on_click=self._return_to_categories
+                ft.Row(
+                    spacing=8,
+                    tight=True,
+                    controls=[
+                        ft.TextButton(
+                            content=ft.Text("К разделам" if is_ru else "Да раздзелаў"),
+                            icon=ft.Icons.ARROW_BACK,
+                            style=ft.ButtonStyle(color=AppColors.PRIMARY),
+                            on_click=self._return_to_categories
+                        ),
+                        ft.Container(
+                            padding=ft.Padding.symmetric(horizontal=10, vertical=4),
+                            border_radius=10,
+                            bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+                            content=ft.Text(
+                                cat_title,
+                                size=11,
+                                weight=ft.FontWeight.W_600,
+                                color=ft.Colors.ON_SURFACE_VARIANT
+                            )
+                        )
+                    ]
                 ),
                 ft.Row(
                     spacing=8,
@@ -743,40 +775,24 @@ class QuizView(ft.Container):
         # Нижняя кнопка действия
         is_last = (self.current_index + 1 >= total_q)
         if not self.answer_checked:
-            action_btn = ft.FilledButton(
-                content=ft.Text("Проверить ответ" if is_ru else "Праверыць адказ"),
-                icon=ft.Icons.CHECK,
-                disabled=(self.selected_option is None),
-                style=ft.ButtonStyle(
-                    bgcolor=AppColors.PRIMARY,
-                    color=ft.Colors.WHITE,
-                    shape=ft.RoundedRectangleBorder(radius=10)
-                ),
+            action_btn = self._primary_button(
+                "Проверить ответ" if is_ru else "Праверыць адказ",
+                ft.Icons.CHECK,
+                on_click=self._handle_action_btn,
+                disabled=(self.selected_option is None)
+            )
+        elif is_last:
+            action_btn = self._primary_button(
+                "Завершить и получить сертификат" if is_ru else "Завяршыць і атрымаць сертыфікат",
+                ft.Icons.WORKSPACE_PREMIUM,
                 on_click=self._handle_action_btn
             )
         else:
-            if is_last:
-                action_btn = ft.FilledButton(
-                    content=ft.Text("Завершить и получить сертификат" if is_ru else "Завяршыць і атрымаць сертыфікат"),
-                    icon=ft.Icons.WORKSPACE_PREMIUM,
-                    style=ft.ButtonStyle(
-                        bgcolor=AppColors.PRIMARY,
-                        color=ft.Colors.WHITE,
-                        shape=ft.RoundedRectangleBorder(radius=10)
-                    ),
-                    on_click=self._handle_action_btn
-                )
-            else:
-                action_btn = ft.FilledButton(
-                    content=ft.Text("Следующий вопрос" if is_ru else "Наступнае пытанне"),
-                    icon=ft.Icons.ARROW_FORWARD,
-                    style=ft.ButtonStyle(
-                        bgcolor=AppColors.PRIMARY,
-                        color=ft.Colors.WHITE,
-                        shape=ft.RoundedRectangleBorder(radius=10)
-                    ),
-                    on_click=self._handle_action_btn
-                )
+            action_btn = self._primary_button(
+                "Следующий вопрос" if is_ru else "Наступнае пытанне",
+                ft.Icons.ARROW_FORWARD,
+                on_click=self._handle_action_btn
+            )
 
         return ft.ListView(
             expand=True,
@@ -861,6 +877,7 @@ class QuizView(ft.Container):
                             width=380,
                             content=ft.TextField(
                                 label="ФИО исследователя / учащегося" if is_ru else "Прозвішча і імя даследчыка",
+                                hint_text="Учащийся" if is_ru else "Вучань",
                                 value=self.student_name,
                                 prefix_icon=ft.Icons.PERSON,
                                 border_radius=10,
@@ -931,14 +948,9 @@ class QuizView(ft.Container):
                                     ),
                                     on_click=self._return_to_categories
                                 ),
-                                ft.FilledButton(
-                                    content=ft.Text("Пройти тему снова" if is_ru else "Прайсці тэму нанова"),
-                                    icon=ft.Icons.REFRESH,
-                                    style=ft.ButtonStyle(
-                                        bgcolor=AppColors.PRIMARY,
-                                        color=ft.Colors.WHITE,
-                                        shape=ft.RoundedRectangleBorder(radius=10)
-                                    ),
+                                self._primary_button(
+                                    "Пройти тему снова" if is_ru else "Прайсці тэму нанова",
+                                    ft.Icons.REFRESH,
                                     on_click=self._restart_current_category
                                 )
                             ]

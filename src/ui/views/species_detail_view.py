@@ -208,7 +208,7 @@ class SpeciesDetailView(ft.Container):
             controls=[
                 ft.FilledButton(
                     icon=ft.Icons.ARROW_BACK,
-                    content="Назад в каталог" if lang == "ru" else "Назад у каталог",
+                    content=ft.Text("Назад в каталог" if lang == "ru" else "Назад у каталог"),
                     on_click=lambda e: self.on_back()
                 ),
                 ft.Container(
